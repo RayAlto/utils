@@ -3,16 +3,15 @@ project(
   ra-utils
   VERSION 1.0
   LANGUAGES CXX)
+option(BUILD_TESTS "Build tests" ON)
 set(RA_UTILS_SRCS
   src/exceptions.cpp
   src/subprocess.cpp)
 set(RA_UTILS_INCLUDES
-  include/)
-set(TEST_SRCS
-  test/test.cpp)
+  ${CMAKE_CURRENT_LIST_DIR}/include/)
 add_library(ra-utils STATIC ${RA_UTILS_SRCS})
 target_include_directories(ra-utils PRIVATE ${RA_UTILS_INCLUDES})
 
-add_executable(ra-utils-test ${TEST_SRCS})
-target_include_directories(ra-utils-test PRIVATE ${RA_UTILS_INCLUDES})
-target_link_libraries(ra-utils-test PRIVATE ra-utils)
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
