@@ -10,7 +10,7 @@ Run a command and get its stdout, stderr and exit_code. Base on `exec()` family 
 
 ```c++
 using rayalto::util::subprocess::Result;
-using rayalto::util::subprocess::Subprocess;
+using rayalto::util::Subprocess;
 // ...
 
 Result result = Subprocess::run({"ls", "-ahl", "/usr/bin"});
