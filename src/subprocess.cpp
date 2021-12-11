@@ -13,19 +13,18 @@
 #include <string>
 #include <vector>
 
-#include "exceptions.hpp" // SyscallError
+#include "exceptions.hpp" // exceptions::SyscallError
 
 namespace rayalto {
 namespace utils {
-namespace subprocess {
 
 namespace {
 
 /**
- * Convert Args to char** so that you can pass it to exec()
- *      (using Args = std::vector<std::string>)
+ * Convert subprocess::Args to char** so that you can pass it to exec()
+ *      (using subprocess::Args = std::vector<std::string>)
  */
-char** args_to_argv(const Args& args) {
+char** args_to_argv(const subprocess::Args& args) {
     char** _argv = new char*[args.size() + 1];
     for (std::size_t i = 0; i < args.size(); i++) {
         const std::string& arg = args[i];
@@ -56,22 +55,25 @@ void clear_argv(char** argv) {
 
 } // anonymous namespace
 
-Subprocess::Subprocess(const Args& command_args) : _args(command_args) {}
+Subprocess::Subprocess(const subprocess::Args& command_args) :
+    _args(command_args) {}
 
 Subprocess::~Subprocess() {}
 
-Result Subprocess::run(bool capture_output) {
+subprocess::Result Subprocess::run(bool capture_output) {
     int child_stdout[2]; // Parent read from child[0], Child write to child[1]
     int child_stderr[2]; // Parent read from child[0], Child write to child[1]
     if (pipe(child_stdout) == -1) {
-        throw SyscallError("Subprocess::run - pipe for child stdout");
+        throw exceptions::SyscallError(
+            "Subprocess::run - pipe for child stdout");
     }
     if (pipe(child_stderr) == -1) {
-        throw SyscallError("Subprocess::run - pipe for child stderr");
+        throw exceptions::SyscallError(
+            "Subprocess::run - pipe for child stderr");
     }
     pid_t pid = fork();
     if (pid == -1) {
-        throw SyscallError("Subprocess::run - fork");
+        throw exceptions::SyscallError("Subprocess::run - fork");
     }
     if (pid == 0) {
         // Children
@@ -79,17 +81,19 @@ Result Subprocess::run(bool capture_output) {
         close(child_stderr[0]); // Close stdin
         // child_stdout[1] -> new stdout for child process
         if (dup2(child_stdout[1], STDOUT_FILENO) == -1) {
-            throw SyscallError("Subprocess::run - dup2 for child stdout");
+            throw exceptions::SyscallError(
+                "Subprocess::run - dup2 for child stdout");
         }
         // child_stderr[1] -> new stderr for child process
         if (dup2(child_stderr[1], STDERR_FILENO) == -1) {
-            throw SyscallError("Subprocess::run - dup2 for child stderr");
+            throw exceptions::SyscallError(
+                "Subprocess::run - dup2 for child stderr");
         }
         char** argv = args_to_argv(_args);
         if (execvp(_args[0].c_str(), argv) == -1) {
             // exec failed
             clear_argv(argv);
-            throw SyscallError("Subprocess::run - execvp");
+            throw exceptions::SyscallError("Subprocess::run - execvp");
         }
     }
     // Parent
@@ -107,7 +111,7 @@ Result Subprocess::run(bool capture_output) {
         _result.stdout.append(stdout_buffer.data(), stdout_read_count);
     }
     if (stdout_read_count == -1) {
-        throw SyscallError("Subprocess::run - read child stdout");
+        throw exceptions::SyscallError("Subprocess::run - read child stdout");
     }
     // Read stderr from pipe child_stderr
     while ((stderr_read_count = read(
@@ -116,11 +120,11 @@ Result Subprocess::run(bool capture_output) {
         _result.stderr.append(stderr_buffer.data(), stderr_read_count);
     }
     if (stderr_read_count == -1) {
-        throw SyscallError("Subprocess::run - read child stderr");
+        throw exceptions::SyscallError("Subprocess::run - read child stderr");
     }
     // Wait and get return_code from child process
     if (waitpid(pid, &return_code, 0) == -1) {
-        throw SyscallError("Subprocess::run - waitpid");
+        throw exceptions::SyscallError("Subprocess::run - waitpid");
     }
 
     _result.exit_normally = WIFEXITED(return_code);
@@ -129,23 +133,23 @@ Result Subprocess::run(bool capture_output) {
     return _result;
 }
 
-Args Subprocess::args() const {
+subprocess::Args Subprocess::args() const {
     return _args;
 }
 
-Result Subprocess::result() const {
+subprocess::Result Subprocess::result() const {
     return _result;
 }
 
-Result Subprocess::run(const Args& args, bool capture_output) {
+subprocess::Result Subprocess::run(const subprocess::Args& args,
+                                   bool capture_output) {
     Subprocess subprocess(args);
     return subprocess.run(capture_output);
 }
 
-Result Subprocess::run(const char* arg, bool capture_output) {
-    return Subprocess::run(Args {arg});
+subprocess::Result Subprocess::run(const char* arg, bool capture_output) {
+    return Subprocess::run(subprocess::Args {arg});
 }
 
-} // namespace subprocess
 } // namespace utils
 } // namespace rayalto

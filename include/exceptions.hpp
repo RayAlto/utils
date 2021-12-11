@@ -5,6 +5,7 @@
 
 namespace rayalto {
 namespace utils {
+namespace exceptions {
 
 /**
  * Base class for exceptions
@@ -47,6 +48,7 @@ public:
     explicit SyscallError(const std::string& where);
 };
 
+} // namespace exceptions
 } // namespace utils
 } // namespace rayalto
 

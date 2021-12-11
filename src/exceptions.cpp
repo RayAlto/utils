@@ -7,6 +7,7 @@
 
 namespace rayalto {
 namespace utils {
+namespace exceptions {
 
 Exception::Exception(const std::string& type,
                      const std::string& where,
@@ -37,8 +38,11 @@ void Exception::set_message(const std::string& type,
 }
 
 SyscallError::SyscallError(const std::string& where) {
-    set_message("SyscallError", where, std::strerror(errno));
+    set_message("SyscallError(error " + std::to_string(errno) + ")",
+                where,
+                std::strerror(errno));
 }
 
+} // namespace exceptions
 } // namespace utils
 } // namespace rayalto

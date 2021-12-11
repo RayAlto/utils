@@ -4,20 +4,18 @@
 #include <string>
 #include <vector>
 
+#include "args.hpp"
 #include "result.hpp"
 
 namespace rayalto {
 namespace utils {
-namespace subprocess {
-
-using Args = std::vector<std::string>;
 
 /**
  * Run a command and get its stdout, stderr and exit code
  * Example:
  *      Subprocess subprocess({"ls", "-ahl"});
  *      subprocess.run();
- *      Result result = subprocess.result();
+ *      subprocess::Result result = subprocess.result();
  *      if (result.exit_normally()) {
  *          std::cout << result.stdout << '\n';
  *      }
@@ -28,7 +26,7 @@ using Args = std::vector<std::string>;
  */
 class Subprocess {
 public:
-    explicit Subprocess(const Args& command_args);
+    explicit Subprocess(const subprocess::Args& command_args);
     explicit Subprocess(const Subprocess& subprocess) = delete;
 
     Subprocess& operator=(const Subprocess&) = delete;
@@ -36,21 +34,21 @@ public:
     ~Subprocess();
 
     // Run the specified command and return the result
-    Result run(bool capture_output = true);
+    subprocess::Result run(bool capture_output = true);
 
-    Args args() const;
-    Result result() const;
+    subprocess::Args args() const;
+    subprocess::Result result() const;
 
     // Run a command directly and get the result
-    static Result run(const Args& args, bool capture_output = true);
-    static Result run(const char* arg, bool capture_output = true);
+    static subprocess::Result run(const subprocess::Args& args,
+                                  bool capture_output = true);
+    static subprocess::Result run(const char* arg, bool capture_output = true);
 
 private:
-    Result _result;
-    Args _args;
+    subprocess::Result _result;
+    subprocess::Args _args;
 };
 
-} // namespace subprocess
 } // namespace utils
 } // namespace rayalto
 

@@ -3,10 +3,10 @@
 #include "ra_utils.hpp"
 
 using rayalto::utils::subprocess::Result;
-using rayalto::utils::subprocess::Subprocess;
+using rayalto::utils::Subprocess;
 
 int main(int argc, char const *argv[]) {
-    Result result = Subprocess::run({"ls", "-ahl", "/usr/bin"});
+    Result result = Subprocess::run({"lp", "-ahl", "/usr/bin"});
     std::cout << "stdout:\n"
               << result.stdout // stdout
               << "stderr:\n"
