@@ -1,11 +1,8 @@
 #include <chrono>
 #include <iostream>
-#include <vector>
 
 #include "ra_utils.hpp"
 
-using rayalto::utils::subprocess::Result;
-using rayalto::utils::Subprocess;
 using rayalto::utils::Timer;
 
 int main(int argc, char const *argv[]) {
