@@ -21,13 +21,21 @@ public:
         _function(function), _interval(interval) {
         _work_thread = std::thread([this]() {
             std::unique_lock<std::mutex> lock(_mutex);
-            while (_working) {
+            while (true) {
+                while (!_working) {
+                    // stop() called / start() has not been called
+                    _done.notify_all(); // completed, notify stop()
+                    _start.wait(lock); // wait for the next start()
+                }
+                if (_exiting) {
+                    // ~Timer() called
+                    break;
+                }
                 lock.unlock();
                 std::this_thread::sleep_for(_interval);
-                lock.lock();
                 _function();
+                lock.lock();
             }
-            _done.notify_all();
         });
     }
     explicit Timer(const Timer&) = delete;
@@ -37,10 +45,14 @@ public:
 
     virtual ~Timer() {
         std::unique_lock<std::mutex> lock(_mutex);
+        _exiting = true;
+        _working = true; // make work thread able to continue
         if (_work_thread.joinable()) {
-            _working = false;
+            // work thread has not been started
             _work_thread.join();
         }
+        // make work thread to continue
+        _start.notify_all();
     }
 
     void set_interval(const precision& interval) {
@@ -50,7 +62,6 @@ public:
     template <class Rep, class Period>
     void set_interval(const std::chrono::duration<Rep, Period>& interval) {
         std::unique_lock<std::mutex> lock(_mutex);
-        // _interval = std::chrono::duration_cast<precision>(interval);
         _interval =
             std::chrono::duration_cast<precision, Rep, Period>(interval);
     }
@@ -58,20 +69,24 @@ public:
     void start() {
         std::unique_lock<std::mutex> lock(_mutex);
         _working = true;
-        if (!_work_thread.joinable()) {
-            // Work thread is already running
-            return;
+        if (_work_thread.joinable()) {
+            // work has not been started
+            // start work thread in background
+            _work_thread.detach();
         }
-        _work_thread.detach();
+        // make work thread to continue
+        _start.notify_all();
     }
 
     void stop() {
         std::unique_lock<std::mutex> lock(_mutex);
-        _working = false;
         if (_work_thread.joinable()) {
             // Work thread is not started yet
             return;
         }
+        // block work thread from working
+        _working = false;
+        // wait for work thread to complete the work at hand
         _done.wait(lock);
     }
 
@@ -79,9 +94,11 @@ protected:
     std::function<void(void)> _function;
     std::thread _work_thread;
     std::condition_variable _done;
+    std::condition_variable _start;
     std::mutex _mutex;
     precision _interval;
     bool _working = false;
+    bool _exiting = false;
 };
 
 } // namespace utils
