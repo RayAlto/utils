@@ -3,9 +3,12 @@ project(
   ra-utils-test
   VERSION 1.0
   LANGUAGES CXX)
-set(TEST_SRCS
-  test.cpp)
 
-add_executable(ra-utils-test ${TEST_SRCS})
-target_include_directories(ra-utils-test PRIVATE ${RA_UTILS_INCLUDES})
-target_link_libraries(ra-utils-test PRIVATE ra-utils)
+function(ra_add_test target_name target_src)
+  add_executable(${target_name} ${target_src})
+  target_include_directories(${target_name} PRIVATE ${RA_UTILS_INCLUDES})
+  target_link_libraries(${target_name} PRIVATE ra-utils)
+endfunction()
+
+ra_add_test(subprocess test_subprocess.cpp)
+ra_add_test(timer test_timer.cpp)
