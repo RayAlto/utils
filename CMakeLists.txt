@@ -9,8 +9,10 @@ set(RA_UTILS_SRCS
   src/subprocess.cpp)
 set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
+find_package(Threads REQUIRED)
 add_library(ra-utils STATIC ${RA_UTILS_SRCS})
 target_include_directories(ra-utils PRIVATE ${RA_UTILS_INCLUDES})
+target_link_libraries(ra-utils PRIVATE Threads::Threads)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
