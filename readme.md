@@ -4,7 +4,7 @@ RayAlto's Stupid Self-use Noob Utils
 
 ## How To
 
-### 1. subprocess
+### 1. Subprocess
 
 Run a command and get its stdout, stderr and exit_code. Base on `exec()` family of functions. Example:
 
@@ -18,3 +18,23 @@ std::cout << result.stdout << std::endl;
 ```
 
 * It's **not** a shell, it will **not** expand `~` or behave like a shell.
+
+### 2. Timer
+
+Call a void function at specified intervals
+
+```c++
+using rayalto::util::Timer;
+// ...
+
+Timer timer([]() {
+    std::cout << "114514" << std::endl;
+}, std::chrono::milliseconds(1919810));
+timer.start();
+std::this_thread::sleep_for(std::chrono::milliseconds(1145141919810));
+timer.set_interval(std::chrono::seconds(1)
+                   + std::chrono::milliseconds(114)
+                   + std::chrono::milliseconds(514));
+std::this_thread::sleep_for(std::chrono::milliseconds(1145141919810));
+timer.stop();
+```
