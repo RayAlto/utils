@@ -10,8 +10,10 @@ int main(int argc, char const *argv[]) {
             std::chrono::milliseconds(100));
     t.start();
     std::this_thread::sleep_for(std::chrono::seconds(1));
+    t.stop();
     t.set_interval(std::chrono::seconds(1));
-    std::this_thread::sleep_for(std::chrono::seconds(4)
+    t.start();
+    std::this_thread::sleep_for(std::chrono::seconds(2)
                                 + std::chrono::milliseconds(100));
     t.stop();
     return 0;
