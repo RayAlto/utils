@@ -38,3 +38,35 @@ timer.set_interval(std::chrono::seconds(1)
 std::this_thread::sleep_for(std::chrono::milliseconds(1145141919810));
 timer.stop();
 ```
+
+### 3. String Tool
+
+Some tools for string, for example:
+
+```c++
+/**
+ * Split "127.0.0.114514" with '.' and get rid of "114514"
+ */
+
+using namespace rayalto::utils;
+
+// ...
+
+std::string foo {"127.0.0.114514"};
+for (auto i : string::split(foo, '.', [](std::string& line) -> bool {
+            if (line == "114514") {
+                return false;
+            }
+            return true;
+        })) {
+    std::cout << i << std::endl;
+}
+```
+
+output:
+
+```
+127
+0
+0
+```
