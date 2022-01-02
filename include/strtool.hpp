@@ -14,31 +14,37 @@ namespace string {
  * Trim out space characters from string (from start)
  */
 std::string lstrip(std::string& str);
+std::string lstrip(const std::string& str);
 
 /**
  * Trim out space characters from string (from end)
  */
 std::string rstrip(std::string& str);
+std::string rstrip(const std::string& str);
 
 /**
  * Trim out space characters from string (from both ends)
  */
 std::string strip(std::string& str);
+std::string strip(const std::string& str);
 
 /**
  * Trim out specified characters from string (from start)
  */
 std::string lstrip(std::string& str, const std::unordered_set<char>& chars);
+std::string lstrip(const std::string& str, const std::unordered_set<char>& chars);
 
 /**
  * Trim out specified characters from string (from end)
  */
 std::string rstrip(std::string& str, const std::unordered_set<char>& chars);
+std::string rstrip(const std::string& str, const std::unordered_set<char>& chars);
 
 /**
  * Trim out specified characters from string (from both ends)
  */
 std::string strip(std::string& str, const std::unordered_set<char>& chars);
+std::string strip(const std::string& str, const std::unordered_set<char>& chars);
 
 /**
  * Split string with specified char

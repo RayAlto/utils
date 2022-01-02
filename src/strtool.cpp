@@ -25,6 +25,16 @@ std::string lstrip(std::string& str) {
     return str;
 }
 
+std::string lstrip(const std::string& str) {
+    std::string result(str);
+    result.erase(
+        result.begin(),
+        std::find_if(result.begin(), result.end(), [](unsigned char ch) -> bool {
+            return !std::isspace(ch);
+        }));
+    return result;
+}
+
 std::string rstrip(std::string& str) {
     str.erase(
         std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) {
@@ -34,9 +44,26 @@ std::string rstrip(std::string& str) {
     return str;
 }
 
+std::string rstrip(const std::string& str) {
+    std::string result(str);
+    result.erase(
+        std::find_if(result.rbegin(), result.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }).base(),
+        result.end());
+    return result;
+}
+
 std::string strip(std::string& str) {
     lstrip(str);
     return rstrip(str);
+}
+
+std::string strip(const std::string& str) {
+    std::string result(str);
+    lstrip(result);
+    rstrip(result);
+    return result;
 }
 
 std::string lstrip(std::string& str, const std::unordered_set<char>& chars) {
@@ -51,6 +78,19 @@ std::string lstrip(std::string& str, const std::unordered_set<char>& chars) {
     return str;
 }
 
+std::string lstrip(const std::string& str, const std::unordered_set<char>& chars) {
+    std::string result(str);
+    if (chars.empty()) {
+        return lstrip(result);
+    }
+    result.erase(
+        result.begin(),
+        std::find_if(result.begin(), result.end(), [&chars](unsigned char ch) -> bool {
+            return (chars.count(ch) == 0);
+        }));
+    return result;
+}
+
 std::string rstrip(std::string& str, const std::unordered_set<char>& chars) {
     if (chars.empty()) {
         return rstrip(str);
@@ -63,9 +103,29 @@ std::string rstrip(std::string& str, const std::unordered_set<char>& chars) {
     return str;
 }
 
+std::string rstrip(const std::string& str, const std::unordered_set<char>& chars) {
+    std::string result(str);
+    if (chars.empty()) {
+        return rstrip(result);
+    }
+    result.erase(
+        std::find_if(result.rbegin(), result.rend(), [&chars](unsigned char ch) {
+            return (chars.count(ch) == 0);
+        }).base(),
+        result.end());
+    return result;
+}
+
 std::string strip(std::string& str, const std::unordered_set<char>& chars) {
     lstrip(str, chars);
     return rstrip(str, chars);
+}
+
+std::string strip(const std::string& str, const std::unordered_set<char>& chars) {
+    std::string result(str);
+    lstrip(result, chars);
+    rstrip(result, chars);
+    return result;
 }
 
 // clang-format on
