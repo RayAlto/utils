@@ -18,22 +18,22 @@ class Timer {
 public:
     Timer(std::function<void(void)>&& function,
           const precision& interval = std::chrono::seconds(1)) :
-        _function(function), _interval(interval) {
-        _work_thread = std::thread([this]() {
-            std::unique_lock<std::mutex> lock(_mutex);
+        function_(function), interval_(interval) {
+        work_thread_ = std::thread([this]() {
+            std::unique_lock<std::mutex> lock(mutex_);
             while (true) {
-                while (!_working) {
+                while (!working_) {
                     // stop() called / start() has not been called
-                    _done.notify_all(); // completed, notify stop()
-                    _start.wait(lock); // wait for the next start()
+                    done_.notify_all(); // completed, notify stop()
+                    start_.wait(lock); // wait for the next start()
                 }
-                if (_exiting) {
+                if (exiting_) {
                     // ~Timer() called
                     break;
                 }
                 lock.unlock();
-                std::this_thread::sleep_for(_interval);
-                _function();
+                std::this_thread::sleep_for(interval_);
+                function_();
                 lock.lock();
             }
         });
@@ -44,61 +44,61 @@ public:
     Timer& operator=(Timer&&) = default;
 
     virtual ~Timer() {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _exiting = true;
-        _working = true; // make work thread able to continue
-        if (_work_thread.joinable()) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        exiting_ = true;
+        working_ = true; // make work thread able to continue
+        if (work_thread_.joinable()) {
             // work thread has not been started
-            _work_thread.join();
+            work_thread_.join();
         }
         // make work thread to continue
-        _start.notify_all();
+        start_.notify_all();
     }
 
     void set_interval(const precision& interval) {
-        _interval = interval;
+        interval_ = interval;
     }
 
     template <class Rep, class Period>
     void set_interval(const std::chrono::duration<Rep, Period>& interval) {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _interval =
+        std::unique_lock<std::mutex> lock(mutex_);
+        interval_ =
             std::chrono::duration_cast<precision, Rep, Period>(interval);
     }
 
     void start() {
-        std::unique_lock<std::mutex> lock(_mutex);
-        _working = true;
-        if (_work_thread.joinable()) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        working_ = true;
+        if (work_thread_.joinable()) {
             // work has not been started
             // start work thread in background
-            _work_thread.detach();
+            work_thread_.detach();
         }
         // make work thread to continue
-        _start.notify_all();
+        start_.notify_all();
     }
 
     void stop() {
-        std::unique_lock<std::mutex> lock(_mutex);
-        if (_work_thread.joinable()) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (work_thread_.joinable()) {
             // Work thread is not started yet
             return;
         }
         // block work thread from working
-        _working = false;
+        working_ = false;
         // wait for work thread to complete the work at hand
-        _done.wait(lock);
+        done_.wait(lock);
     }
 
 protected:
-    std::function<void(void)> _function;
-    std::thread _work_thread;
-    std::condition_variable _done;
-    std::condition_variable _start;
-    std::mutex _mutex;
-    precision _interval;
-    bool _working = false;
-    bool _exiting = false;
+    std::function<void(void)> function_;
+    std::thread work_thread_;
+    std::condition_variable done_;
+    std::condition_variable start_;
+    std::mutex mutex_;
+    precision interval_;
+    bool working_ = false;
+    bool exiting_ = false;
 };
 
 } // namespace utils

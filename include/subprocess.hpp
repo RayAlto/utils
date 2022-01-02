@@ -45,8 +45,8 @@ public:
     static subprocess::Result run(const char* arg, bool capture_output = true);
 
 private:
-    subprocess::Result _result;
-    subprocess::Args _args;
+    subprocess::Result result_;
+    subprocess::Args args_;
 };
 
 } // namespace utils

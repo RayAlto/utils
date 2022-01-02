@@ -56,7 +56,7 @@ void clear_argv(char** argv) {
 } // anonymous namespace
 
 Subprocess::Subprocess(const subprocess::Args& command_args) :
-    _args(command_args) {}
+    args_(command_args) {}
 
 Subprocess::~Subprocess() {}
 
@@ -89,8 +89,8 @@ subprocess::Result Subprocess::run(bool capture_output) {
             throw exceptions::SyscallError(
                 "Subprocess::run - dup2 for child stderr");
         }
-        char** argv = args_to_argv(_args);
-        if (execvp(_args[0].c_str(), argv) == -1) {
+        char** argv = args_to_argv(args_);
+        if (execvp(args_[0].c_str(), argv) == -1) {
             // exec failed
             clear_argv(argv);
             throw exceptions::SyscallError("Subprocess::run - execvp");
@@ -108,7 +108,7 @@ subprocess::Result Subprocess::run(bool capture_output) {
     while ((stdout_read_count = read(
                 child_stdout[0], stdout_buffer.data(), stdout_buffer.size()))
            > 0) {
-        _result.stdout.append(stdout_buffer.data(), stdout_read_count);
+        result_.stdout.append(stdout_buffer.data(), stdout_read_count);
     }
     if (stdout_read_count == -1) {
         throw exceptions::SyscallError("Subprocess::run - read child stdout");
@@ -117,7 +117,7 @@ subprocess::Result Subprocess::run(bool capture_output) {
     while ((stderr_read_count = read(
                 child_stderr[0], stderr_buffer.data(), stderr_buffer.size()))
            > 0) {
-        _result.stderr.append(stderr_buffer.data(), stderr_read_count);
+        result_.stderr.append(stderr_buffer.data(), stderr_read_count);
     }
     if (stderr_read_count == -1) {
         throw exceptions::SyscallError("Subprocess::run - read child stderr");
@@ -127,18 +127,18 @@ subprocess::Result Subprocess::run(bool capture_output) {
         throw exceptions::SyscallError("Subprocess::run - waitpid");
     }
 
-    _result.exit_normally = WIFEXITED(return_code);
-    _result.exit_code = WEXITSTATUS(return_code);
+    result_.exit_normally = WIFEXITED(return_code);
+    result_.exit_code = WEXITSTATUS(return_code);
 
-    return _result;
+    return result_;
 }
 
 subprocess::Args Subprocess::args() const {
-    return _args;
+    return args_;
 }
 
 subprocess::Result Subprocess::result() const {
-    return _result;
+    return result_;
 }
 
 subprocess::Result Subprocess::run(const subprocess::Args& args,
