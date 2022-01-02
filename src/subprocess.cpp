@@ -61,8 +61,8 @@ Subprocess::Subprocess(const subprocess::Args& command_args) :
 Subprocess::~Subprocess() {}
 
 subprocess::Result Subprocess::run(bool capture_output) {
-    int child_stdout[2]; // Parent read from child[0], Child write to child[1]
-    int child_stderr[2]; // Parent read from child[0], Child write to child[1]
+    int child_stdout[2]; // parent read from child[0], Child write to child[1]
+    int child_stderr[2]; // parent read from child[0], Child write to child[1]
     if (pipe(child_stdout) == -1) {
         throw exceptions::SyscallError(
             "Subprocess::run - pipe for child stdout");
@@ -76,9 +76,9 @@ subprocess::Result Subprocess::run(bool capture_output) {
         throw exceptions::SyscallError("Subprocess::run - fork");
     }
     if (pid == 0) {
-        // Children
-        close(child_stdout[0]); // Close stdin
-        close(child_stderr[0]); // Close stdin
+        // children
+        close(child_stdout[0]); // close stdin
+        close(child_stderr[0]); // close stdin
         // child_stdout[1] -> new stdout for child process
         if (dup2(child_stdout[1], STDOUT_FILENO) == -1) {
             throw exceptions::SyscallError(
@@ -96,15 +96,15 @@ subprocess::Result Subprocess::run(bool capture_output) {
             throw exceptions::SyscallError("Subprocess::run - execvp");
         }
     }
-    // Parent
+    // parent
     int return_code = 0;
     std::array<char, 128> stdout_buffer;
     std::array<char, 128> stderr_buffer;
-    close(child_stdout[1]); // Close stdout
-    close(child_stderr[1]); // Close stdout
+    close(child_stdout[1]); // close stdout
+    close(child_stderr[1]); // close stdout
     ssize_t stdout_read_count = 0;
     ssize_t stderr_read_count = 0;
-    // Read stdout from pipe child_stdout
+    // read stdout from pipe child_stdout
     while ((stdout_read_count = read(
                 child_stdout[0], stdout_buffer.data(), stdout_buffer.size()))
            > 0) {
@@ -113,7 +113,7 @@ subprocess::Result Subprocess::run(bool capture_output) {
     if (stdout_read_count == -1) {
         throw exceptions::SyscallError("Subprocess::run - read child stdout");
     }
-    // Read stderr from pipe child_stderr
+    // read stderr from pipe child_stderr
     while ((stderr_read_count = read(
                 child_stderr[0], stderr_buffer.data(), stderr_buffer.size()))
            > 0) {
@@ -122,7 +122,7 @@ subprocess::Result Subprocess::run(bool capture_output) {
     if (stderr_read_count == -1) {
         throw exceptions::SyscallError("Subprocess::run - read child stderr");
     }
-    // Wait and get return_code from child process
+    // wait and get return_code from child process
     if (waitpid(pid, &return_code, 0) == -1) {
         throw exceptions::SyscallError("Subprocess::run - waitpid");
     }

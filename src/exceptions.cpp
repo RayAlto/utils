@@ -27,7 +27,7 @@ void Exception::set_message(const std::string& type,
         message_.clear();
     }
 
-    message_.reserve(23 // Space for format characters
+    message_.reserve(23 // space for format characters
                      + where.size() + type.size() + message.size());
     message_.append("[");
     message_.append(where);
