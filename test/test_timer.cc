@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "ra_utils.hpp"
+#include "timer.h"
 
 using rayalto::utils::Timer;
 

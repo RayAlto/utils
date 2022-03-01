@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "ra_utils.hpp"
+#include "subprocess/subprocess.h"
+#include "subprocess/result.h"
 
 using rayalto::utils::subprocess::Result;
 using rayalto::utils::Subprocess;

@@ -1,5 +1,5 @@
-#ifndef RA_UTILS_INCLUDE_RESULT_CPP_
-#define RA_UTILS_INCLUDE_RESULT_CPP_
+#ifndef RA_UTILS_SUBPROCESS_RESULT_HPP_
+#define RA_UTILS_SUBPROCESS_RESULT_HPP_
 
 #include <string>
 
@@ -18,4 +18,4 @@ struct Result {
 } // namespace utils
 } // namespace rayalto
 
-#endif // RA_UTILS_INCLUDE_RESULT_CPP_
+#endif // RA_UTILS_SUBPROCESS_RESULT_HPP_

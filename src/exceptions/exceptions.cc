@@ -1,9 +1,8 @@
-#include "exceptions.hpp"
+#include "exceptions/exceptions.h"
 
+#include <cerrno> // errno(marco)
+#include <cstring> // std::strerror
 #include <string>
-#include <stdexcept>
-#include <cerrno>
-#include <cstring>
 
 namespace rayalto {
 namespace utils {
@@ -27,13 +26,13 @@ void Exception::set_message(const std::string& type,
         message_.clear();
     }
 
-    message_.reserve(23 // space for format characters
+    message_.reserve(10 // space for format characters
                      + where.size() + type.size() + message.size());
     message_.append("[");
     message_.append(where);
     message_.append("] -> ");
     message_.append(type);
-    message_.append(":\n               ");
+    message_.append(":\n\t\t");
     message_.append(message);
 }
 

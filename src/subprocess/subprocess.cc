@@ -1,19 +1,15 @@
-#include "subprocess.hpp"
+#include "subprocess/subprocess.h"
+
+#include <array>
+#include <cstddef> // std::size_t
+#include <cstdio> // std::exit WIFEXITED WEXITSTATUS(marco)
+#include <cstring> // std::strcpy
+#include <string>
 
 #include <sys/wait.h> // waitpid
 #include <unistd.h> // pipe fork close dup2 read exec
 
-#include <array>
-#include <cerrno> // errno(marco)
-#include <cstddef> // std::size_t
-#include <cstdio> // std::exit WIFEXITED WEXITSTATUS(marco)
-#include <cstring> // std::strerror
-#include <memory> // std::unique_ptr
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include "exceptions.hpp" // exceptions::SyscallError
+#include "exceptions/exceptions.h" // exceptions::SyscallError
 
 namespace rayalto {
 namespace utils {

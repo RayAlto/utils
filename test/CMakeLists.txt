@@ -4,13 +4,14 @@ project(
   VERSION 1.0
   LANGUAGES CXX)
 
-macro(ra_add_test target_name target_src)
+macro(ra_test_add target_name target_src)
   add_executable(${target_name} ${target_src})
   target_include_directories(${target_name} PRIVATE ${RA_UTILS_INCLUDES})
   target_link_libraries(${target_name} PRIVATE ra-utils)
 endmacro()
 
-ra_add_test(subprocess test_subprocess.cpp)
-ra_add_test(timer test_timer.cpp)
-ra_add_test(request test_request.cpp)
-ra_add_test(strtool test_strtool.cpp)
+ra_test_add(subprocess test_subprocess.cc)
+ra_test_add(timer test_timer.cc)
+ra_test_add(request test_request.cc)
+ra_test_add(strtool test_strtool.cc)
+ra_test_add(mimetype test_mimetype.cc)

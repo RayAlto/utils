@@ -1,5 +1,5 @@
-#ifndef RA_UTILS_INCLUDE_TIMER_HPP_
-#define RA_UTILS_INCLUDE_TIMER_HPP_
+#ifndef RA_UTILS_TIMER_HPP_
+#define RA_UTILS_TIMER_HPP_
 
 #include <chrono>
 #include <condition_variable>
@@ -81,7 +81,7 @@ public:
     void stop() {
         std::unique_lock<std::mutex> lock(mutex_);
         if (work_thread_.joinable()) {
-            // Work thread is not started yet
+            // work thread is not started yet
             return;
         }
         // block work thread from working
@@ -104,4 +104,4 @@ protected:
 } // namespace utils
 } // namespace rayalto
 
-#endif // RA_UTILS_INCLUDE_TIMER_HPP_
+#endif // RA_UTILS_TIMER_HPP_

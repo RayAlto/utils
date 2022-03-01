@@ -6,7 +6,8 @@ RayAlto's Stupid Self-use Noob Utils
 
 ### 1. Subprocess
 
-Run a command and get its stdout, stderr and exit_code. Base on `exec()` family of functions. Example:
+Run a command and get its stdout, stderr and exit_code. Base on `exec()` family
+of functions. Example:
 
 ```c++
 using rayalto::util::subprocess::Result;
@@ -17,7 +18,7 @@ Result result = Subprocess::run({"ls", "-ahl", "/usr/bin"});
 std::cout << result.stdout << std::endl;
 ```
 
-* It's **not** a shell, it will **not** expand `~` or behave like a shell.
+- It's **not** a shell, it will **not** expand `~` or behave like a shell.
 
 ### 2. Timer
 
@@ -65,8 +66,9 @@ for (auto i : string::split(foo, '.', [](std::string& line) -> bool {
 
 output:
 
-```
+```plain
 127
 0
 0
 ```
+

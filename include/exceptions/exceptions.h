@@ -1,6 +1,7 @@
-#ifndef RA_UTILS_INCLUDE_EXCEPTIONS_HPP_
-#define RA_UTILS_INCLUDE_EXCEPTIONS_HPP_
+#ifndef RA_UTILS_EXCEPTIONS_EXCEPTIONS_HPP_
+#define RA_UTILS_EXCEPTIONS_EXCEPTIONS_HPP_
 
+#include <exception>
 #include <string>
 
 namespace rayalto {
@@ -52,4 +53,4 @@ public:
 } // namespace utils
 } // namespace rayalto
 
-#endif // RA_UTILS_INCLUDE_EXCEPTIONS_HPP_
+#endif // RA_UTILS_EXCEPTIONS_EXCEPTIONS_HPP_

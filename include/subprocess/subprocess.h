@@ -1,11 +1,11 @@
-#ifndef RA_UTILS_INCLUDE_SUBPROCESS_HPP_
-#define RA_UTILS_INCLUDE_SUBPROCESS_HPP_
+#ifndef RA_UTILS_SUBPROCESS_SUBPROCESS_HPP_
+#define RA_UTILS_SUBPROCESS_SUBPROCESS_HPP_
 
 #include <string>
 #include <vector>
 
-#include "args.hpp"
-#include "result.hpp"
+#include "args.h"
+#include "result.h"
 
 namespace rayalto {
 namespace utils {
@@ -33,13 +33,13 @@ public:
 
     ~Subprocess();
 
-    // Run the specified command and return the result
+    // run the specified command and return the result
     subprocess::Result run(bool capture_output = true);
 
     subprocess::Args args() const;
     subprocess::Result result() const;
 
-    // Run a command directly and get the result
+    // run a command directly and get the result
     static subprocess::Result run(const subprocess::Args& args,
                                   bool capture_output = true);
     static subprocess::Result run(const char* arg, bool capture_output = true);
@@ -52,4 +52,4 @@ private:
 } // namespace utils
 } // namespace rayalto
 
-#endif // RA_UTILS_INCLUDE_SUBPROCESS_HPP_
+#endif // RA_UTILS_SUBPROCESS_SUBPROCESS_HPP_

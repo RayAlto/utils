@@ -1,5 +1,5 @@
-#ifndef RA_UTILS_INCLUDE_ARGS_HPP_
-#define RA_UTILS_INCLUDE_ARGS_HPP_
+#ifndef RA_UTILS_SUBPROCESS_ARGS_HPP_
+#define RA_UTILS_SUBPROCESS_ARGS_HPP_
 
 #include <string>
 #include <vector>
@@ -14,4 +14,4 @@ using Args = std::vector<std::string>;
 } // namespace utils
 } // namespace rayalto
 
-#endif // RA_UTILS_INCLUDE_ARGS_HPP_
+#endif // RA_UTILS_SUBPROCESS_ARGS_HPP_
