@@ -2,6 +2,7 @@
 #define RA_UTILS_REQUEST_RESPONSE_HPP_
 
 #include <string>
+#include <cstdint>
 
 #include "cookie.h"
 #include "header.h"
@@ -22,7 +23,19 @@ struct TimeElapsed {
     // time elapsed from start until SSL/SSH handshake completed
     double handshake;
     // time elapsed until file transfer start
-    double pretransfer;
+    double pre_transfer;
+    // time elapsed from start until the first byte is received
+    double start_transfer;
+};
+
+struct Speed {
+    std::int64_t download;
+    std::int64_t upload;
+};
+
+struct ByteTransfered {
+    std::int64_t download;
+    std::int64_t upload;
 };
 
 } // namespace response
@@ -32,9 +45,11 @@ struct Response {
     std::string body;
     long code;
     long http_version;
-    response::TimeElapsed time_elapsed;
     Header header;
     Cookie cookie;
+    response::TimeElapsed time_elapsed;
+    response::ByteTransfered byte_transfered;
+    response::Speed speed;
 };
 
 } // namespace request

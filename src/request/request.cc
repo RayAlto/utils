@@ -90,6 +90,9 @@ Request::Request() {
     for (auto p : r.cookie) {
         std::cout << p.first << ": " << p.second << std::endl;
     }
+    std::cout << "===== Byte Transferd =====" << std::endl;
+    std::cout << "size downloaded: " << r.byte_transfered.download << std::endl;
+    std::cout << "download speed: " << r.speed.download << std::endl;
 }
 
 Request::~Request() {
@@ -235,7 +238,18 @@ bool Request::request() {
         handle_, CURLINFO_APPCONNECT_TIME, &response_.time_elapsed.handshake);
     curl_easy_getinfo(handle_,
                       CURLINFO_PRETRANSFER_TIME,
-                      &response_.time_elapsed.pretransfer);
+                      &response_.time_elapsed.pre_transfer);
+    curl_easy_getinfo(handle_,
+                      CURLINFO_STARTTRANSFER_TIME,
+                      &response_.time_elapsed.start_transfer);
+    curl_easy_getinfo(
+        handle_, CURLINFO_SIZE_UPLOAD_T, &response_.byte_transfered.upload);
+    curl_easy_getinfo(
+        handle_, CURLINFO_SIZE_DOWNLOAD_T, &response_.byte_transfered.download);
+    curl_easy_getinfo(
+        handle_, CURLINFO_SPEED_UPLOAD_T, &response_.speed.upload);
+    curl_easy_getinfo(
+        handle_, CURLINFO_SPEED_DOWNLOAD_T, &response_.speed.download);
     return (curl_result == CURLE_OK);
 }
 
