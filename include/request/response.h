@@ -56,6 +56,7 @@ struct Response {
     response::ByteTransfered byte_transfered;
     response::Speed speed;
     response::LocalInfo local_info;
+    std::string verbose;
 };
 
 } // namespace request

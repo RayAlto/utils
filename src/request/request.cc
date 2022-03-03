@@ -1,5 +1,7 @@
 #include "request/request.h"
 
+#include <cstddef>
+#include <cstdio>
 #include <cstring> // std::strlen, std::size_t
 #include <ctime>
 #include <iostream>
@@ -97,6 +99,8 @@ Request::Request() {
     std::cout << "===== Local Info =====" << std::endl;
     std::cout << "ip: " << r.local_info.ip << std::endl;
     std::cout << "port: " << r.local_info.port << std::endl;
+    std::cout << "===== Verbose =====" << std::endl;
+    std::cout << r.verbose << std::endl;
 }
 
 Request::~Request() {
@@ -183,13 +187,22 @@ void Request::authentication(request::Authentication&& authentication) {
     authentication_ = std::move(authentication);
 }
 
+request::Proxy Request::proxy() {
+    return proxy_;
+}
+
+void Request::proxy(const request::Proxy& proxy) {
+    proxy_ = proxy;
+}
+
+void Request::proxy(request::Proxy&& proxy) {
+    proxy_ = std::move(proxy);
+}
+
 bool Request::request() {
     char error_info_buffer[CURL_ERROR_SIZE];
     error_info_buffer[0] = 0;
-    // [option] verbose
-    if (verbose_) {
-        curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
-    }
+    curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
     // [option] url
     curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
     // [option] cookie
@@ -200,6 +213,8 @@ bool Request::request() {
     curl_easy_setopt(handle_, CURLOPT_USERAGENT, useragent_.c_str());
     // [option] authentication
     curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
+    // [option] proxy
+    curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
     // [option] method
     curl_easy_setopt(
         handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
@@ -217,6 +232,9 @@ bool Request::request() {
     curl_easy_setopt(
         handle_, CURLOPT_HEADERFUNCTION, curl_custom_header_function);
     curl_easy_setopt(handle_, CURLOPT_HEADERDATA, &response_.header);
+    // verbose information
+    std::FILE* temp_stderr = std::tmpfile();
+    curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr);
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
     // receive message
@@ -260,6 +278,11 @@ bool Request::request() {
     curl_easy_getinfo(handle_, CURLINFO_LOCAL_IP, &local_ip);
     response_.local_info.ip = local_ip;
     curl_easy_getinfo(handle_, CURLINFO_LOCAL_PORT, &response_.local_info.port);
+    std::rewind(temp_stderr);
+    char temp_buffer[64];
+    while (std::fgets(temp_buffer, 64, temp_stderr) != nullptr) {
+        response_.verbose.append(temp_buffer);
+    }
     return (curl_result == CURLE_OK);
 }
 
@@ -267,9 +290,44 @@ request::Response Request::response() {
     return response_;
 }
 
-std::time_t Request::parse_time_str(const char* time_str) {
+std::string Request::url_encode(const std::string& url) {
+    char* result_c_str = curl_easy_escape(handle_, url.c_str(), url.length());
+    std::string result = result_c_str;
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_encode(const char* url, std::size_t len) {
+    char* result_c_str = curl_easy_escape(handle_, url, len);
+    std::string result = result_c_str;
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_decode(const std::string& url) {
+    int result_length;
+    char* result_c_str =
+        curl_easy_unescape(handle_, url.c_str(), url.length(), &result_length);
+    std::string result(result_c_str, result_length);
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_decode(const char* url, std::size_t len) {
+    int result_length;
+    char* result_c_str = curl_easy_unescape(handle_, url, len, &result_length);
+    std::string result(result_c_str, result_length);
+    curl_free(result_c_str);
+    return result;
+}
+
+namespace request {
+
+std::time_t parse_time_str(const char* time_str) {
     return curl_getdate(time_str, nullptr);
 }
+
+} // namespace request
 
 } // namespace utils
 } // namespace rayalto

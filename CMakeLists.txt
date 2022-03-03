@@ -9,6 +9,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/request/authentication.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/request/cookie.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/request/header.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/request/proxy.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/request/request.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/subprocess/subprocess.cc
