@@ -38,6 +38,11 @@ struct ByteTransfered {
     std::int64_t upload;
 };
 
+struct LocalInfo {
+    std::string ip;
+    long port;
+};
+
 } // namespace response
 
 struct Response {
@@ -50,6 +55,7 @@ struct Response {
     response::TimeElapsed time_elapsed;
     response::ByteTransfered byte_transfered;
     response::Speed speed;
+    response::LocalInfo local_info;
 };
 
 } // namespace request

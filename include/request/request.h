@@ -1,6 +1,8 @@
 #ifndef RA_UTILS_REQUEST_REQUEST_HPP_
 #define RA_UTILS_REQUEST_REQUEST_HPP_
 
+#include <cstddef>
+#include <ctime>
 #include <string>
 
 #include <curl/curl.h>
@@ -69,6 +71,13 @@ public:
 
     // get the last response
     request::Response response();
+
+    /* ===== other func ===== */
+    /**
+     * parse a time string to unix timestamp
+     * see: https://curl.se/libcurl/c/curl_getdate.html
+     */
+    std::time_t parse_time_str(const char* time_str);
 
 protected:
     CURL* handle_;

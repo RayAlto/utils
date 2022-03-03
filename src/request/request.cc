@@ -1,6 +1,7 @@
 #include "request/request.h"
 
 #include <cstring> // std::strlen, std::size_t
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -64,13 +65,13 @@ Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
     curl_version_ = curl_version_info(CURLVERSION_NOW)->version;
-    // url("https://httpbin.org/anything");
+    url("https://httpbin.org/anything");
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
     // url("https://httpbin.org/cookies");
     // url("https://httpbin.org/cookies/set/test/test");
     // url("https://httpbin.org/headers");
-    url("https://www.baidu.com");
+    // url("https://www.baidu.com");
     cookie({{"a", "1"}, {"b", "2"}});
     useragent("114514");
     header({{"Test", "test"}, {"Foo", "bar"}});
@@ -93,6 +94,9 @@ Request::Request() {
     std::cout << "===== Byte Transferd =====" << std::endl;
     std::cout << "size downloaded: " << r.byte_transfered.download << std::endl;
     std::cout << "download speed: " << r.speed.download << std::endl;
+    std::cout << "===== Local Info =====" << std::endl;
+    std::cout << "ip: " << r.local_info.ip << std::endl;
+    std::cout << "port: " << r.local_info.port << std::endl;
 }
 
 Request::~Request() {
@@ -201,6 +205,8 @@ bool Request::request() {
         handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
+    // receive cert info
+    curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1l);
     // receive error
     curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer);
     // receive response text
@@ -250,11 +256,19 @@ bool Request::request() {
         handle_, CURLINFO_SPEED_UPLOAD_T, &response_.speed.upload);
     curl_easy_getinfo(
         handle_, CURLINFO_SPEED_DOWNLOAD_T, &response_.speed.download);
+    char* local_ip;
+    curl_easy_getinfo(handle_, CURLINFO_LOCAL_IP, &local_ip);
+    response_.local_info.ip = local_ip;
+    curl_easy_getinfo(handle_, CURLINFO_LOCAL_PORT, &response_.local_info.port);
     return (curl_result == CURLE_OK);
 }
 
 request::Response Request::response() {
     return response_;
+}
+
+std::time_t Request::parse_time_str(const char* time_str) {
+    return curl_getdate(time_str, nullptr);
 }
 
 } // namespace utils
