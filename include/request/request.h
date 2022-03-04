@@ -72,6 +72,10 @@ public:
     void proxy(const request::Proxy& proxy);
     // set proxy server
     void proxy(request::Proxy&& proxy);
+    // tunneling through http proxy set with Request::proxy()
+    bool http_proxy_tunnel();
+    // tunneling through http proxy set with Request::proxy()
+    void http_proxy_tunnel(const bool tunneling);
 
     // apply current settings and perform the request
     bool request();
@@ -96,6 +100,8 @@ protected:
     std::string useragent_;
     request::Authentication authentication_;
     request::Proxy proxy_;
+    bool http_proxy_tunnel_ = false;
+
     request::Response response_;
 
     std::string curl_version_;

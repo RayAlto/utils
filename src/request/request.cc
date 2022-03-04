@@ -199,6 +199,14 @@ void Request::proxy(request::Proxy&& proxy) {
     proxy_ = std::move(proxy);
 }
 
+bool Request::http_proxy_tunnel() {
+    return http_proxy_tunnel_;
+}
+
+void Request::http_proxy_tunnel(const bool tunneling) {
+    http_proxy_tunnel_ = tunneling;
+}
+
 bool Request::request() {
     char error_info_buffer[CURL_ERROR_SIZE];
     error_info_buffer[0] = 0;
@@ -215,6 +223,10 @@ bool Request::request() {
     curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
     // [option] proxy
     curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
+    // [option] http proxy tunnel
+    if (http_proxy_tunnel_) {
+        curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
+    }
     // [option] method
     curl_easy_setopt(
         handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
