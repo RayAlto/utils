@@ -76,10 +76,12 @@ constexpr long curl_http_proxy_tunnel(const bool& http_proxy_tunnel) {
 
 } // anonymous namespace
 
+const std::string Request::curl_version_ =
+    curl_version_info(CURLVERSION_NOW)->version;
+
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
-    curl_version_ = curl_version_info(CURLVERSION_NOW)->version;
     // url("https://httpbin.org/anything");
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
@@ -123,7 +125,7 @@ Request::~Request() {
     curl_global_cleanup();
 }
 
-const std::string Request::curl_version() {
+std::string Request::curl_version() {
     return curl_version_;
 }
 

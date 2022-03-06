@@ -30,7 +30,7 @@ public:
     virtual ~Request();
 
     // get curl version string
-    const std::string curl_version();
+    static std::string curl_version();
     // reset all current setting
     void reset();
     // get current http method
@@ -110,7 +110,7 @@ protected:
 
     request::Response response_;
 
-    std::string curl_version_;
+    const static std::string curl_version_;
 };
 
 namespace request {
