@@ -72,3 +72,33 @@ output:
 0
 ```
 
+### 4. MIME Type
+
+Get MIME Type from file extension.
+
+```c++
+std::cout << std::boolalpha << util::MimeTypes::know("png") << std::endl;
+std::cout << util::MimeTypes::get("png") << std::endl;
+std::cout << std::boolalpha << util::MimeTypes::know("wtf") << std::endl;
+std::cout << util::MimeTypes::get("wtf") << std::endl;
+std::cout << util::MimeTypes::get("wtf", "application/what-the-fuck") << std::endl;
+std::cout << util::MimeTypes::default_text << std::endl;
+std::cout << util::MimeTypes::default_binary << std::endl;
+```
+
+output:
+
+```plain
+true
+image/png
+false
+application/octet-stream
+application/what-the-fuck
+text/plain
+application/octet-stream
+```
+
+> You can update the "database" by running [this python script](./script/update_mime_types_data.py). The script will download & parse MIME Types from:
+>
+> - [Apache HTTPD](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
+> - [Nginx](https://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
