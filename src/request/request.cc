@@ -12,6 +12,7 @@
 #include <curl/easy.h>
 
 #include "request/header.h"
+#include "request/ip_resolve.h"
 #include "request/method.h"
 #include "request/response.h"
 #include "string/strtool.h"
@@ -61,19 +62,33 @@ std::size_t curl_custom_header_function(char* buffer,
     return actual_size;
 }
 
+constexpr long curl_ip_resolve(const request::IP_Resolve& ip_resolve) {
+    return ip_resolve == request::IP_Resolve::WHATEVER ? CURL_IPRESOLVE_WHATEVER
+           : ip_resolve == request::IP_Resolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
+           : ip_resolve == request::IP_Resolve::IPv6_ONLY
+               ? CURL_IPRESOLVE_V6
+               : CURL_IPRESOLVE_WHATEVER;
+}
+
+constexpr long curl_http_proxy_tunnel(const bool& http_proxy_tunnel) {
+    return http_proxy_tunnel ? 1l : 0l;
+}
+
 } // anonymous namespace
 
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
     curl_version_ = curl_version_info(CURLVERSION_NOW)->version;
-    url("https://httpbin.org/anything");
+    // url("https://httpbin.org/anything");
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
     // url("https://httpbin.org/cookies");
     // url("https://httpbin.org/cookies/set/test/test");
     // url("https://httpbin.org/headers");
     // url("https://www.baidu.com");
+    url("https://www.zhihu.com");
+    ip_resolve(request::IP_Resolve::IPv4_ONLY);
     cookie({{"a", "1"}, {"b", "2"}});
     useragent("114514");
     header({{"Test", "test"}, {"Foo", "bar"}});
@@ -125,6 +140,14 @@ request::Method Request::method() {
 
 void Request::method(const request::Method& method) {
     method_ = method;
+}
+
+request::IP_Resolve Request::ip_resolve() {
+    return ip_resolve_;
+}
+
+void Request::ip_resolve(const request::IP_Resolve& ip_resolve) {
+    ip_resolve_ = ip_resolve;
 }
 
 std::string Request::url() {
@@ -203,14 +226,17 @@ bool Request::http_proxy_tunnel() {
     return http_proxy_tunnel_;
 }
 
-void Request::http_proxy_tunnel(const bool tunneling) {
+void Request::http_proxy_tunnel(const bool& tunneling) {
     http_proxy_tunnel_ = tunneling;
 }
 
 bool Request::request() {
-    char error_info_buffer[CURL_ERROR_SIZE];
-    error_info_buffer[0] = 0;
     curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
+    // [option] method
+    curl_easy_setopt(
+        handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
+    // [option] ip resolve
+    curl_easy_setopt(handle_, CURLOPT_IPRESOLVE, curl_ip_resolve(ip_resolve_));
     // [option] url
     curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
     // [option] cookie
@@ -224,17 +250,16 @@ bool Request::request() {
     // [option] proxy
     curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
     // [option] http proxy tunnel
-    if (http_proxy_tunnel_) {
-        curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
-    }
-    // [option] method
-    curl_easy_setopt(
-        handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
+    curl_easy_setopt(handle_,
+                     CURLOPT_HTTPPROXYTUNNEL,
+                     curl_http_proxy_tunnel(http_proxy_tunnel_));
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
     // receive cert info
     curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1l);
     // receive error
+    char error_info_buffer[CURL_ERROR_SIZE];
+    error_info_buffer[0] = 0;
     curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer);
     // receive response text
     curl_easy_setopt(

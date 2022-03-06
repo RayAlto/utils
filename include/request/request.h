@@ -8,8 +8,9 @@
 #include <curl/curl.h>
 
 #include "authentication.h"
+#include "ip_resolve.h"
 #include "method.h"
-#include "request/proxy.h"
+#include "proxy.h"
 #include "response.h"
 
 namespace rayalto {
@@ -36,6 +37,10 @@ public:
     request::Method method();
     // set http method
     void method(const request::Method& method);
+    // ip resolve
+    request::IP_Resolve ip_resolve();
+    // want to try IPv6? ip_resolve(request::IP_RESOLVE::IPv6_ONLY)
+    void ip_resolve(const request::IP_Resolve& ip_resolve);
     // get current target url
     std::string url();
     // set target url
@@ -75,7 +80,7 @@ public:
     // tunneling through http proxy set with Request::proxy()
     bool http_proxy_tunnel();
     // tunneling through http proxy set with Request::proxy()
-    void http_proxy_tunnel(const bool tunneling);
+    void http_proxy_tunnel(const bool& tunneling);
 
     // apply current settings and perform the request
     bool request();
@@ -94,6 +99,7 @@ protected:
     bool verbose_ = false;
 
     request::Method method_ = request::Method::GET;
+    request::IP_Resolve ip_resolve_ = request::IP_Resolve::WHATEVER;
     std::string url_;
     request::Cookie cookie_;
     request::Header header_;

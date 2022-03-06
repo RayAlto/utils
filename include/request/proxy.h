@@ -49,7 +49,7 @@ public:
     const char* c_str() const noexcept;
     bool empty() const noexcept;
 
-    virtual ~Proxy();
+    virtual ~Proxy() = default;
 
 protected:
     std::string proxy_;

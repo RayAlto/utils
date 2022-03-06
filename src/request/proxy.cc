@@ -15,7 +15,7 @@ Proxy::Proxy(const proxy::Type& type, const std::string& ip, const long& port) :
     proxy_(proxy::type::c_str(type) + ip + ':' + std::to_string(port)) {}
 
 const char* Proxy::c_str() const noexcept {
-    return proxy_.c_str();
+    return proxy_.empty() ? nullptr : proxy_.c_str();
 }
 
 bool Proxy::empty() const noexcept {
