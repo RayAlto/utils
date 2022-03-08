@@ -81,6 +81,14 @@ public:
     bool http_proxy_tunnel();
     // tunneling through http proxy set with Request::proxy()
     void http_proxy_tunnel(const bool& tunneling);
+    // timeout for transfer operation
+    long timeout();
+    // timeout for transfer operation
+    void timeout(const long& timeout);
+    // timeout for connection phase
+    long connect_timeout();
+    // timeout for connection phase
+    void connect_timeout(const long& connect_timeout);
 
     // apply current settings and perform the request
     bool request();
@@ -107,6 +115,8 @@ protected:
     request::Authentication authentication_;
     request::Proxy proxy_;
     bool http_proxy_tunnel_ = false;
+    long timeout_ = 0l;
+    long connect_timeout_ = 0l;
 
     request::Response response_;
 

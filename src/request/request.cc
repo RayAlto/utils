@@ -232,7 +232,28 @@ void Request::http_proxy_tunnel(const bool& tunneling) {
     http_proxy_tunnel_ = tunneling;
 }
 
+long Request::timeout() {
+    return timeout_;
+}
+
+void Request::timeout(const long& timeout) {
+    timeout_ = timeout;
+}
+
+long Request::connect_timeout() {
+    return connect_timeout_;
+}
+
+void Request::connect_timeout(const long& connect_timeout) {
+    connect_timeout_ = connect_timeout;
+}
+
 bool Request::request() {
+    // useful for multithreading??
+    curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1l);
+    // enable TCP keep-alive
+    curl_easy_setopt(handle_, CURLOPT_TCP_KEEPALIVE, 1l);
+    // get verbose message
     curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
     // [option] method
     curl_easy_setopt(
@@ -255,6 +276,10 @@ bool Request::request() {
     curl_easy_setopt(handle_,
                      CURLOPT_HTTPPROXYTUNNEL,
                      curl_http_proxy_tunnel(http_proxy_tunnel_));
+    // [option] timeout
+    curl_easy_setopt(handle_, CURLOPT_TIMEOUT_MS, timeout_);
+    // [option] connect timeout
+    curl_easy_setopt(handle_, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_);
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
     // receive cert info
