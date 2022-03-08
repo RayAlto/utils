@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace rayalto {
@@ -310,27 +311,24 @@ bool compare_ic(const std::string& lv, const std::string& rv) {
 
 std::string join(const std::string& str,
                  const std::initializer_list<std::string>& between) {
-    std::string result =
-        std::accumulate(std::next(between.begin()), between.end(), *between.begin());
-    // TODO...
-    return result;
+    return std::accumulate(std::next(between.begin()),
+                           between.end(),
+                           *between.begin(),
+                           [&str](std::string l, std::string r) -> std::string {
+                               return std::move(l) + std::move(str)
+                                      + std::move(r);
+                           });
 }
 
 std::string join(std::string&& str,
                  std::initializer_list<std::string>&& between) {
-    std::string result;
-    return result;
-    // TODO...
-}
-
-template <typename Iter>
-std::string join(const std::string& str, Iter begin, Iter end) {
-    // TODO...
-}
-
-template <typename Iter>
-std::string join(std::string&& str, Iter begin, Iter end) {
-    // TODO...
+    return std::accumulate(std::next(between.begin()),
+                           between.end(),
+                           *between.begin(),
+                           [&str](std::string l, std::string r) -> std::string {
+                               return std::move(l) + std::move(str)
+                                      + std::move(r);
+                           });
 }
 
 } // namespace string

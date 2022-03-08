@@ -2,12 +2,15 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
-using namespace rayalto::utils;
+using namespace rayalto;
 
 int main(int argc, char const* argv[]) {
-    bool foo = string::compare_ic("abc", "ABC");
-    bool bar = string::compare_ic("def", "ABC");
-    std::cout << std::boolalpha << foo << std::endl << bar << std::endl;
+    std::vector<std::string> strings {"foo", "bar", "hello", "world"};
+    std::cout << utils::string::join(", ", {"foo", "bar", "hello", "world"})
+              << std::endl
+              << utils::string::join(", ", strings.begin(), strings.end())
+              << std::endl;
     return 0;
 }
