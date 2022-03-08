@@ -106,7 +106,7 @@ protected:
     CURL* handle_;
     bool verbose_ = false;
 
-    request::Method method_ = request::Method::GET;
+    request::Method method_ = request::Method::DEFAULT;
     request::IP_Resolve ip_resolve_ = request::IP_Resolve::WHATEVER;
     std::string url_;
     request::Cookie cookie_;

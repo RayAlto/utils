@@ -8,7 +8,7 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
-enum class Method : std::uint8_t { GET, POST, PUT, DELETE, PATCH };
+enum class Method : std::uint8_t { GET, POST, PUT, DELETE, PATCH, DEFAULT };
 
 namespace method {
 

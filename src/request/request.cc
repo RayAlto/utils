@@ -62,18 +62,6 @@ std::size_t curl_custom_header_function(char* buffer,
     return actual_size;
 }
 
-constexpr long curl_ip_resolve(const request::IP_Resolve& ip_resolve) {
-    return ip_resolve == request::IP_Resolve::WHATEVER ? CURL_IPRESOLVE_WHATEVER
-           : ip_resolve == request::IP_Resolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
-           : ip_resolve == request::IP_Resolve::IPv6_ONLY
-               ? CURL_IPRESOLVE_V6
-               : CURL_IPRESOLVE_WHATEVER;
-}
-
-constexpr long curl_http_proxy_tunnel(const bool& http_proxy_tunnel) {
-    return http_proxy_tunnel ? 1l : 0l;
-}
-
 } // anonymous namespace
 
 const std::string Request::curl_version_ =
@@ -255,31 +243,6 @@ bool Request::request() {
     curl_easy_setopt(handle_, CURLOPT_TCP_KEEPALIVE, 1l);
     // get verbose message
     curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
-    // [option] method
-    curl_easy_setopt(
-        handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
-    // [option] ip resolve
-    curl_easy_setopt(handle_, CURLOPT_IPRESOLVE, curl_ip_resolve(ip_resolve_));
-    // [option] url
-    curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
-    // [option] cookie
-    curl_easy_setopt(handle_, CURLOPT_COOKIE, cookie_.c_str());
-    // [option] header
-    curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, header_.curl_header());
-    // [option] useragent
-    curl_easy_setopt(handle_, CURLOPT_USERAGENT, useragent_.c_str());
-    // [option] authentication
-    curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
-    // [option] proxy
-    curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
-    // [option] http proxy tunnel
-    curl_easy_setopt(handle_,
-                     CURLOPT_HTTPPROXYTUNNEL,
-                     curl_http_proxy_tunnel(http_proxy_tunnel_));
-    // [option] timeout
-    curl_easy_setopt(handle_, CURLOPT_TIMEOUT_MS, timeout_);
-    // [option] connect timeout
-    curl_easy_setopt(handle_, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_);
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
     // receive cert info
@@ -299,6 +262,49 @@ bool Request::request() {
     // verbose information
     std::FILE* temp_stderr = std::tmpfile();
     curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr);
+    // [option] method
+    curl_easy_setopt(
+        handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
+    // [option] ip resolve
+    curl_easy_setopt(handle_,
+                     CURLOPT_IPRESOLVE,
+                     request::ip_resolve::as_option(ip_resolve_));
+    // [option] url
+    if (!url_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
+    }
+    // [option] cookie
+    if (!cookie_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_COOKIE, cookie_.c_str());
+    }
+    // [option] header
+    if (!header_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, header_.curl_header());
+    }
+    // [option] useragent
+    if (!useragent_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_USERAGENT, useragent_.c_str());
+    }
+    // [option] authentication
+    if (!authentication_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
+    }
+    // [option] proxy
+    if (!proxy_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
+    }
+    // [option] http proxy tunnel
+    if (http_proxy_tunnel_) {
+        curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
+    }
+    // [option] timeout
+    if (timeout_) {
+        curl_easy_setopt(handle_, CURLOPT_TIMEOUT_MS, timeout_);
+    }
+    // [option] connect timeout
+    if (connect_timeout_) {
+        curl_easy_setopt(handle_, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_);
+    }
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
     // receive message
