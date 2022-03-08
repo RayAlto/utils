@@ -92,7 +92,18 @@ std::string kv_format(
 );
 // clang-format on
 
+// case insensitive string compare
 bool compare_ic(const std::string& lv, const std::string& rv);
+
+// string join
+std::string join(const std::string& str,
+                 const std::initializer_list<std::string>& between);
+std::string join(std::string&& str,
+                 std::initializer_list<std::string>&& between);
+template <typename Iter>
+std::string join(const std::string& str, Iter begin, Iter end);
+template <typename Iter>
+std::string join(std::string&& str, Iter begin, Iter end);
 
 } // namespace string
 } // namespace utils

@@ -4,6 +4,8 @@
 #include <cctype>
 #include <cstddef>
 #include <functional>
+#include <iterator>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -304,6 +306,31 @@ bool compare_ic(const std::string& lv, const std::string& rv) {
                       [](unsigned char lc, unsigned char rc) {
                           return std::tolower(lc) == std::tolower(rc);
                       });
+}
+
+std::string join(const std::string& str,
+                 const std::initializer_list<std::string>& between) {
+    std::string result =
+        std::accumulate(std::next(between.begin()), between.end(), *between.begin());
+    // TODO...
+    return result;
+}
+
+std::string join(std::string&& str,
+                 std::initializer_list<std::string>&& between) {
+    std::string result;
+    return result;
+    // TODO...
+}
+
+template <typename Iter>
+std::string join(const std::string& str, Iter begin, Iter end) {
+    // TODO...
+}
+
+template <typename Iter>
+std::string join(std::string&& str, Iter begin, Iter end) {
+    // TODO...
 }
 
 } // namespace string
