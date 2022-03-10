@@ -9,8 +9,6 @@
 #include <utility>
 
 #include <curl/curl.h>
-#include <curl/easy.h>
-#include <curl/system.h>
 
 #include "request/header.h"
 #include "request/ip_resolve.h"
@@ -31,7 +29,7 @@ void parse_header(const char* data,
             // empty line
             continue;
         }
-        if (header.substr(0, 5) == "HTTP/") {
+        if (header.rfind("HTTP/", 0) == 0) {
             // something like 'HTTP/2 200'
             continue;
         }
@@ -80,12 +78,15 @@ Request::Request() {
     // url("https://httpbin.org/headers");
     // url("https://www.baidu.com");
     // url("https://www.zhihu.com");
-    ip_resolve(request::IP_Resolve::IPv4_ONLY);
-    cookie({{"a", "1"}, {"b", "2"}});
+    // ip_resolve(request::IP_Resolve::IPv4_ONLY);
+    // cookie({{"a", "1"}, {"b", "2"}});
     // useragent("114514");
-    header({{"Test", "test"}, {"Foo", "bar"}});
-    authentication({"foo", "bar"});
-    method(request::Method::POST);
+    // header({{"Test", "test"},
+    //         {"Foo", "bar"},
+    //         {"content-type", "application/json"}});
+    // header({{"Test", "test"}, {"Foo", "bar"}});
+    // authentication({"foo", "bar"});
+    // method(request::Method::POST);
     // interface("192.168.220.2");
     request();
     auto r = response_;
@@ -101,14 +102,14 @@ Request::Request() {
     for (auto p : r.cookie) {
         std::cout << p.first << ": " << p.second << std::endl;
     }
-    std::cout << "===== Byte Transferd =====" << std::endl;
-    std::cout << "size downloaded: " << r.byte_transfered.download << std::endl;
-    std::cout << "download speed: " << r.speed.download << std::endl;
-    std::cout << "===== Local Info =====" << std::endl;
-    std::cout << "ip: " << r.local_info.ip << std::endl;
-    std::cout << "port: " << r.local_info.port << std::endl;
-    std::cout << "===== Verbose =====" << std::endl;
-    std::cout << r.verbose << std::endl;
+    // std::cout << "===== Byte Transferd =====" << std::endl;
+    // std::cout << "size downloaded: " << r.byte_transfered.download << std::endl;
+    // std::cout << "download speed: " << r.speed.download << std::endl;
+    // std::cout << "===== Local Info =====" << std::endl;
+    // std::cout << "ip: " << r.local_info.ip << std::endl;
+    // std::cout << "port: " << r.local_info.port << std::endl;
+    // std::cout << "===== Verbose =====" << std::endl;
+    // std::cout << r.verbose << std::endl;
 }
 
 Request::~Request() {
@@ -465,7 +466,6 @@ std::string Request::url_decode(const char* url, std::size_t len) {
 }
 
 namespace request {
-
 std::time_t parse_time_str(const char* time_str) {
     return curl_getdate(time_str, nullptr);
 }
