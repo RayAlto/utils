@@ -95,6 +95,24 @@ public:
     void interface(const std::string& interface);
     // outgoing network interface (interface name/IP address/host name)
     void interface(std::string&& interface);
+    // interface DNS resolver should bind to (MUST be an interface name)
+    std::string dns_interface();
+    // interface DNS resolver should bind to (MUST be an interface name)
+    void dns_interface(const std::string& dns_interface);
+    // interface DNS resolver should bind to (MUST be an interface name)
+    void dns_interface(std::string&& dns_interface);
+    // local ipv4 address DNS resolver should bind to
+    std::string dns_local_ipv4();
+    // local ipv4 address DNS resolver should bind to
+    void dns_local_ipv4(const std::string& dns_local_ipv4);
+    // local ipv4 address DNS resolver should bind to
+    void dns_local_ipv4(std::string&& dns_local_ipv4);
+    // local ipv6 address DNS resolver should bind to
+    std::string dns_local_ipv6();
+    // local ipv6 address DNS resolver should bind to
+    void dns_local_ipv6(const std::string& dns_local_ipv6);
+    // local ipv6 address DNS resolver should bind to
+    void dns_local_ipv6(std::string&& dns_local_ipv6);
 
     // apply current settings and perform the request
     bool request();
@@ -124,6 +142,9 @@ protected:
     long timeout_ = 0l;
     long connect_timeout_ = 0l;
     std::string interface_;
+    std::string dns_interface_;
+    std::string dns_local_ipv4_;
+    std::string dns_local_ipv6_;
 
     request::Response response_;
 

@@ -251,6 +251,42 @@ void Request::interface(std::string&& interface) {
     interface_ = std::move(interface);
 }
 
+std::string Request::dns_interface() {
+    return dns_interface_;
+}
+
+void Request::dns_interface(const std::string& dns_interface) {
+    dns_interface_ = dns_interface;
+}
+
+void Request::dns_interface(std::string&& dns_interface) {
+    dns_interface_ = std::move(dns_interface);
+}
+
+std::string Request::dns_local_ipv4() {
+    return dns_local_ipv4_;
+}
+
+void Request::dns_local_ipv4(const std::string& dns_local_ipv4) {
+    dns_local_ipv4_ = dns_local_ipv4;
+}
+
+void Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
+    dns_local_ipv4_ = std::move(dns_local_ipv4);
+}
+
+std::string Request::dns_local_ipv6() {
+    return dns_local_ipv6_;
+}
+
+void Request::dns_local_ipv6(const std::string& dns_local_ipv6) {
+    dns_local_ipv6_ = dns_local_ipv6;
+}
+
+void Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
+    dns_local_ipv6_ = std::move(dns_local_ipv6);
+}
+
 bool Request::request() {
     // useful for multithreading??
     curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1l);
@@ -326,6 +362,21 @@ bool Request::request() {
     // [option] interface
     if (!interface_.empty()) {
         curl_easy_setopt(handle_, CURLOPT_INTERFACE, interface_.c_str());
+    }
+    // [option] dns interface
+    if (!dns_interface_.empty()) {
+        curl_easy_setopt(
+            handle_, CURLOPT_DNS_INTERFACE, dns_interface_.c_str());
+    }
+    // [option] dns local ipv4 address
+    if (!dns_local_ipv4_.empty()) {
+        curl_easy_setopt(
+            handle_, CURLOPT_DNS_LOCAL_IP4, dns_local_ipv4_.c_str());
+    }
+    // [option] dns local ipv6 address
+    if (!dns_local_ipv6_.empty()) {
+        curl_easy_setopt(
+            handle_, CURLOPT_DNS_LOCAL_IP6, dns_local_ipv6_.c_str());
     }
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
