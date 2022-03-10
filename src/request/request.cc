@@ -71,17 +71,18 @@ const std::string Request::curl_version_ =
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
-    // url("https://httpbin.org/anything");
+    useragent_ = "curl/" + curl_version_;
+    url("https://httpbin.org/anything");
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
     // url("https://httpbin.org/cookies");
     // url("https://httpbin.org/cookies/set/test/test");
     // url("https://httpbin.org/headers");
     // url("https://www.baidu.com");
-    url("https://www.zhihu.com");
+    // url("https://www.zhihu.com");
     ip_resolve(request::IP_Resolve::IPv4_ONLY);
     cookie({{"a", "1"}, {"b", "2"}});
-    useragent("114514");
+    // useragent("114514");
     header({{"Test", "test"}, {"Foo", "bar"}});
     authentication({"foo", "bar"});
     method(request::Method::POST);
