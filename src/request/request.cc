@@ -10,6 +10,7 @@
 
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <curl/system.h>
 
 #include "request/header.h"
 #include "request/ip_resolve.h"
@@ -242,7 +243,7 @@ bool Request::request() {
     // enable TCP keep-alive
     curl_easy_setopt(handle_, CURLOPT_TCP_KEEPALIVE, 1l);
     // get verbose message
-    curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1);
+    curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1l);
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
     // receive cert info
@@ -299,11 +300,14 @@ bool Request::request() {
     }
     // [option] timeout
     if (timeout_) {
-        curl_easy_setopt(handle_, CURLOPT_TIMEOUT_MS, timeout_);
+        curl_easy_setopt(
+            handle_, CURLOPT_TIMEOUT_MS, static_cast<curl_off_t>(timeout_));
     }
     // [option] connect timeout
     if (connect_timeout_) {
-        curl_easy_setopt(handle_, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_);
+        curl_easy_setopt(handle_,
+                         CURLOPT_CONNECTTIMEOUT_MS,
+                         static_cast<curl_off_t>(connect_timeout_));
     }
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
