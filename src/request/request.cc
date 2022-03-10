@@ -86,6 +86,7 @@ Request::Request() {
     header({{"Test", "test"}, {"Foo", "bar"}});
     authentication({"foo", "bar"});
     method(request::Method::POST);
+    // interface("192.168.220.2");
     request();
     auto r = response_;
     std::cout << "===== Code =====" << std::endl;
@@ -238,6 +239,18 @@ void Request::connect_timeout(const long& connect_timeout) {
     connect_timeout_ = connect_timeout;
 }
 
+std::string Request::interface() {
+    return interface_;
+}
+
+void Request::interface(const std::string& interface) {
+    interface_ = interface;
+}
+
+void Request::interface(std::string&& interface) {
+    interface_ = std::move(interface);
+}
+
 bool Request::request() {
     // useful for multithreading??
     curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1l);
@@ -309,6 +322,10 @@ bool Request::request() {
         curl_easy_setopt(handle_,
                          CURLOPT_CONNECTTIMEOUT_MS,
                          static_cast<curl_off_t>(connect_timeout_));
+    }
+    // [option] interface
+    if (!interface_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_INTERFACE, interface_.c_str());
     }
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);

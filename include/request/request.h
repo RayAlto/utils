@@ -89,6 +89,12 @@ public:
     long connect_timeout();
     // timeout for connection phase
     void connect_timeout(const long& connect_timeout);
+    // outgoing network interface (interface name/IP address/host name)
+    std::string interface();
+    // outgoing network interface (interface name/IP address/host name)
+    void interface(const std::string& interface);
+    // outgoing network interface (interface name/IP address/host name)
+    void interface(std::string&& interface);
 
     // apply current settings and perform the request
     bool request();
@@ -117,6 +123,7 @@ protected:
     bool http_proxy_tunnel_ = false;
     long timeout_ = 0l;
     long connect_timeout_ = 0l;
+    std::string interface_;
 
     request::Response response_;
 
