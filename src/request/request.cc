@@ -15,6 +15,7 @@
 #include "request/method.h"
 #include "request/response.h"
 #include "string/strtool.h"
+#include "util/mime_types.h"
 
 namespace rayalto {
 namespace utils {
@@ -71,6 +72,8 @@ Request::Request() {
     handle_ = curl_easy_init();
     useragent_ = "curl/" + curl_version_;
     url("https://httpbin.org/anything");
+    body(R"rayalto({"foo": 1, "bar": 114514})rayalto",
+         util::MimeTypes::get("json"));
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
     // url("https://httpbin.org/cookies");
@@ -86,7 +89,7 @@ Request::Request() {
     //         {"content-type", "application/json"}});
     // header({{"Test", "test"}, {"Foo", "bar"}});
     // authentication({"foo", "bar"});
-    // method(request::Method::POST);
+    method(request::Method::GET);
     // interface("192.168.220.2");
     request();
     auto r = response_;
@@ -202,6 +205,20 @@ void Request::authentication(const request::Authentication& authentication) {
 
 void Request::authentication(request::Authentication&& authentication) {
     authentication_ = std::move(authentication);
+}
+
+std::string Request::body() {
+    return body_;
+}
+
+void Request::body(const std::string& body, const std::string& mime_type) {
+    body_ = body;
+    header_["content-type"] = mime_type;
+}
+
+void Request::body(std::string&& body, std::string&& mime_type) {
+    body_ = std::move(body);
+    header_["content-type"] = std::move(mime_type);
 }
 
 request::Proxy Request::proxy() {
@@ -340,6 +357,11 @@ bool Request::request() {
     // [option] authentication
     if (!authentication_.empty()) {
         curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
+    }
+    // [option] body
+    if (!body_.empty()) {
+        curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body_.c_str());
+        curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE_LARGE, body_.length());
     }
     // [option] proxy
     if (!proxy_.empty()) {

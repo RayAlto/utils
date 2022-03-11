@@ -71,6 +71,15 @@ public:
     void authentication(const request::Authentication& authentication);
     // set server authentication (set authorization header will override this)
     void authentication(request::Authentication&& authentication);
+    // body, content-type will be set to "application/x-www-form-urlencoded"
+    std::string body();
+    // body, content-type will be set to "application/x-www-form-urlencoded"
+    void body(
+        const std::string& body,
+        const std::string& mime_type = "application/x-www-form-urlencoded");
+    // body, content-type will be set to "application/x-www-form-urlencoded"
+    void body(std::string&& body,
+              std::string&& mime_type = "application/x-www-form-urlencoded");
     // get current proxy server
     request::Proxy proxy();
     // set proxy server
@@ -137,6 +146,7 @@ protected:
     request::Header header_;
     std::string useragent_;
     request::Authentication authentication_;
+    std::string body_;
     request::Proxy proxy_;
     bool http_proxy_tunnel_ = false;
     long timeout_ = 0l;
