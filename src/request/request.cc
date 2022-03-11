@@ -131,7 +131,11 @@ void Request::reset() {
     cookie_.clear();
 }
 
-request::Method Request::method() {
+const request::Method& Request::method() const {
+    return method_;
+}
+
+request::Method& Request::method() {
     return method_;
 }
 
@@ -139,7 +143,11 @@ void Request::method(const request::Method& method) {
     method_ = method;
 }
 
-request::IP_Resolve Request::ip_resolve() {
+const request::IP_Resolve& Request::ip_resolve() const {
+    return ip_resolve_;
+}
+
+request::IP_Resolve& Request::ip_resolve() {
     return ip_resolve_;
 }
 
@@ -147,7 +155,11 @@ void Request::ip_resolve(const request::IP_Resolve& ip_resolve) {
     ip_resolve_ = ip_resolve;
 }
 
-std::string Request::url() {
+const std::string& Request::url() const {
+    return url_;
+}
+
+std::string& Request::url() {
     return url_;
 }
 
@@ -159,7 +171,11 @@ void Request::url(std::string&& url) {
     url_ = std::move(url);
 }
 
-request::Cookie Request::cookie() {
+const request::Cookie& Request::cookie() const {
+    return cookie_;
+}
+
+request::Cookie& Request::cookie() {
     return cookie_;
 }
 
@@ -171,7 +187,11 @@ void Request::cookie(request::Cookie&& cookie) {
     cookie_ = std::move(cookie);
 }
 
-request::Header Request::header() {
+const request::Header& Request::header() const {
+    return header_;
+}
+
+request::Header& Request::header() {
     return header_;
 }
 
@@ -183,7 +203,11 @@ void Request::header(request::Header&& header) {
     header_ = std::move(header);
 }
 
-std::string Request::useragent() {
+const std::string& Request::useragent() const {
+    return useragent_;
+}
+
+std::string& Request::useragent() {
     return useragent_;
 }
 
@@ -195,7 +219,11 @@ void Request::useragent(std::string&& useragent) {
     useragent_ = std::move(useragent);
 }
 
-request::Authentication Request::authentication() {
+const request::Authentication& Request::authentication() const {
+    return authentication_;
+}
+
+request::Authentication& Request::authentication() {
     return authentication_;
 }
 
@@ -207,7 +235,11 @@ void Request::authentication(request::Authentication&& authentication) {
     authentication_ = std::move(authentication);
 }
 
-std::string Request::body() {
+const std::string& Request::body() const {
+    return body_;
+}
+
+std::string& Request::body() {
     return body_;
 }
 
@@ -221,7 +253,11 @@ void Request::body(std::string&& body, std::string&& mime_type) {
     header_["content-type"] = std::move(mime_type);
 }
 
-request::Proxy Request::proxy() {
+const request::Proxy& Request::proxy() const {
+    return proxy_;
+}
+
+request::Proxy& Request::proxy() {
     return proxy_;
 }
 
@@ -233,7 +269,11 @@ void Request::proxy(request::Proxy&& proxy) {
     proxy_ = std::move(proxy);
 }
 
-bool Request::http_proxy_tunnel() {
+const bool& Request::http_proxy_tunnel() const {
+    return http_proxy_tunnel_;
+}
+
+bool& Request::http_proxy_tunnel() {
     return http_proxy_tunnel_;
 }
 
@@ -241,7 +281,11 @@ void Request::http_proxy_tunnel(const bool& tunneling) {
     http_proxy_tunnel_ = tunneling;
 }
 
-long Request::timeout() {
+const long& Request::timeout() const {
+    return timeout_;
+}
+
+long& Request::timeout() {
     return timeout_;
 }
 
@@ -249,7 +293,11 @@ void Request::timeout(const long& timeout) {
     timeout_ = timeout;
 }
 
-long Request::connect_timeout() {
+const long& Request::connect_timeout() const {
+    return connect_timeout_;
+}
+
+long& Request::connect_timeout() {
     return connect_timeout_;
 }
 
@@ -257,7 +305,11 @@ void Request::connect_timeout(const long& connect_timeout) {
     connect_timeout_ = connect_timeout;
 }
 
-std::string Request::interface() {
+const std::string& Request::interface() const {
+    return interface_;
+}
+
+std::string& Request::interface() {
     return interface_;
 }
 
@@ -269,7 +321,11 @@ void Request::interface(std::string&& interface) {
     interface_ = std::move(interface);
 }
 
-std::string Request::dns_interface() {
+const std::string& Request::dns_interface() const {
+    return dns_interface_;
+}
+
+std::string& Request::dns_interface() {
     return dns_interface_;
 }
 
@@ -281,7 +337,11 @@ void Request::dns_interface(std::string&& dns_interface) {
     dns_interface_ = std::move(dns_interface);
 }
 
-std::string Request::dns_local_ipv4() {
+const std::string& Request::dns_local_ipv4() const {
+    return dns_local_ipv4_;
+}
+
+std::string& Request::dns_local_ipv4() {
     return dns_local_ipv4_;
 }
 
@@ -293,7 +353,11 @@ void Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
     dns_local_ipv4_ = std::move(dns_local_ipv4);
 }
 
-std::string Request::dns_local_ipv6() {
+const std::string& Request::dns_local_ipv6() const {
+    return dns_local_ipv6_;
+}
+
+std::string& Request::dns_local_ipv6() {
     return dns_local_ipv6_;
 }
 
@@ -452,7 +516,11 @@ bool Request::request() {
     return (curl_result == CURLE_OK);
 }
 
-request::Response Request::response() {
+const request::Response& Request::response() const {
+    return response_;
+}
+
+request::Response& Request::response() {
     return response_;
 }
 

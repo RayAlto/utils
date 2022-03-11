@@ -34,100 +34,123 @@ public:
     // reset all current setting
     void reset();
     // get current http method
-    request::Method method();
+    request::Method& method();
+    const request::Method& method() const;
     // set http method
     void method(const request::Method& method);
-    // ip resolve
-    request::IP_Resolve ip_resolve();
-    // want to try IPv6? ip_resolve(request::IP_RESOLVE::IPv6_ONLY)
+
+    // current ip resolve setting
+    request::IP_Resolve& ip_resolve();
+    const request::IP_Resolve& ip_resolve() const;
+    // want IPv6? ip_resolve(request::IP_RESOLVE::IPv6_ONLY)
     void ip_resolve(const request::IP_Resolve& ip_resolve);
+
     // get current target url
-    std::string url();
-    // set target url
+    std::string& url();
+    const std::string& url() const;
+    // set current target url
     void url(const std::string& url);
-    // set target url
     void url(std::string&& url);
-    // get current cookie
-    request::Cookie cookie();
-    // set cookie
+
+    // get current cookie for request
+    request::Cookie& cookie();
+    const request::Cookie& cookie() const;
+    // set current cookie for request
     void cookie(const request::Cookie& cookie);
-    // set cookie
     void cookie(request::Cookie&& cookie);
-    // get current header
-    request::Header header();
-    // set header
+
+    // get current header for request
+    request::Header& header();
+    const request::Header& header() const;
+    // set current header for request
     void header(const request::Header& header);
-    // set header
     void header(request::Header&& header);
-    // get current user agent
-    std::string useragent();
+
+    // get current user agent setting
+    std::string& useragent();
+    const std::string& useragent() const;
     // set user agent (set user agent header will override this)
     void useragent(const std::string& useragent);
-    // set user agent (set user agent header will override this)
     void useragent(std::string&& useragent);
+
     // get current server authentication setting
-    request::Authentication authentication();
+    request::Authentication& authentication();
+    const request::Authentication& authentication() const;
     // set server authentication (set authorization header will override this)
     void authentication(const request::Authentication& authentication);
-    // set server authentication (set authorization header will override this)
     void authentication(request::Authentication&& authentication);
-    // body, content-type will be set to "application/x-www-form-urlencoded"
-    std::string body();
-    // body, content-type will be set to "application/x-www-form-urlencoded"
+
+    // get body set for the current request
+    std::string& body();
+    const std::string& body() const;
+    // set body for current request, default mime type is
+    // "application/x-www-form-urlencoded"
     void body(
         const std::string& body,
         const std::string& mime_type = "application/x-www-form-urlencoded");
-    // body, content-type will be set to "application/x-www-form-urlencoded"
     void body(std::string&& body,
               std::string&& mime_type = "application/x-www-form-urlencoded");
-    // get current proxy server
-    request::Proxy proxy();
+
+    // get current proxy setting
+    request::Proxy& proxy();
+    const request::Proxy& proxy() const;
     // set proxy server
     void proxy(const request::Proxy& proxy);
-    // set proxy server
     void proxy(request::Proxy&& proxy);
-    // tunneling through http proxy set with Request::proxy()
-    bool http_proxy_tunnel();
-    // tunneling through http proxy set with Request::proxy()
+
+    // tunneling through http proxy set by Request::proxy()
+    bool& http_proxy_tunnel();
+    const bool& http_proxy_tunnel() const;
+    // whether tunneling through http proxy set by Request::proxy()
     void http_proxy_tunnel(const bool& tunneling);
-    // timeout for transfer operation
-    long timeout();
+
+    // get timeout setting for current transfer operation
+    long& timeout();
+    const long& timeout() const;
     // timeout for transfer operation
     void timeout(const long& timeout);
-    // timeout for connection phase
-    long connect_timeout();
-    // timeout for connection phase
+
+    // get timeout setting for connection phase
+    long& connect_timeout();
+    const long& connect_timeout() const;
+    // set timeout for connection phase
     void connect_timeout(const long& connect_timeout);
-    // outgoing network interface (interface name/IP address/host name)
-    std::string interface();
-    // outgoing network interface (interface name/IP address/host name)
+
+    // get current outgoing network interface setting
+    std::string& interface();
+    const std::string& interface() const;
+    // set outgoing network interface (interface name/IP address/host name)
     void interface(const std::string& interface);
-    // outgoing network interface (interface name/IP address/host name)
     void interface(std::string&& interface);
-    // interface DNS resolver should bind to (MUST be an interface name)
-    std::string dns_interface();
-    // interface DNS resolver should bind to (MUST be an interface name)
+
+    // get current setting for interface DNS resolver should bind to
+    std::string& dns_interface();
+    const std::string& dns_interface() const;
+    // set interface DNS resolver should bind to
+    // (MUST be an interface name, ip address/host name is NOT allowed)
     void dns_interface(const std::string& dns_interface);
-    // interface DNS resolver should bind to (MUST be an interface name)
     void dns_interface(std::string&& dns_interface);
-    // local ipv4 address DNS resolver should bind to
-    std::string dns_local_ipv4();
-    // local ipv4 address DNS resolver should bind to
+
+    // get current setting for local ipv4 address DNS resolver should bind to
+    std::string& dns_local_ipv4();
+    const std::string& dns_local_ipv4() const;
+    // set local ipv4 address DNS resolver should bind to
     void dns_local_ipv4(const std::string& dns_local_ipv4);
-    // local ipv4 address DNS resolver should bind to
     void dns_local_ipv4(std::string&& dns_local_ipv4);
-    // local ipv6 address DNS resolver should bind to
-    std::string dns_local_ipv6();
-    // local ipv6 address DNS resolver should bind to
+
+    // get current setting for local ipv6 address DNS resolver should bind to
+    std::string& dns_local_ipv6();
+    const std::string& dns_local_ipv6() const;
+    // set local ipv6 address DNS resolver should bind to
     void dns_local_ipv6(const std::string& dns_local_ipv6);
-    // local ipv6 address DNS resolver should bind to
     void dns_local_ipv6(std::string&& dns_local_ipv6);
 
     // apply current settings and perform the request
     bool request();
 
     // get the last response
-    request::Response response();
+    request::Response& response();
+    const request::Response& response() const;
 
     /* ===== other func ===== */
     std::string url_encode(const std::string& url);
@@ -160,6 +183,8 @@ protected:
 
     const static std::string curl_version_;
 };
+
+/* ========== other func ========== */
 
 namespace request {
 
