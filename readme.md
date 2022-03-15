@@ -74,14 +74,14 @@ output:
 
 ### 4. MIME Type
 
-Get MIME Type from file extension.
+Get MIME Type from file.
 
 ```c++
-std::cout << std::boolalpha << util::MimeTypes::know("png") << std::endl;
-std::cout << util::MimeTypes::get("png") << std::endl;
-std::cout << std::boolalpha << util::MimeTypes::know("wtf") << std::endl;
-std::cout << util::MimeTypes::get("wtf") << std::endl;
-std::cout << util::MimeTypes::get("wtf", "application/what-the-fuck") << std::endl;
+std::cout << std::boolalpha << util::MimeTypes::know("foo.png") << std::endl;
+std::cout << util::MimeTypes::get("foo.png") << std::endl;
+std::cout << std::boolalpha << util::MimeTypes::know("foo.wtf") << std::endl;
+std::cout << util::MimeTypes::get("foo.wtf") << std::endl;
+std::cout << util::MimeTypes::get("foo.wtf", "application/what-the-fuck") << std::endl;
 std::cout << util::MimeTypes::default_text << std::endl;
 std::cout << util::MimeTypes::default_binary << std::endl;
 ```
