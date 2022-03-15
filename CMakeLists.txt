@@ -13,7 +13,6 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/request/request.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/subprocess/subprocess.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/util/map_handler.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types_data.cc
 )

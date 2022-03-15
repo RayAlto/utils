@@ -12,12 +12,12 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
-class Header : public util::MapIcHandler {
+class Header : public util::DictIcHandler {
 public:
     Header(
         std::initializer_list<std::pair<const std::string, std::string>> pairs);
-    Header(const util::MapIc& map);
-    Header(util::MapIc&& map);
+    Header(const util::DictIC& map);
+    Header(util::DictIC&& map);
     Header() = default;
     Header(const Header& header);
     Header(Header&& header) noexcept;

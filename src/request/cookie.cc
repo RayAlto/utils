@@ -15,16 +15,16 @@ namespace request {
 
 Cookie::Cookie(
     std::initializer_list<std::pair<const std::string, std::string>> pairs) :
-    util::MapHandler(pairs) {}
+    util::DictHandler(pairs) {}
 
-Cookie::Cookie(const util::Map& map) : util::MapHandler(map) {}
+Cookie::Cookie(const util::Dict& map) : util::DictHandler(map) {}
 
-Cookie::Cookie(util::Map&& map) : util::MapHandler(std::move(map)) {}
+Cookie::Cookie(util::Dict&& map) : util::DictHandler(std::move(map)) {}
 
-Cookie::Cookie(const Cookie& cookie) : util::MapHandler(cookie.map_) {}
+Cookie::Cookie(const Cookie& cookie) : util::DictHandler(cookie.map_) {}
 
 Cookie::Cookie(Cookie&& cookie) noexcept :
-    util::MapHandler(std::move(cookie.map_)) {}
+    util::DictHandler(std::move(cookie.map_)) {}
 
 Cookie& Cookie::operator=(const Cookie& cookie) {
     this->map_ = cookie.map_;

@@ -13,12 +13,12 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
-class Cookie : public util::MapHandler {
+class Cookie : public util::DictHandler {
 public:
     Cookie(
         std::initializer_list<std::pair<const std::string, std::string>> pairs);
-    Cookie(const util::Map& map);
-    Cookie(util::Map&& map);
+    Cookie(const util::Dict& map);
+    Cookie(util::Dict&& map);
     Cookie() = default;
     Cookie(const Cookie&);
     Cookie(Cookie&&) noexcept;

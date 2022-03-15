@@ -30,159 +30,392 @@ struct LessIC {
     }
 };
 
-// std::map<std::string, std::string>
-using Map = std::map<std::string, std::string>;
-// std::map<std::string, std::string, LessIc>
-using MapIc = std::map<std::string, std::string, LessIC>;
+// imitating dict in python
+using Dict = std::map<std::string, std::string>;
+// imitating dict in python, case insensitive version
+using DictIC = std::map<std::string, std::string, LessIC>;
 
 /**
- * Stupid wrap of std::map<std::string, std::string> with virtual destructor
- * and some extra stupid functions
+ * Stupid wrap of std::map<std::string, ValueType> with virtual destructor
+ * and some extra stupid functions, case insensitive version
  */
-class MapHandler {
+template <typename ValueType>
+class MapIc {
+    using MapType = std::map<std::string, ValueType, LessIC>;
+    using iterator = typename MapType::iterator;
+    using const_iterator = typename MapType::const_iterator;
+
 public:
-    MapHandler(const Map& map);
-    MapHandler(Map&& map);
-    MapHandler(
-        std::initializer_list<std::pair<const std::string, std::string>> pairs);
-    MapHandler() = default;
-    MapHandler(const MapHandler&) = default;
-    MapHandler(MapHandler&&) noexcept = default;
-    MapHandler& operator=(const MapHandler&) = default;
-    MapHandler& operator=(MapHandler&&) noexcept = default;
+    MapIc(const MapType& map) : map_(map) {}
+    MapIc(MapType&& map) : map_(std::move(map)) {}
+    MapIc(
+        std::initializer_list<std::pair<const std::string, ValueType>> pairs) :
+        map_(pairs) {}
 
-    virtual ~MapHandler() = default;
+    MapIc() = default;
+    MapIc(const MapIc&) = default;
+    MapIc(MapIc&&) noexcept = default;
 
-    std::string& operator[](const std::string& name);
+    MapIc& operator=(const MapIc&) = default;
+    MapIc& operator=(MapIc&&) noexcept = default;
 
-    using iterator = Map::iterator;
-    using const_iterator = Map::const_iterator;
+    virtual ~MapIc() = default;
 
-    iterator begin();
-    const_iterator begin() const;
-    const_iterator cbegin() const;
-    iterator end();
-    const_iterator end() const;
-    const_iterator cend() const;
-    void clear();
-    bool empty() const noexcept;
-    std::size_t size() const noexcept;
-    iterator find(const std::string& key);
-    const_iterator find(const std::string& key) const;
-    iterator erase(iterator pos);
-    iterator erase(const_iterator pos);
-    iterator erase(const_iterator first, const_iterator last);
+    std::string& operator[](const std::string& name) {
+        return map_[name];
+    }
+
+    iterator begin() {
+        return map_.begin();
+    }
+    const_iterator begin() const {
+        return map_.begin();
+    }
+
+    const_iterator cbegin() const {
+        return map_.cbegin();
+    }
+
+    iterator end() {
+        return map_.end();
+    }
+    const_iterator end() const {
+        return map_.end();
+    }
+
+    const_iterator cend() const {
+        return map_.cend();
+    }
+
+    void clear() {
+        return map_.clear();
+    }
+
+    bool empty() const noexcept {
+        return map_.empty();
+    }
+
+    std::size_t size() const noexcept {
+        return map_.size();
+    }
+
+    iterator find(const std::string& key) {
+        return map_.find(key);
+    }
+    const_iterator find(const std::string& key) const {
+        return map_.find(key);
+    }
+
+    iterator erase(iterator pos) {
+        return map_.erase(pos);
+    }
+    iterator erase(const_iterator pos) {
+        return map_.erase(pos);
+    }
+    iterator erase(const_iterator first, const_iterator last) {
+        return map_.erase(first, last);
+    }
+
     std::pair<iterator, bool> insert(
-        const std::pair<std::string, std::string>& item);
-    std::pair<iterator, bool> insert(
-        std::pair<std::string, std::string>&& item);
+        const std::pair<std::string, ValueType>& item) {
+        return map_.insert(item);
+    }
+    std::pair<iterator, bool> insert(std::pair<std::string, ValueType>&& item) {
+        return map_.insert(std::move(item));
+    }
     iterator insert(const_iterator hint,
-                    const std::pair<std::string, std::string>& item);
+                    const std::pair<std::string, ValueType>& item) {
+        return map_.insert(hint, item);
+    }
     iterator insert(const_iterator hint,
-                    std::pair<std::string, std::string>&& item);
+                    std::pair<std::string, ValueType>&& item) {
+        return map_.insert(hint, std::move(item));
+    }
+
     template <class InputIt>
-    void insert(InputIt first, InputIt last);
+    void insert(InputIt first, InputIt last) {
+        return map_.insert(first, last);
+    }
     void insert(
-        std::initializer_list<std::pair<const std::string, std::string>> items);
+        std::initializer_list<std::pair<const std::string, ValueType>> items) {
+        return map_.insert(items);
+    }
 
     // test whether a key exists
-    bool exists(const std::string& key) const;
+    bool exists(const std::string& key) const {
+        return (map_.find(key) == map_.end());
+    }
+
     // try to remove an item by key, return false if the key does not exists
-    bool remove(const std::string& key);
+    bool remove(const std::string& key) {
+        const_iterator found = map_.find(key);
+        if (found == map_.end()) {
+            return false;
+        }
+        map_.erase(found);
+        return true;
+    }
+
     // try to remove items by key, return the amount of items actually removed
-    std::size_t remove(std::initializer_list<std::string> keys);
+    std::size_t remove(std::initializer_list<std::string> keys) {
+        std::size_t count = 0;
+        for (const std::string key : keys) {
+            if (remove(key)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // try to add an item, return false if the key already exists
-    bool add(const std::pair<std::string, std::string>& item);
+    bool add(const std::pair<std::string, ValueType>& item) {
+        return map_.insert(item).second;
+    }
+
     // try to add an item, return false if the key already exists
-    bool add(std::pair<std::string, std::string>&& item);
+    bool add(std::pair<std::string, ValueType>&& item) {
+        return map_.insert(std::move(item)).second;
+    }
+
     // try to add items, return the amount of items actually added
     std::size_t add(
-        std::initializer_list<std::pair<std::string, std::string>> items);
+        std::initializer_list<std::pair<std::string, ValueType>> items) {
+        std::size_t count = 0;
+        for (std::pair<std::string, std::string> item : items) {
+            if (add(item)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // try to update/add an item, return false if a same item is already exists
-    bool update(const std::pair<std::string, std::string>& item);
+    bool update(const std::pair<std::string, ValueType>& item) {
+        std::string& previous_value = map_[item.first];
+        if (previous_value == item.second) {
+            return false;
+        }
+        previous_value = item.second;
+        return true;
+    }
+
     // try to update/add an item, return false if a same item is already exists
-    bool update(std::pair<std::string, std::string>&& item);
+    bool update(std::pair<std::string, ValueType>&& item) {
+        std::string& previous_value = map_[item.first];
+        if (previous_value == item.second) {
+            return false;
+        }
+        previous_value = std::move(item.second);
+        return true;
+    }
+
     // try to update/add items, return the amount of items actually updated/added
     std::size_t update(
-        std::initializer_list<std::pair<std::string, std::string>> items);
+        std::initializer_list<std::pair<std::string, ValueType>> items) {
+        std::size_t count = 0;
+        for (std::pair<std::string, std::string> item : items) {
+            if (update(item)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
 
 protected:
-    Map map_;
+    MapType map_;
 };
 
 /**
- * (Ignore case version)
- * Stupid wrap of std::map<std::string, std::string> with virtual destructor
+ * Stupid wrap of std::map<std::string, ValueType> with virtual destructor
  * and some extra stupid functions
  */
-class MapIcHandler {
+template <typename ValueType>
+class Map {
+    using MapType = std::map<std::string, ValueType>;
+    using iterator = typename MapType::iterator;
+    using const_iterator = typename MapType::const_iterator;
+
 public:
-    MapIcHandler(const MapIc& map);
-    MapIcHandler(MapIc&& map);
-    MapIcHandler() = default;
-    MapIcHandler(const MapIcHandler&) = default;
-    MapIcHandler(MapIcHandler&&) noexcept = default;
-    MapIcHandler& operator=(const MapIcHandler&) = default;
-    MapIcHandler& operator=(MapIcHandler&&) noexcept = default;
+    Map(const MapType& map) : map_(map) {}
+    Map(MapType&& map) : map_(std::move(map)) {}
+    Map(std::initializer_list<std::pair<const std::string, ValueType>> pairs) :
+        map_(pairs) {}
 
-    virtual ~MapIcHandler() = default;
+    Map() = default;
+    Map(const Map&) = default;
+    Map(Map&&) noexcept = default;
 
-    std::string& operator[](const std::string& name);
+    Map& operator=(const Map&) = default;
+    Map& operator=(Map&&) noexcept = default;
 
-    using iterator = MapIc::iterator;
-    using const_iterator = MapIc::const_iterator;
+    virtual ~Map() = default;
 
-    iterator begin();
-    const_iterator begin() const;
-    const_iterator cbegin() const;
-    iterator end();
-    const_iterator end() const;
-    const_iterator cend() const;
-    void clear();
-    bool empty() const noexcept;
-    std::size_t size() const noexcept;
-    iterator find(const std::string& key);
-    const_iterator find(const std::string& key) const;
-    iterator erase(iterator pos);
-    iterator erase(const_iterator pos);
-    iterator erase(const_iterator first, const_iterator last);
+    std::string& operator[](const std::string& name) {
+        return map_[name];
+    }
+
+    iterator begin() {
+        return map_.begin();
+    }
+    const_iterator begin() const {
+        return map_.begin();
+    }
+
+    const_iterator cbegin() const {
+        return map_.cbegin();
+    }
+
+    iterator end() {
+        return map_.end();
+    }
+    const_iterator end() const {
+        return map_.end();
+    }
+
+    const_iterator cend() const {
+        return map_.cend();
+    }
+
+    void clear() {
+        return map_.clear();
+    }
+
+    bool empty() const noexcept {
+        return map_.empty();
+    }
+
+    std::size_t size() const noexcept {
+        return map_.size();
+    }
+
+    iterator find(const std::string& key) {
+        return map_.find(key);
+    }
+    const_iterator find(const std::string& key) const {
+        return map_.find(key);
+    }
+
+    iterator erase(iterator pos) {
+        return map_.erase(pos);
+    }
+    iterator erase(const_iterator pos) {
+        return map_.erase(pos);
+    }
+    iterator erase(const_iterator first, const_iterator last) {
+        return map_.erase(first, last);
+    }
+
     std::pair<iterator, bool> insert(
-        const std::pair<std::string, std::string>& item);
-    std::pair<iterator, bool> insert(
-        std::pair<std::string, std::string>&& item);
+        const std::pair<std::string, ValueType>& item) {
+        return map_.insert(item);
+    }
+    std::pair<iterator, bool> insert(std::pair<std::string, ValueType>&& item) {
+        return map_.insert(std::move(item));
+    }
     iterator insert(const_iterator hint,
-                    const std::pair<std::string, std::string>& item);
+                    const std::pair<std::string, ValueType>& item) {
+        return map_.insert(hint, item);
+    }
     iterator insert(const_iterator hint,
-                    std::pair<std::string, std::string>&& item);
+                    std::pair<std::string, ValueType>&& item) {
+        return map_.insert(hint, std::move(item));
+    }
+
     template <class InputIt>
-    void insert(InputIt first, InputIt last);
+    void insert(InputIt first, InputIt last) {
+        return map_.insert(first, last);
+    }
     void insert(
-        std::initializer_list<std::pair<const std::string, std::string>> items);
+        std::initializer_list<std::pair<const std::string, ValueType>> items) {
+        return map_.insert(items);
+    }
 
     // test whether a key exists
-    bool exists(const std::string& key) const;
+    bool exists(const std::string& key) const {
+        return (map_.find(key) == map_.end());
+    }
+
     // try to remove an item by key, return false if the key does not exists
-    bool remove(const std::string& key);
+    bool remove(const std::string& key) {
+        const_iterator found = map_.find(key);
+        if (found == map_.end()) {
+            return false;
+        }
+        map_.erase(found);
+        return true;
+    }
+
     // try to remove items by key, return the amount of items actually removed
-    std::size_t remove(std::initializer_list<std::string> keys);
+    std::size_t remove(std::initializer_list<std::string> keys) {
+        std::size_t count = 0;
+        for (const std::string key : keys) {
+            if (remove(key)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // try to add an item, return false if the key already exists
-    bool add(const std::pair<std::string, std::string>& item);
+    bool add(const std::pair<std::string, ValueType>& item) {
+        return map_.insert(item).second;
+    }
+
     // try to add an item, return false if the key already exists
-    bool add(std::pair<std::string, std::string>&& item);
+    bool add(std::pair<std::string, ValueType>&& item) {
+        return map_.insert(std::move(item)).second;
+    }
+
     // try to add items, return the amount of items actually added
     std::size_t add(
-        std::initializer_list<std::pair<std::string, std::string>> items);
+        std::initializer_list<std::pair<std::string, ValueType>> items) {
+        std::size_t count = 0;
+        for (std::pair<std::string, std::string> item : items) {
+            if (add(item)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // try to update/add an item, return false if a same item is already exists
-    bool update(const std::pair<std::string, std::string>& item);
+    bool update(const std::pair<std::string, ValueType>& item) {
+        std::string& previous_value = map_[item.first];
+        if (previous_value == item.second) {
+            return false;
+        }
+        previous_value = item.second;
+        return true;
+    }
+
     // try to update/add an item, return false if a same item is already exists
-    bool update(std::pair<std::string, std::string>&& item);
+    bool update(std::pair<std::string, ValueType>&& item) {
+        std::string& previous_value = map_[item.first];
+        if (previous_value == item.second) {
+            return false;
+        }
+        previous_value = std::move(item.second);
+        return true;
+    }
+
     // try to update/add items, return the amount of items actually updated/added
     std::size_t update(
-        std::initializer_list<std::pair<std::string, std::string>> items);
+        std::initializer_list<std::pair<std::string, ValueType>> items) {
+        std::size_t count = 0;
+        for (std::pair<std::string, std::string> item : items) {
+            if (update(item)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
 
 protected:
-    MapIc map_;
+    MapType map_;
 };
+
+using DictHandler = Map<std::string>;
+using DictIcHandler = MapIc<std::string>;
 
 } // namespace util
 } // namespace utils

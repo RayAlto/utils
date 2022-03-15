@@ -72,8 +72,22 @@ Request::Request() {
     handle_ = curl_easy_init();
     useragent_ = "curl/" + curl_version_;
     url("https://httpbin.org/anything");
-    body(R"rayalto({"foo": 1, "bar": 114514})rayalto",
-         util::MimeTypes::get("json"));
+    curl_mime* mime;
+    curl_mimepart* part_text;
+    mime = curl_mime_init(handle_);
+    part_text = curl_mime_addpart(mime);
+    curl_mime_name(part_text, "mime text");
+    curl_mime_data(part_text, "mime part data", static_cast<std::size_t>(-1));
+    curl_mimepart* part_file;
+    part_file = curl_mime_addpart(mime);
+    curl_mime_name(part_file, "mime file");
+    curl_mime_data(part_file, "mime part data", static_cast<std::size_t>(-1));
+    /* curl_mime_filedata(part_file, "test.jpg"); */
+    curl_mime_filename(part_file, "vnc.jpg");
+    curl_easy_setopt(handle_, CURLOPT_MIMEPOST, mime);
+
+    /* body(R"rayalto({"foo": 1, "bar": 114514})rayalto", */
+    /*      util::MimeTypes::get("json")); */
     // url("https://httpbin.org/basic-auth/foo/bar");
     // url("https://httpbin.org/hidden-basic-auth/foo/bar");
     // url("https://httpbin.org/cookies");
