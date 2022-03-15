@@ -20,11 +20,11 @@ public:
     virtual ~MimeTypes() = default;
 
     // check if I know this file extension
-    static bool know(const std::string& extension);
+    static bool know(const std::string& filename);
 
     // get mime type of the file extension
     // <fallback> if I do not know about this extension
-    static std::string get(const std::string& extension,
+    static std::string get(const std::string& filename,
                            const std::string& fallback = default_binary);
 
     static const std::string default_text;
