@@ -370,7 +370,7 @@ public:
     std::size_t add(
         std::initializer_list<std::pair<std::string, ValueType>> items) {
         std::size_t count = 0;
-        for (std::pair<std::string, std::string> item : items) {
+        for (std::pair<std::string, ValueType> item : items) {
             if (add(item)) {
                 count += 1;
             }
