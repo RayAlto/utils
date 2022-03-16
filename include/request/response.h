@@ -4,8 +4,8 @@
 #include <string>
 #include <cstdint>
 
-#include "cookie.h"
-#include "header.h"
+#include "request/cookie.h"
+#include "request/header.h"
 
 namespace rayalto {
 namespace utils {

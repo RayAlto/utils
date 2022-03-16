@@ -1,10 +1,11 @@
 #ifndef RA_UTILS_REQUEST_HEADER_HPP_
 #define RA_UTILS_REQUEST_HEADER_HPP_
 
-#include <curl/curl.h>
 #include <initializer_list>
 #include <string>
 #include <utility>
+
+#include <curl/curl.h>
 
 #include "util/map_handler.h"
 

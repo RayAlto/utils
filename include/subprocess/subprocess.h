@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "args.h"
-#include "result.h"
+#include "subprocess/args.h"
+#include "subprocess/result.h"
 
 namespace rayalto {
 namespace utils {
