@@ -9,10 +9,12 @@
 #include <utility>
 
 #include <curl/curl.h>
+#include <curl/easy.h>
 
 #include "request/header.h"
 #include "request/ip_resolve.h"
 #include "request/method.h"
+#include "request/mime_part.h"
 #include "request/response.h"
 #include "string/strtool.h"
 #include "util/mime_types.h"
@@ -62,6 +64,35 @@ std::size_t curl_custom_header_function(char* buffer,
     return actual_size;
 }
 
+void curl_add_mime_part(curl_mime* mime,
+                        const std::string& part_name,
+                        const request::MimePart& mime_part) {
+    curl_mimepart* curl_mimepart_ = curl_mime_addpart(mime);
+    if (!part_name.empty()) {
+        curl_mime_name(curl_mimepart_, part_name.c_str());
+    }
+    if (!mime_part.type().empty()) {
+        curl_mime_type(curl_mimepart_, mime_part.type().c_str());
+    }
+    if (mime_part.is_file()) {
+        // is a file
+        if (!mime_part.data().empty()) {
+            curl_mime_filedata(curl_mimepart_, mime_part.data().c_str());
+        }
+        if (!mime_part.file_name().empty()) {
+            curl_mime_filename(curl_mimepart_, mime_part.file_name().c_str());
+        }
+    }
+    else {
+        // raw data
+        if (!mime_part.data().empty()) {
+            curl_mime_data(curl_mimepart_,
+                           mime_part.data().c_str(),
+                           mime_part.data().length());
+        }
+    }
+}
+
 } // anonymous namespace
 
 const std::string Request::curl_version_ =
@@ -71,62 +102,6 @@ Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
     useragent_ = "curl/" + curl_version_;
-    url("https://httpbin.org/anything");
-    curl_mime* mime;
-    curl_mimepart* part_text;
-    mime = curl_mime_init(handle_);
-    part_text = curl_mime_addpart(mime);
-    curl_mime_name(part_text, "mime text");
-    curl_mime_data(part_text, "mime part data", static_cast<std::size_t>(-1));
-    curl_mimepart* part_file;
-    part_file = curl_mime_addpart(mime);
-    curl_mime_name(part_file, "mime file");
-    curl_mime_data(part_file, "mime part data", static_cast<std::size_t>(-1));
-    /* curl_mime_filedata(part_file, "test.jpg"); */
-    curl_mime_filename(part_file, "vnc.jpg");
-    curl_easy_setopt(handle_, CURLOPT_MIMEPOST, mime);
-
-    /* body(R"rayalto({"foo": 1, "bar": 114514})rayalto", */
-    /*      util::MimeTypes::get("json")); */
-    // url("https://httpbin.org/basic-auth/foo/bar");
-    // url("https://httpbin.org/hidden-basic-auth/foo/bar");
-    // url("https://httpbin.org/cookies");
-    // url("https://httpbin.org/cookies/set/test/test");
-    // url("https://httpbin.org/headers");
-    // url("https://www.baidu.com");
-    // url("https://www.zhihu.com");
-    // ip_resolve(request::IP_Resolve::IPv4_ONLY);
-    // cookie({{"a", "1"}, {"b", "2"}});
-    // useragent("114514");
-    // header({{"Test", "test"},
-    //         {"Foo", "bar"},
-    //         {"content-type", "application/json"}});
-    // header({{"Test", "test"}, {"Foo", "bar"}});
-    // authentication({"foo", "bar"});
-    method(request::Method::GET);
-    // interface("192.168.220.2");
-    request();
-    auto r = response_;
-    std::cout << "===== Code =====" << std::endl;
-    std::cout << r.code << std::endl;
-    std::cout << "===== Body =====" << std::endl;
-    std::cout << r.body << std::endl;
-    std::cout << "===== Header =====" << std::endl;
-    for (auto p : r.header) {
-        std::cout << p.first << ": " << p.second << std::endl;
-    }
-    std::cout << "===== Cookie =====" << std::endl;
-    for (auto p : r.cookie) {
-        std::cout << p.first << ": " << p.second << std::endl;
-    }
-    // std::cout << "===== Byte Transferd =====" << std::endl;
-    // std::cout << "size downloaded: " << r.byte_transfered.download << std::endl;
-    // std::cout << "download speed: " << r.speed.download << std::endl;
-    // std::cout << "===== Local Info =====" << std::endl;
-    // std::cout << "ip: " << r.local_info.ip << std::endl;
-    // std::cout << "port: " << r.local_info.port << std::endl;
-    // std::cout << "===== Verbose =====" << std::endl;
-    // std::cout << r.verbose << std::endl;
 }
 
 Request::~Request() {
@@ -265,6 +240,22 @@ void Request::body(const std::string& body, const std::string& mime_type) {
 void Request::body(std::string&& body, std::string&& mime_type) {
     body_ = std::move(body);
     header_["content-type"] = std::move(mime_type);
+}
+
+request::MimeParts& Request::mime_parts() {
+    return mime_parts_;
+}
+
+const request::MimeParts& Request::mime_parts() const {
+    return mime_parts_;
+}
+
+void Request::mime_parts(const request::MimeParts& mime_parts) {
+    mime_parts_ = mime_parts;
+}
+
+void Request::mime_parts(request::MimeParts&& mime_parts) {
+    mime_parts_ = std::move(mime_parts);
 }
 
 const request::Proxy& Request::proxy() const {
@@ -440,6 +431,22 @@ bool Request::request() {
     if (!body_.empty()) {
         curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body_.c_str());
         curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE_LARGE, body_.length());
+    }
+    // [option] multi part
+    if (!mime_parts_.empty()) {
+        // clean previous curl_mime
+        if (curl_mime_) {
+            curl_mime_free(curl_mime_);
+            curl_mime_ = nullptr;
+        }
+        // init fresh curl_mime
+        curl_mime_ = curl_mime_init(handle_);
+        // add parts
+        for (const std::pair<std::string, request::MimePart>& mime_part :
+             mime_parts_) {
+            curl_add_mime_part(curl_mime_, mime_part.first, mime_part.second);
+        }
+        curl_easy_setopt(handle_, CURLOPT_MIMEPOST, curl_mime_);
     }
     // [option] proxy
     if (!proxy_.empty()) {

@@ -7,17 +7,23 @@
 
 #include <curl/curl.h>
 
-#include "authentication.h"
-#include "ip_resolve.h"
-#include "method.h"
-#include "proxy.h"
-#include "response.h"
+#include "request/authentication.h"
+#include "request/ip_resolve.h"
+#include "request/method.h"
+#include "request/proxy.h"
+#include "request/mime_parts.h"
+#include "request/mime_part.h"
+#include "request/response.h"
 
 namespace rayalto {
 namespace utils {
 
 /**
  * Make http request easily
+ *
+ * Note:
+ *   - Set mime type in body and mime_parts at the same time may cause strange
+ *       problems.
  */
 class Request {
 public:
@@ -90,6 +96,12 @@ public:
         const std::string& mime_type = "application/x-www-form-urlencoded");
     void body(std::string&& body,
               std::string&& mime_type = "application/x-www-form-urlencoded");
+
+    // multipart/formdata
+    request::MimeParts& mime_parts();
+    const request::MimeParts& mime_parts() const;
+    void mime_parts(const request::MimeParts& mime_parts);
+    void mime_parts(request::MimeParts&& mime_parts);
 
     // get current proxy setting
     request::Proxy& proxy();
@@ -170,6 +182,9 @@ protected:
     std::string useragent_;
     request::Authentication authentication_;
     std::string body_;
+    request::MimeParts mime_parts_;
+    // why the FUCK curl_mime_init() need a curl handle?
+    curl_mime* curl_mime_ = nullptr;
     request::Proxy proxy_;
     bool http_proxy_tunnel_ = false;
     long timeout_ = 0l;
