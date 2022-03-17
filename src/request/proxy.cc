@@ -46,6 +46,11 @@ void Proxy::http_proxy_tunnel(bool&& http_proxy_tunnel) {
     http_proxy_tunnel_ = std::move(http_proxy_tunnel);
 }
 
+void Proxy::clear() noexcept {
+    proxy_.clear();
+    http_proxy_tunnel_ = false;
+}
+
 const char* Proxy::c_str() const noexcept {
     return proxy_.empty() ? nullptr : proxy_.c_str();
 }

@@ -119,9 +119,26 @@ std::string Request::curl_version() {
 
 void Request::reset() {
     curl_easy_reset(handle_);
-    authentication_.clear();
-    header_.clear();
+    method_ = request::Method::DEFAULT;
+    ip_resolve_ = request::IP_Resolve::WHATEVER;
+    url_.clear();
     cookie_.clear();
+    header_.clear();
+    useragent_ = "curl/" + curl_version_;
+    authentication_.clear();
+    body_.clear();
+    mime_parts_.clear();
+    if (curl_mime_) {
+        curl_mime_free(curl_mime_);
+        curl_mime_ = nullptr;
+    }
+    proxy_.clear();
+    local_setting_.interface.clear();
+    local_setting_.dns_interface.clear();
+    local_setting_.dns_local_ipv4.clear();
+    local_setting_.dns_local_ipv6.clear();
+    timeout_setting_.timeout = 0l;
+    timeout_setting_.connect_timeout = 300000l;
 }
 
 const request::Method& Request::method() const {

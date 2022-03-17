@@ -60,6 +60,8 @@ public:
     void http_proxy_tunnel(const bool& http_proxy_tunnel);
     void http_proxy_tunnel(bool&& http_proxy_tunnel);
 
+    void clear() noexcept;
+
     const char* c_str() const noexcept;
     bool empty() const noexcept;
 

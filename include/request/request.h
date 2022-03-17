@@ -26,8 +26,8 @@ struct LocalSetting {
 };
 
 struct TimeoutSetting {
-    long timeout = 300000l;
-    long connect_timeout = 0l;
+    long timeout = 0l;
+    long connect_timeout = 300000l;
 };
 
 /**
@@ -123,9 +123,11 @@ public:
     void proxy(request::Proxy&& proxy);
 
     // get timeout (milliseconds) setting for current transfer operation
+    //     default: 0, never times out during transfer
     long& timeout();
     const long& timeout() const;
     // timeout (milliseconds) for transfer operation
+    //     default: 0, never times out during transfer
     void timeout(const long& timeout);
 
     // get timeout (milliseconds) setting for connection phase
@@ -137,11 +139,9 @@ public:
     void connect_timeout(const long& connect_timeout);
 
     // get current outgoing network interface setting
-    //     default: 0, never times out during transfer
     std::string& interface();
     const std::string& interface() const;
     // set outgoing network interface (interface name/IP address/host name)
-    //     default: 0, never times out during transfer
     void interface(const std::string& interface);
     void interface(std::string&& interface);
 
@@ -182,7 +182,6 @@ public:
 
 protected:
     CURL* handle_;
-    bool verbose_ = false;
 
     request::Method method_ = request::Method::DEFAULT;
     request::IP_Resolve ip_resolve_ = request::IP_Resolve::WHATEVER;
