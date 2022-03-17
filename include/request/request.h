@@ -18,6 +18,18 @@
 namespace rayalto {
 namespace utils {
 
+struct LocalSetting {
+    std::string interface;
+    std::string dns_interface;
+    std::string dns_local_ipv4;
+    std::string dns_local_ipv6;
+};
+
+struct TimeoutSetting {
+    long timeout = 300000l;
+    long connect_timeout = 0l;
+};
+
 /**
  * Make http request easily
  *
@@ -110,28 +122,26 @@ public:
     void proxy(const request::Proxy& proxy);
     void proxy(request::Proxy&& proxy);
 
-    // tunneling through http proxy set by Request::proxy()
-    bool& http_proxy_tunnel();
-    const bool& http_proxy_tunnel() const;
-    // whether tunneling through http proxy set by Request::proxy()
-    void http_proxy_tunnel(const bool& tunneling);
-
-    // get timeout setting for current transfer operation
+    // get timeout (milliseconds) setting for current transfer operation
     long& timeout();
     const long& timeout() const;
-    // timeout for transfer operation
+    // timeout (milliseconds) for transfer operation
     void timeout(const long& timeout);
 
-    // get timeout setting for connection phase
+    // get timeout (milliseconds) setting for connection phase
+    //     default: 300000
     long& connect_timeout();
     const long& connect_timeout() const;
-    // set timeout for connection phase
+    // set timeout (milliseconds) for connection phase
+    //     default: 300000
     void connect_timeout(const long& connect_timeout);
 
     // get current outgoing network interface setting
+    //     default: 0, never times out during transfer
     std::string& interface();
     const std::string& interface() const;
     // set outgoing network interface (interface name/IP address/host name)
+    //     default: 0, never times out during transfer
     void interface(const std::string& interface);
     void interface(std::string&& interface);
 
@@ -186,13 +196,8 @@ protected:
     // why the FUCK curl_mime_init() need a curl handle?
     curl_mime* curl_mime_ = nullptr;
     request::Proxy proxy_;
-    bool http_proxy_tunnel_ = false;
-    long timeout_ = 0l;
-    long connect_timeout_ = 0l;
-    std::string interface_;
-    std::string dns_interface_;
-    std::string dns_local_ipv4_;
-    std::string dns_local_ipv6_;
+    LocalSetting local_setting_;
+    TimeoutSetting timeout_setting_;
 
     request::Response response_;
 

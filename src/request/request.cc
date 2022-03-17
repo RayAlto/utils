@@ -278,104 +278,92 @@ void Request::proxy(request::Proxy&& proxy) {
     proxy_ = std::move(proxy);
 }
 
-const bool& Request::http_proxy_tunnel() const {
-    return http_proxy_tunnel_;
-}
-
-bool& Request::http_proxy_tunnel() {
-    return http_proxy_tunnel_;
-}
-
-void Request::http_proxy_tunnel(const bool& tunneling) {
-    http_proxy_tunnel_ = tunneling;
-}
-
 const long& Request::timeout() const {
-    return timeout_;
+    return timeout_setting_.timeout;
 }
 
 long& Request::timeout() {
-    return timeout_;
+    return timeout_setting_.timeout;
 }
 
 void Request::timeout(const long& timeout) {
-    timeout_ = timeout;
+    timeout_setting_.timeout = timeout;
 }
 
 const long& Request::connect_timeout() const {
-    return connect_timeout_;
+    return timeout_setting_.connect_timeout;
 }
 
 long& Request::connect_timeout() {
-    return connect_timeout_;
+    return timeout_setting_.connect_timeout;
 }
 
 void Request::connect_timeout(const long& connect_timeout) {
-    connect_timeout_ = connect_timeout;
+    timeout_setting_.connect_timeout = connect_timeout;
 }
 
 const std::string& Request::interface() const {
-    return interface_;
+    return local_setting_.interface;
 }
 
 std::string& Request::interface() {
-    return interface_;
+    return local_setting_.interface;
 }
 
 void Request::interface(const std::string& interface) {
-    interface_ = interface;
+    local_setting_.interface = interface;
 }
 
 void Request::interface(std::string&& interface) {
-    interface_ = std::move(interface);
+    local_setting_.interface = std::move(interface);
 }
 
 const std::string& Request::dns_interface() const {
-    return dns_interface_;
+    return local_setting_.dns_interface;
 }
 
 std::string& Request::dns_interface() {
-    return dns_interface_;
+    return local_setting_.dns_interface;
 }
 
 void Request::dns_interface(const std::string& dns_interface) {
-    dns_interface_ = dns_interface;
+    local_setting_.dns_interface = dns_interface;
 }
 
 void Request::dns_interface(std::string&& dns_interface) {
-    dns_interface_ = std::move(dns_interface);
+    local_setting_.dns_interface = std::move(dns_interface);
 }
 
 const std::string& Request::dns_local_ipv4() const {
-    return dns_local_ipv4_;
+    return local_setting_.dns_local_ipv4;
 }
 
 std::string& Request::dns_local_ipv4() {
-    return dns_local_ipv4_;
+    return local_setting_.dns_local_ipv4;
 }
 
 void Request::dns_local_ipv4(const std::string& dns_local_ipv4) {
-    dns_local_ipv4_ = dns_local_ipv4;
+    local_setting_.dns_local_ipv4 = dns_local_ipv4;
 }
 
 void Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
-    dns_local_ipv4_ = std::move(dns_local_ipv4);
+    local_setting_.dns_local_ipv4 = std::move(dns_local_ipv4);
 }
 
 const std::string& Request::dns_local_ipv6() const {
-    return dns_local_ipv6_;
+    return local_setting_.dns_local_ipv6;
 }
 
 std::string& Request::dns_local_ipv6() {
-    return dns_local_ipv6_;
+    return local_setting_.dns_local_ipv6;
 }
 
 void Request::dns_local_ipv6(const std::string& dns_local_ipv6) {
-    dns_local_ipv6_ = dns_local_ipv6;
+    local_setting_.dns_local_ipv6 = dns_local_ipv6;
 }
 
 void Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
-    dns_local_ipv6_ = std::move(dns_local_ipv6);
+    local_setting_.dns_local_ipv6 = std::move(dns_local_ipv6);
 }
 
 bool Request::request() {
@@ -457,38 +445,44 @@ bool Request::request() {
         curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
     }
     // [option] http proxy tunnel
-    if (http_proxy_tunnel_) {
+    if (proxy_.http_proxy_tunnel()) {
         curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
     }
     // [option] timeout
-    if (timeout_) {
-        curl_easy_setopt(
-            handle_, CURLOPT_TIMEOUT_MS, static_cast<curl_off_t>(timeout_));
+    if (timeout_setting_.timeout) {
+        curl_easy_setopt(handle_,
+                         CURLOPT_TIMEOUT_MS,
+                         static_cast<curl_off_t>(timeout_setting_.timeout));
     }
     // [option] connect timeout
-    if (connect_timeout_) {
-        curl_easy_setopt(handle_,
-                         CURLOPT_CONNECTTIMEOUT_MS,
-                         static_cast<curl_off_t>(connect_timeout_));
+    if (timeout_setting_.connect_timeout != 300000l) {
+        curl_easy_setopt(
+            handle_,
+            CURLOPT_CONNECTTIMEOUT_MS,
+            static_cast<curl_off_t>(timeout_setting_.connect_timeout));
     }
     // [option] interface
-    if (!interface_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_INTERFACE, interface_.c_str());
+    if (!local_setting_.interface.empty()) {
+        curl_easy_setopt(
+            handle_, CURLOPT_INTERFACE, local_setting_.interface.c_str());
     }
     // [option] dns interface
-    if (!dns_interface_.empty()) {
-        curl_easy_setopt(
-            handle_, CURLOPT_DNS_INTERFACE, dns_interface_.c_str());
+    if (!local_setting_.dns_interface.empty()) {
+        curl_easy_setopt(handle_,
+                         CURLOPT_DNS_INTERFACE,
+                         local_setting_.dns_interface.c_str());
     }
     // [option] dns local ipv4 address
-    if (!dns_local_ipv4_.empty()) {
-        curl_easy_setopt(
-            handle_, CURLOPT_DNS_LOCAL_IP4, dns_local_ipv4_.c_str());
+    if (!local_setting_.dns_local_ipv4.empty()) {
+        curl_easy_setopt(handle_,
+                         CURLOPT_DNS_LOCAL_IP4,
+                         local_setting_.dns_local_ipv4.c_str());
     }
     // [option] dns local ipv6 address
-    if (!dns_local_ipv6_.empty()) {
-        curl_easy_setopt(
-            handle_, CURLOPT_DNS_LOCAL_IP6, dns_local_ipv6_.c_str());
+    if (!local_setting_.dns_local_ipv6.empty()) {
+        curl_easy_setopt(handle_,
+                         CURLOPT_DNS_LOCAL_IP6,
+                         local_setting_.dns_local_ipv6.c_str());
     }
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
