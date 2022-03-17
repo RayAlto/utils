@@ -105,6 +105,10 @@ Request::Request() {
 }
 
 Request::~Request() {
+    if (curl_mime_) {
+        curl_mime_free(curl_mime_);
+        curl_mime_ = nullptr;
+    }
     curl_easy_cleanup(handle_);
     curl_global_cleanup();
 }
