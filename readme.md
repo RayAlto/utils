@@ -98,7 +98,78 @@ text/plain
 application/octet-stream
 ```
 
-> You can update the "database" by running [this python script](./script/update_mime_types_data.py). The script will download & parse MIME Types from:
+> You can update the "[database](./src/util/mime_types_data.cc)" by running [this python script](./script/update_mime_types_data.py). The script will download & parse MIME Types from:
 >
 > - [Apache HTTPD](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
 > - [Nginx](https://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
+
+### 5. Request
+
+A stupid curl wrapper
+
+```c++
+using rayalto::utils::util::MimeTypes;
+using rayalto::utils::Request;
+using namespace rayalto::utils::request;
+
+Request request;
+request.url("https://httpbin.org/anything");
+request.method(Method::POST);
+request.useragent("RayAlto/114514");
+request.header({
+    {"foo", "bar"},
+    {"114514", "1919810"}
+});
+request.cookie({
+    {"brand", "Nabisco Oreo"},
+    {"comment", "delicious"}
+});
+request.mime_parts().add({
+    {/* part name */ "file",
+     /* part data */ MimePart()
+          .is_file(true)
+          .data("example.png")
+          .file_name("senpai.png")
+          .type(MimeTypes::get("png"))
+    },
+    {/* part name */ "data",
+     /* part data */ MimePart()
+          .data(R"+*+*({"kimochi": "1919810", "come": "114514"})+*+*")
+          .type(MimeTypes::get("json"))
+    }
+});
+request.request();
+Response response = request.response();
+std::cout << response.body << std::endl;
+```
+
+output
+
+```plain
+{
+  "args": {},
+  "data": "",
+  "files": {
+    "file": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAOElEQVQ4y2NgoBAw4pH7jyT/n0S9KJr+45NnotQLw8
+AAFiJjajQWiDDg/4C5gBFLqBMjR1Q0EgUAOTcME3wmR8oAAAAASUVORK5CYII="
+  },
+  "form": {
+    "data": "{\"kimochi\": \"1919810\", \"come\": \"114514\"}"
+  },
+  "headers": {
+    "114514": "1919810",
+    "Accept": "*/*",
+    "Content-Length": "465",
+    "Content-Type": "multipart/form-data; boundary=------------------------40e411258b65ef2a",
+    "Cookie": "brand=Nabisco Oreo; comment=delicious;",
+    "Foo": "bar",
+    "Host": "httpbin.org",
+    "User-Agent": "RayAlto/114514",
+    "X-Amzn-Trace-Id": "Root=1-6232a7a2-7a4070915e0907a528fa2dd8"
+  },
+  "json": null,
+  "method": "POST",
+  "origin": "64.69.36.41",
+  "url": "https://httpbin.org/anything"
+}
+```
