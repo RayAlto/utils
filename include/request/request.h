@@ -20,6 +20,8 @@ namespace utils {
 
 struct LocalSetting {
     std::string interface;
+    long port = 0;
+    long port_range = 1;
     std::string dns_interface;
     std::string dns_local_ipv4;
     std::string dns_local_ipv6;
@@ -31,7 +33,7 @@ struct TimeoutSetting {
 };
 
 /**
- * Make http request easily
+ * Make http request easily, super heavy shitty wrapper for the great curl
  *
  * Note:
  *   - Set mime type in body and mime_parts at the same time may cause strange
@@ -139,11 +141,27 @@ public:
     void connect_timeout(const long& connect_timeout);
 
     // get current outgoing network interface setting
-    std::string& interface();
-    const std::string& interface() const;
+    std::string& local_interface();
+    const std::string& local_interface() const;
     // set outgoing network interface (interface name/IP address/host name)
-    void interface(const std::string& interface);
-    void interface(std::string&& interface);
+    void local_interface(const std::string& interface);
+    void local_interface(std::string&& interface);
+
+    // local port setting
+    long& local_port();
+    const long& local_port() const;
+    // local port used for the connection
+    //     default: 0, use whatever the system thinks is fine
+    void local_port(const long& port);
+    void local_port(long&& port);
+
+    // local port range setting
+    long& local_port_range();
+    const long& local_port_range() const;
+    // local port range to try
+    //     default: 1
+    void local_port_range(const long& range);
+    void local_port_range(long&& range);
 
     // get current setting for interface DNS resolver should bind to
     std::string& dns_interface();

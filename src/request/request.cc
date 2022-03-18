@@ -319,20 +319,52 @@ void Request::connect_timeout(const long& connect_timeout) {
     timeout_setting_.connect_timeout = connect_timeout;
 }
 
-const std::string& Request::interface() const {
+const std::string& Request::local_interface() const {
     return local_setting_.interface;
 }
 
-std::string& Request::interface() {
+std::string& Request::local_interface() {
     return local_setting_.interface;
 }
 
-void Request::interface(const std::string& interface) {
+void Request::local_interface(const std::string& interface) {
     local_setting_.interface = interface;
 }
 
-void Request::interface(std::string&& interface) {
+void Request::local_interface(std::string&& interface) {
     local_setting_.interface = std::move(interface);
+}
+
+long& Request::local_port() {
+    return local_setting_.port;
+}
+
+const long& Request::local_port() const {
+    return local_setting_.port;
+}
+
+void Request::local_port(const long& port) {
+    local_setting_.port = port;
+}
+
+void Request::local_port(long&& port) {
+    local_setting_.port = std::move(port);
+}
+
+long& Request::local_port_range() {
+    return local_setting_.port_range;
+}
+
+const long& Request::local_port_range() const {
+    return local_setting_.port_range;
+}
+
+void Request::local_port_range(const long& range) {
+    local_setting_.port_range = range;
+}
+
+void Request::local_port_range(long&& range) {
+    local_setting_.port_range = std::move(range);
 }
 
 const std::string& Request::dns_interface() const {
@@ -478,10 +510,19 @@ bool Request::request() {
             CURLOPT_CONNECTTIMEOUT_MS,
             static_cast<curl_off_t>(timeout_setting_.connect_timeout));
     }
-    // [option] interface
+    // [option] local interface
     if (!local_setting_.interface.empty()) {
         curl_easy_setopt(
             handle_, CURLOPT_INTERFACE, local_setting_.interface.c_str());
+    }
+    // [option] local port
+    if (local_setting_.port != 0) {
+        curl_easy_setopt(handle_, CURLOPT_LOCALPORT, &local_setting_.port);
+    }
+    // [option] local port range
+    if (local_setting_.port_range != 1) {
+        curl_easy_setopt(
+            handle_, CURLOPT_LOCALPORTRANGE, &local_setting_.port_range);
     }
     // [option] dns interface
     if (!local_setting_.dns_interface.empty()) {
