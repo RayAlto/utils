@@ -134,6 +134,8 @@ void Request::reset() {
     }
     proxy_.clear();
     local_setting_.interface.clear();
+    local_setting_.port = 0;
+    local_setting_.port_range = 1;
     local_setting_.dns_interface.clear();
     local_setting_.dns_local_ipv4.clear();
     local_setting_.dns_local_ipv6.clear();
