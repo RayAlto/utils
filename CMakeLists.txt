@@ -17,18 +17,21 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/subprocess/subprocess.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/websocket/ws_client.cc
 )
 set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
 
 find_package(Threads REQUIRED)
 find_package(CURL COMPONENTS HTTP HTTPS SSL)
+find_package(libwebsockets REQUIRED)
 
-add_library(ra-utils STATIC ${RA_UTILS_SRCS})
-set_property(TARGET ra-utils PROPERTY CXX_STANDARD 11)
-target_include_directories(ra-utils PRIVATE ${RA_UTILS_INCLUDES})
-target_link_libraries(ra-utils PRIVATE Threads::Threads)
-target_link_libraries(ra-utils PRIVATE CURL::libcurl)
+add_library(${CMAKE_PROJECT_NAME} STATIC ${RA_UTILS_SRCS})
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${RA_UTILS_INCLUDES})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE CURL::libcurl)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE websockets)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
