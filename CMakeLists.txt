@@ -23,15 +23,18 @@ set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
 
 find_package(Threads REQUIRED)
-find_package(CURL COMPONENTS HTTP HTTPS SSL)
-find_package(libwebsockets REQUIRED)
+find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
+find_package(CURL REQUIRED COMPONENTS HTTP HTTPS SSL)
+find_package(websocketpp REQUIRED)
 
 add_library(${CMAKE_PROJECT_NAME} STATIC ${RA_UTILS_SRCS})
-set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${RA_UTILS_INCLUDES})
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OpenSSL::Crypto)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OpenSSL::SSL)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE CURL::libcurl)
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE websockets)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE websocketpp::websocketpp)
 
 if(BUILD_TESTS)
   add_subdirectory(test)

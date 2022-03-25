@@ -173,3 +173,46 @@ AAFiJjajQWiDDg/4C5gBFLqBMjR1Q0EgUAOTcME3wmR8oAAAAASUVORK5CYII="
   "url": "https://httpbin.org/anything"
 }
 ```
+
+### 6. WebSocket
+
+A stupid WebSocket client, thanks to [zaphoyd (Peter Thorson)](https://github.com/zaphoyd) and his great work [websocketpp](https://github.com/zaphoyd/websocketpp) which is much more simple to use than the self-proclaimed "simple-to-use" libwebsockets.
+
+Because the client is multi-threaded, it takes a certain amount of time for the client to actually connect to server after `url()` called. You can call `connected()` to check whether client is really connected to server.
+
+```c++
+#include <chrono>
+#include <iostream>
+#include <thread>
+
+#include "websocket/ws_client.h"
+
+using rayalto::utils::websocket::MessageType;
+using rayalto::utils::WsClient;
+
+int main(int argc, char const* argv[]) {
+    WsClient client;
+    client.on_receive(
+        [&](const MessageType& type, const std::string& message) -> void {
+            std::cout << message << std::endl;
+        });
+    // local echo server
+    client.url("ws://127.0.0.1:8080");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    client.send(MessageType::TEXT, "hello");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    // my echo server with tls, DO NOT mess around
+    client.url("wss://test.rayalto.top:8443");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    client.send(MessageType::TEXT, "hello");
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    return 0;
+}
+```
+
+output
+
+```plain
+hello
+hello
+```
