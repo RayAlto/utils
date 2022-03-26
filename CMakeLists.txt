@@ -17,6 +17,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/subprocess/subprocess.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/websocket/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/websocket/ws_client.cc
 )
 set(RA_UTILS_INCLUDES
