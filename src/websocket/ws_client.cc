@@ -109,6 +109,10 @@ void WsClient::disconnect(websocket::CloseStatus&& status) {
     release_(std::move(status));
 }
 
+void WsClient::url(std::string&& url) {
+    url_ = std::move(url);
+}
+
 const std::string& WsClient::url() const {
     return url_;
 }
@@ -117,8 +121,20 @@ void WsClient::url(const std::string& url) {
     url_ = url;
 }
 
-void WsClient::url(std::string&& url) {
-    url_ = std::move(url);
+void WsClient::useragent(const std::string& useragent) {
+    useragent_ = useragent;
+}
+
+void WsClient::useragent(std::string&& useragent) {
+    useragent_ = std::move(useragent);
+}
+
+std::string& WsClient::useragent() {
+    return useragent_;
+}
+
+const std::string& WsClient::useragent() const {
+    return useragent_;
 }
 
 void WsClient::send(const websocket::MessageType& type,
@@ -249,6 +265,8 @@ void WsClient::connect_(std::error_code& error) {
             websocketpp::client<websocketpp::config::asio_tls_client>>();
         client_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_ssl_->clear_error_channels(websocketpp::log::elevel::all);
+        client_ssl_->set_user_agent(useragent_.empty() ? "RaWebsocket/114514"
+                                                       : useragent_);
         client_ssl_->init_asio();
 
         client_ssl_->set_tls_init_handler(
@@ -351,6 +369,8 @@ void WsClient::connect_(std::error_code& error) {
             websocketpp::client<websocketpp::config::asio_client>>();
         client_no_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_no_ssl_->clear_error_channels(websocketpp::log::elevel::all);
+        client_no_ssl_->set_user_agent(useragent_.empty() ? "RaWebsocket/114514"
+                                                          : useragent_);
         client_no_ssl_->init_asio();
 
         client_no_ssl_->set_open_handler(

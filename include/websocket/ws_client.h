@@ -68,9 +68,15 @@ public:
     void disconnect(websocket::CloseStatus&& status);
 
     // WebSocket server url, ws[s]://address[:port][/path]
-    const std::string& url() const;
     void url(const std::string& url);
     void url(std::string&& url);
+    const std::string& url() const;
+
+    // User-Agent
+    void useragent(const std::string& useragent);
+    void useragent(std::string&& useragent);
+    std::string& useragent();
+    const std::string& useragent() const;
 
     // send message
     void send(const websocket::MessageType& type,
@@ -84,12 +90,16 @@ public:
 
 protected:
     bool with_ssl_ = true;
+
     std::shared_ptr<websocketpp::client<websocketpp::config::asio_tls_client>>
         client_ssl_ {nullptr};
     std::shared_ptr<websocketpp::client<websocketpp::config::asio_client>>
         client_no_ssl_ {nullptr};
+
     std::shared_ptr<std::thread> work_thread_;
+
     websocketpp::connection_hdl connection_handle_;
+
     std::function<void(WsClient&)> establish_callback_;
     std::function<void(WsClient&, const websocket::CloseStatus&)>
         fail_callback_;
@@ -99,8 +109,11 @@ protected:
         receive_callback_;
     std::function<void(WsClient&, const websocket::CloseStatus&)>
         close_callback_;
+
     std::atomic<bool> connected_ {false};
+
     std::string url_;
+    std::string useragent_;
 
     void release_();
     void release_(const websocket::CloseStatus& status);
