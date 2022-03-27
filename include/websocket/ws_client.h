@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <thread>
 
 #include "websocketpp/client.hpp"
@@ -59,7 +60,7 @@ public:
             callback);
 
     // connect
-    void connect();
+    void connect(std::error_code& error);
 
     // disconnect
     void disconnect();
@@ -72,8 +73,12 @@ public:
     void url(std::string&& url);
 
     // send message
-    void send(const websocket::MessageType& type, const std::string& message);
-    void send(const websocket::MessageType& type, std::string&& message);
+    void send(const websocket::MessageType& type,
+              const std::string& message,
+              std::error_code& error);
+    void send(const websocket::MessageType& type,
+              std::string&& message,
+              std::error_code& error);
 
     bool connected() const;
 
@@ -99,7 +104,7 @@ protected:
 
     void release_();
     void release_(const websocket::CloseStatus& status);
-    void connect_();
+    void connect_(std::error_code& error);
 };
 
 } // namespace utils

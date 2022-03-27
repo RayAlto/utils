@@ -92,9 +92,9 @@ void WsClient::on_close(
     close_callback_ = std::move(callback);
 }
 
-void WsClient::connect() {
+void WsClient::connect(std::error_code& error) {
     release_();
-    connect_();
+    connect_(error);
 }
 
 void WsClient::disconnect() {
@@ -122,24 +122,24 @@ void WsClient::url(std::string&& url) {
 }
 
 void WsClient::send(const websocket::MessageType& type,
-                    const std::string& message) {
+                    const std::string& message,
+                    std::error_code& error) {
     if (!connected_) {
         return;
     }
-    std::error_code ws_error;
     if (with_ssl_) {
         switch (type) {
         case websocket::MessageType::TEXT:
             client_ssl_->send(connection_handle_,
                               std::move(message),
                               websocketpp::frame::opcode::text,
-                              ws_error);
+                              error);
             break;
         case websocket::MessageType::BINARY:
             client_ssl_->send(connection_handle_,
                               std::move(message),
                               websocketpp::frame::opcode::binary,
-                              ws_error);
+                              error);
             break;
         default: break;
         }
@@ -150,40 +150,38 @@ void WsClient::send(const websocket::MessageType& type,
             client_no_ssl_->send(connection_handle_,
                                  std::move(message),
                                  websocketpp::frame::opcode::text,
-                                 ws_error);
+                                 error);
             break;
         case websocket::MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
                                  std::move(message),
                                  websocketpp::frame::opcode::binary,
-                                 ws_error);
+                                 error);
             break;
         default: break;
         }
-    }
-    if (ws_error) {
-        // TODO: error handling?
     }
 }
 
-void WsClient::send(const websocket::MessageType& type, std::string&& message) {
+void WsClient::send(const websocket::MessageType& type,
+                    std::string&& message,
+                    std::error_code& error) {
     if (!connected_) {
         return;
     }
-    std::error_code ws_error;
     if (with_ssl_) {
         switch (type) {
         case websocket::MessageType::TEXT:
             client_ssl_->send(connection_handle_,
                               message,
                               websocketpp::frame::opcode::text,
-                              ws_error);
+                              error);
             break;
         case websocket::MessageType::BINARY:
             client_ssl_->send(connection_handle_,
                               message,
                               websocketpp::frame::opcode::binary,
-                              ws_error);
+                              error);
             break;
         default: break;
         }
@@ -194,19 +192,16 @@ void WsClient::send(const websocket::MessageType& type, std::string&& message) {
             client_no_ssl_->send(connection_handle_,
                                  message,
                                  websocketpp::frame::opcode::text,
-                                 ws_error);
+                                 error);
             break;
         case websocket::MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
                                  message,
                                  websocketpp::frame::opcode::binary,
-                                 ws_error);
+                                 error);
             break;
         default: break;
         }
-    }
-    if (ws_error) {
-        // TODO: error handling?
     }
 }
 
@@ -245,14 +240,13 @@ void WsClient::release_(const websocket::CloseStatus& status) {
     connected_ = false;
 }
 
-void WsClient::connect_() {
+void WsClient::connect_(std::error_code& error) {
     if (url_[2] == 's') {
         // wss
 
         with_ssl_ = true;
         client_ssl_ = std::make_shared<
             websocketpp::client<websocketpp::config::asio_tls_client>>();
-        std::error_code ws_error;
         client_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_ssl_->clear_error_channels(websocketpp::log::elevel::all);
         client_ssl_->init_asio();
@@ -343,10 +337,7 @@ void WsClient::connect_() {
 
         websocketpp::client<
             websocketpp::config::asio_tls_client>::connection_ptr connection =
-            client_ssl_->get_connection(url_, ws_error);
-        if (ws_error) {
-            // TODO: error handling
-        }
+            client_ssl_->get_connection(url_, error);
 
         connection_handle_ = connection->get_handle();
 
@@ -358,7 +349,6 @@ void WsClient::connect_() {
         with_ssl_ = false;
         client_no_ssl_ = std::make_shared<
             websocketpp::client<websocketpp::config::asio_client>>();
-        std::error_code ws_error;
         client_no_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_no_ssl_->clear_error_channels(websocketpp::log::elevel::all);
         client_no_ssl_->init_asio();
@@ -436,10 +426,7 @@ void WsClient::connect_() {
 
         // get connection
         websocketpp::client<websocketpp::config::asio_client>::connection_ptr
-            connection = client_no_ssl_->get_connection(url_, ws_error);
-        if (ws_error) {
-            // TODO: error handling
-        }
+            connection = client_no_ssl_->get_connection(url_, error);
 
         connection_handle_ = connection->get_handle();
 
