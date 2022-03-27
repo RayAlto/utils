@@ -10,8 +10,6 @@ macro(ra_test_add target_name target_src)
   target_link_libraries(${target_name} PRIVATE ra-utils)
 endmacro()
 
-ra_test_add(subprocess test_subprocess.cc)
-ra_test_add(timer test_timer.cc)
 ra_test_add(request test_request.cc)
 ra_test_add(strtool test_strtool.cc)
 ra_test_add(mimetype test_mimetype.cc)
