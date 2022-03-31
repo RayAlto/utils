@@ -3,6 +3,7 @@ project(
   ra-utils
   VERSION 1.0
   LANGUAGES CXX)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 option(BUILD_TESTS "Build tests" ON)
 set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/exceptions/exceptions.cc
