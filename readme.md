@@ -4,43 +4,7 @@ RayAlto's Stupid Self-use Noob Utils
 
 ## How To
 
-### 1. Subprocess
-
-Run a command and get its stdout, stderr and exit_code. Base on `exec()` family
-of functions. Example:
-
-```c++
-using rayalto::util::subprocess::Result;
-using rayalto::util::Subprocess;
-// ...
-
-Result result = Subprocess::run({"ls", "-ahl", "/usr/bin"});
-std::cout << result.stdout << std::endl;
-```
-
-- It's **not** a shell, it will **not** expand `~` or behave like a shell.
-
-### 2. Timer
-
-Call a void function at specified intervals
-
-```c++
-using rayalto::util::Timer;
-// ...
-
-Timer timer([]() {
-    std::cout << "114514" << std::endl;
-}, std::chrono::milliseconds(1919810));
-timer.start();
-std::this_thread::sleep_for(std::chrono::milliseconds(1145141919810));
-timer.set_interval(std::chrono::seconds(1)
-                   + std::chrono::milliseconds(114)
-                   + std::chrono::milliseconds(514));
-std::this_thread::sleep_for(std::chrono::milliseconds(1145141919810));
-timer.stop();
-```
-
-### 3. String Tool
+### 1. String Tool
 
 Some tools for string, for example:
 
@@ -72,7 +36,7 @@ output:
 0
 ```
 
-### 4. MIME Type
+### 2. MIME Type
 
 Get MIME Type from file.
 
@@ -103,7 +67,7 @@ application/octet-stream
 > - [Apache HTTPD](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
 > - [Nginx](https://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
 
-### 5. Request
+### 3. Request
 
 A stupid curl wrapper
 
@@ -174,7 +138,7 @@ AAFiJjajQWiDDg/4C5gBFLqBMjR1Q0EgUAOTcME3wmR8oAAAAASUVORK5CYII="
 }
 ```
 
-### 6. WebSocket
+### 4. WebSocket
 
 A stupid WebSocket client, thanks to [zaphoyd (Peter Thorson)](https://github.com/zaphoyd) and his great work [websocketpp](https://github.com/zaphoyd/websocketpp) which is much more simple to use than the self-proclaimed "simple-to-use" libwebsockets.
 

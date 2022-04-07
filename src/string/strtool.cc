@@ -6,6 +6,7 @@
 #include <functional>
 #include <iterator>
 #include <numeric>
+#include <random>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -329,6 +330,30 @@ std::string join(std::string&& str,
                                return std::move(l) + std::move(str)
                                       + std::move(r);
                            });
+}
+
+std::string random_string(const std::size_t& len) {
+    return random_string(
+        len, {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+              'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+              'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
+              'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+              'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'});
+}
+
+std::string random_string(const std::size_t& len,
+                          const std::vector<char>& characters) {
+    std::string foo(len, 0);
+    char result[len + 1];
+    std::random_device r_device;
+    std::mt19937 random_engine(r_device());
+    std::uniform_int_distribution<std::size_t> distribution(
+        0, characters.size() - 1);
+    for (int i = 0; i < len; ++i) {
+        result[i] = characters[distribution(random_engine)];
+    }
+    result[len] = '\0';
+    return result;
 }
 
 } // namespace string
