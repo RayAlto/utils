@@ -1,5 +1,4 @@
 #include "string/strtool.h"
-#include <openssl/evp.h>
 
 #include <algorithm>
 #include <cctype>
@@ -14,6 +13,8 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include "openssl/evp.h"
 
 namespace rayalto {
 namespace utils {
