@@ -12,6 +12,12 @@ int main(int argc, char const* argv[]) {
               << std::endl
               << utils::string::join(", ", strings.begin(), strings.end())
               << std::endl
-              << utils::string::random_string() << std::endl;
+              << utils::string::random_string() << std::endl
+              << std::boolalpha
+              << (utils::string::base64_decode(utils::string::base64_encode(
+                      "关注永雏塔菲喵，关注永雏塔菲谢谢喵。"))
+                  == std::string {"关注永雏塔菲喵，关注永雏塔菲谢谢喵。"})
+              << std::endl;
+
     return 0;
 }

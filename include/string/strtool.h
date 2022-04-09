@@ -126,6 +126,26 @@ std::string random_string(const std::size_t& len = 32);
 std::string random_string(const std::size_t& len,
                           const std::vector<char>& characters);
 
+std::string base64_encode(const std::string& input_data);
+std::string base64_encode(const char* input_data);
+std::string base64_encode(const unsigned char* input_data);
+std::string base64_encode(const std::string& input_data,
+                          const std::size_t& input_length);
+std::string base64_encode(const char* input_data,
+                          const std::size_t& input_length);
+std::string base64_encode(const unsigned char* input_data,
+                          const std::size_t& input_length);
+
+std::string base64_decode(const std::string& input_data);
+std::string base64_decode(const char* input_data);
+std::string base64_decode(const unsigned char* input_data);
+std::string base64_decode(const std::string& input_data,
+                          const std::size_t& input_length);
+std::string base64_decode(const char* input_data,
+                          const std::size_t& input_length);
+std::string base64_decode(const unsigned char* input_data,
+                          const std::size_t& input_length);
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto
