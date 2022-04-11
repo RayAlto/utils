@@ -122,7 +122,7 @@ std::string join(std::string&& str, Iter begin, Iter end) {
     return __private__::join(std::move(str), begin, end);
 }
 
-std::string random_string(const std::size_t& len = 32);
+std::string random_string(const std::size_t& len = 16);
 std::string random_string(const std::size_t& len,
                           const std::vector<char>& characters);
 
