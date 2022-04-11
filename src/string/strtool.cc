@@ -385,7 +385,7 @@ std::string base64_encode(const char* input_data,
 
 std::string base64_encode(const unsigned char* input_data,
                           const std::size_t& input_length) {
-    char result[((input_length / 3) + 2) * 8];
+    char result[((input_length / 3) + 2) * 4];
     EVP_EncodeBlock(
         reinterpret_cast<unsigned char*>(result), input_data, input_length);
     return result;
