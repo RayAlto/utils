@@ -14,8 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "openssl/evp.h"
-
 namespace rayalto {
 namespace utils {
 namespace string {
@@ -356,70 +354,6 @@ std::string random_string(const std::size_t& len,
         result[i] = characters[distribution(random_engine)];
     }
     result[len] = '\0';
-    return result;
-}
-
-std::string base64_encode(const std::string& input_data) {
-    return base64_encode(input_data, input_data.length());
-}
-
-std::string base64_encode(const char* input_data) {
-    return base64_encode(input_data, std::strlen(input_data));
-}
-
-std::string base64_encode(const unsigned char* input_data) {
-    return base64_encode(
-        input_data, std::strlen(reinterpret_cast<const char*>(input_data)));
-}
-
-std::string base64_encode(const std::string& input_data,
-                          const std::size_t& input_length) {
-    return base64_encode(input_data.data(), input_length);
-}
-
-std::string base64_encode(const char* input_data,
-                          const std::size_t& input_length) {
-    return base64_encode(reinterpret_cast<const unsigned char*>(input_data),
-                         input_length);
-}
-
-std::string base64_encode(const unsigned char* input_data,
-                          const std::size_t& input_length) {
-    char result[((input_length / 3) + 2) * 4];
-    EVP_EncodeBlock(
-        reinterpret_cast<unsigned char*>(result), input_data, input_length);
-    return result;
-}
-
-std::string base64_decode(const std::string& input_data) {
-    return base64_decode(input_data, input_data.length());
-}
-
-std::string base64_decode(const char* input_data) {
-    return base64_decode(input_data, std::strlen(input_data));
-}
-
-std::string base64_decode(const unsigned char* input_data) {
-    return base64_decode(
-        input_data, std::strlen(reinterpret_cast<const char*>(input_data)));
-}
-
-std::string base64_decode(const std::string& input_data,
-                          const std::size_t& input_length) {
-    return base64_decode(input_data.data(), input_length);
-}
-
-std::string base64_decode(const char* input_data,
-                          const std::size_t& input_length) {
-    return base64_decode(reinterpret_cast<const unsigned char*>(input_data),
-                         input_length);
-}
-
-std::string base64_decode(const unsigned char* input_data,
-                          const std::size_t& input_length) {
-    char result[((input_length / 4) + 1) * 3];
-    EVP_DecodeBlock(
-        reinterpret_cast<unsigned char*>(result), input_data, input_length);
     return result;
 }
 

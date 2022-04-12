@@ -11,15 +11,14 @@ namespace crypto {
 namespace hash {
 
 // sha-256 digest, empty when openssl failed
-std::array<unsigned char, 32> sha256(const std::string& message);
-std::array<unsigned char, 32> sha256(const std::string& message,
-                                     const std::size_t& message_length);
-std::array<unsigned char, 32> sha256(const char* message);
-std::array<unsigned char, 32> sha256(const char* message,
-                                     const std::size_t& message_length);
-std::array<unsigned char, 32> sha256(const unsigned char* message);
-std::array<unsigned char, 32> sha256(const unsigned char* message,
-                                     const std::size_t& message_length);
+std::string sha256(const std::string& message);
+std::string sha256(const std::string& message,
+                   const std::size_t& message_length);
+std::string sha256(const char* message);
+std::string sha256(const char* message, const std::size_t& message_length);
+std::string sha256(const unsigned char* message);
+std::string sha256(const unsigned char* message,
+                   const std::size_t& message_length);
 
 } // namespace hash
 } // namespace crypto
