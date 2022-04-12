@@ -1,11 +1,11 @@
 #include "crypto/hash.h"
-#include <openssl/crypto.h>
 
 #include <array>
 #include <cstddef>
 #include <cstring>
 #include <string>
 
+#include "openssl/crypto.h"
 #include "openssl/evp.h"
 #include "openssl/ossl_typ.h"
 
@@ -44,24 +44,31 @@ std::string sha256(const unsigned char* message,
     std::string result;
     EVP_MD_CTX* message_digest_context = nullptr;
     unsigned char* digest = nullptr;
+    unsigned int digest_len = 0;
     message_digest_context = EVP_MD_CTX_new();
-    unsigned int digest_len;
     if (message_digest_context == nullptr) {
+        EVP_MD_CTX_free(message_digest_context);
         return result;
     }
     if (EVP_DigestInit_ex(message_digest_context, EVP_sha256(), nullptr) != 1) {
+        EVP_MD_CTX_free(message_digest_context);
         return result;
     }
     if (EVP_DigestUpdate(message_digest_context, message, message_length)
         != 1) {
+        EVP_MD_CTX_free(message_digest_context);
         return result;
     }
     digest = reinterpret_cast<unsigned char*>(
         OPENSSL_malloc(EVP_MD_size(EVP_sha256())));
     if (digest == nullptr) {
+        EVP_MD_CTX_free(message_digest_context);
+        OPENSSL_free(digest);
         return result;
     }
     if (EVP_DigestFinal_ex(message_digest_context, digest, &digest_len) != 1) {
+        EVP_MD_CTX_free(message_digest_context);
+        OPENSSL_free(digest);
         return result;
     }
     result = std::string(reinterpret_cast<char*>(digest), digest_len);
