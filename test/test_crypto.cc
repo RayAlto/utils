@@ -17,6 +17,7 @@ int main(int argc, char const *argv[]) {
     }
     std::cout << std::endl;
 
+    // echo '灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n' | openssl enc -d -base64
     std::cout << crypto::codec::base64_encode(
         "灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n");
 
