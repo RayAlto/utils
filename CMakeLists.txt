@@ -7,6 +7,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 option(BUILD_TESTS "Build tests" ON)
 set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/codec.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/crypto/diffie_hellman.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/encrypt.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/hash.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/random.cc
