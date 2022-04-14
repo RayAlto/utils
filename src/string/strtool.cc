@@ -357,6 +357,66 @@ std::string random_string(const std::size_t& len,
     return result;
 }
 
+std::string hex_string(const std::vector<unsigned char>& data,
+                       const bool& upper_case) {
+    return hex_string(data.data(), data.size(), upper_case);
+}
+
+std::string hex_string(const std::vector<unsigned char>& data,
+                       const std::size_t& data_length,
+                       const bool& upper_case) {
+    return hex_string(data.data(), data_length, upper_case);
+}
+
+std::string hex_string(const std::string& data, const bool& upper_case) {
+    return hex_string(reinterpret_cast<const unsigned char*>(data.data()),
+                      data.length(),
+                      upper_case);
+}
+
+std::string hex_string(const std::string& data,
+                       const std::size_t& data_length,
+                       const bool& upper_case) {
+    return hex_string(reinterpret_cast<const unsigned char*>(data.data()),
+                      data_length,
+                      upper_case);
+}
+
+std::string hex_string(const char* data, const bool& upper_case) {
+    return hex_string(reinterpret_cast<const unsigned char*>(data),
+                      std::strlen(data),
+                      upper_case);
+}
+
+std::string hex_string(const char* data,
+                       const std::size_t& data_length,
+                       const bool& upper_case) {
+    return hex_string(
+        reinterpret_cast<const unsigned char*>(data), data_length, upper_case);
+}
+
+std::string hex_string(const unsigned char* data, const bool& upper_case) {
+    return hex_string(
+        data, std::strlen(reinterpret_cast<const char*>(data)), upper_case);
+}
+
+std::string hex_string(const unsigned char* data,
+                       const std::size_t& data_length,
+                       const bool& upper_case) {
+    char result[data_length * 2 + 1];
+    result[data_length * 2] = '\0';
+    unsigned char hex_str_lower[] {"0123456789abcdef"};
+    unsigned char hex_str_upper[] {"0123456789ABCDEF"};
+    unsigned char* hex_str = upper_case ? hex_str_upper : hex_str_lower;
+    for (int i = 0; i < data_length; ++i) {
+        // clang-format off
+        result[2 * i    ] = hex_str[(data[i] >> 4) & 0x0f];
+        result[2 * i + 1] = hex_str[ data[i]       & 0x0f];
+        // clang-format on
+    }
+    return std::string(result);
+}
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto

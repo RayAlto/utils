@@ -12,7 +12,10 @@ int main(int argc, char const* argv[]) {
               << std::endl
               << utils::string::join(", ", strings.begin(), strings.end())
               << std::endl
-              << utils::string::random_string() << std::endl;
+              << utils::string::random_string() << std::endl
+              << utils::string::hex_string(
+                     "灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！")
+              << std::endl;
 
     return 0;
 }

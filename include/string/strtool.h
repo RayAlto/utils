@@ -126,6 +126,25 @@ std::string random_string(const std::size_t& len = 16);
 std::string random_string(const std::size_t& len,
                           const std::vector<char>& characters);
 
+std::string hex_string(const std::vector<unsigned char>& data,
+                       const bool& upper_case = false);
+std::string hex_string(const std::vector<unsigned char>& data,
+                       const std::size_t& data_length,
+                       const bool& upper_case = false);
+std::string hex_string(const std::string& data, const bool& upper_case = false);
+std::string hex_string(const std::string& data,
+                       const std::size_t& data_length,
+                       const bool& upper_case = false);
+std::string hex_string(const char* data, const bool& upper_case = false);
+std::string hex_string(const char* data,
+                       const std::size_t& data_length,
+                       const bool& upper_case = false);
+std::string hex_string(const unsigned char* data,
+                       const bool& upper_case = false);
+std::string hex_string(const unsigned char* data,
+                       const std::size_t& data_length,
+                       const bool& upper_case = false);
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto
