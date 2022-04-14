@@ -2,14 +2,14 @@
 #define RA_UTILS_CRYPTO_RANDOM_H_
 
 #include <cstddef>
-#include <string>
+#include <vector>
 
 namespace rayalto {
 namespace utils {
 namespace crypto {
 namespace random {
 
-std::string bytes(const std::size_t& length);
+std::vector<unsigned char> bytes(const std::size_t& length);
 
 } // namespace random
 } // namespace crypto

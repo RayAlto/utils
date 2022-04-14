@@ -1,7 +1,7 @@
 #include "crypto/random.h"
 
 #include <cstddef>
-#include <string>
+#include <vector>
 
 #include "openssl/rand.h"
 
@@ -10,12 +10,12 @@ namespace utils {
 namespace crypto {
 namespace random {
 
-std::string bytes(const std::size_t& length) {
+std::vector<unsigned char> bytes(const std::size_t& length) {
     unsigned char buffer[length + 1];
     if (RAND_bytes(buffer, length) <= 0) {
-        return std::string {};
+        return std::vector<unsigned char> {};
     }
-    return std::string(reinterpret_cast<char*>(buffer), length);
+    return std::vector<unsigned char>(buffer, buffer + length);
 }
 
 } // namespace random
