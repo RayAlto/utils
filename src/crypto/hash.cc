@@ -1,9 +1,8 @@
 #include "crypto/hash.h"
 
-#include <array>
 #include <cstddef>
 #include <cstring>
-#include <string>
+#include <vector>
 
 #include "openssl/crypto.h"
 #include "openssl/evp.h"
@@ -14,34 +13,33 @@ namespace utils {
 namespace crypto {
 namespace hash {
 
-std::string sha256(const std::string& message) {
-    return sha256(reinterpret_cast<const unsigned char*>(message.data()),
-                  message.length());
+std::vector<unsigned char> sha256(const std::vector<unsigned char>& message) {
+    return sha256(message.data(), message.size());
 }
 
-std::string sha256(const std::string& message,
-                   const std::size_t& message_length) {
-    return sha256(reinterpret_cast<const unsigned char*>(message.data()),
-                  message_length);
+std::vector<unsigned char> sha256(const std::vector<unsigned char>& message,
+                                  const std::size_t& message_length) {
+    return sha256(message.data(), message_length);
 }
 
-std::string sha256(const char* message) {
+std::vector<unsigned char> sha256(const char* message) {
     return sha256(reinterpret_cast<const unsigned char*>(message),
                   std::strlen(message));
 }
 
-std::string sha256(const char* message, const std::size_t& message_length) {
+std::vector<unsigned char> sha256(const char* message,
+                                  const std::size_t& message_length) {
     return sha256(reinterpret_cast<const unsigned char*>(message),
                   message_length);
 }
 
-std::string sha256(const unsigned char* message) {
+std::vector<unsigned char> sha256(const unsigned char* message) {
     return sha256(message, std::strlen(reinterpret_cast<const char*>(message)));
 }
 
-std::string sha256(const unsigned char* message,
-                   const std::size_t& message_length) {
-    std::string result;
+std::vector<unsigned char> sha256(const unsigned char* message,
+                                  const std::size_t& message_length) {
+    std::vector<unsigned char> result;
     EVP_MD_CTX* message_digest_context = nullptr;
     unsigned char* digest = nullptr;
     unsigned int digest_len = 0;
@@ -71,7 +69,7 @@ std::string sha256(const unsigned char* message,
         OPENSSL_free(digest);
         return result;
     }
-    result = std::string(reinterpret_cast<char*>(digest), digest_len);
+    result = std::vector<unsigned char>(digest, digest + digest_len);
     EVP_MD_CTX_free(message_digest_context);
     OPENSSL_free(digest);
     return result;
