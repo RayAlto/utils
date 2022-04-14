@@ -1,4 +1,5 @@
 #include "exceptions/exceptions.h"
+#include <openssl/err.h>
 
 #include <cerrno> // errno(marco)
 #include <cstring> // std::strerror
@@ -40,6 +41,15 @@ SyscallError::SyscallError(const std::string& where) {
     set_message("SyscallError(error " + std::to_string(errno) + ")",
                 where,
                 std::strerror(errno));
+}
+
+OpensslError::OpensslError(const std::string& where) {
+    unsigned long error_code = ERR_get_error();
+    char error_buffer[256];
+    ERR_error_string(error_code, error_buffer);
+    set_message("OpenSSL(" + std::to_string(error_code) + ")",
+                where,
+                std::string(error_buffer));
 }
 
 } // namespace exceptions

@@ -49,6 +49,18 @@ public:
     explicit SyscallError(const std::string& where);
 };
 
+/**
+ * Automatically get error info from OpenSSL
+ * Example:
+ *      if(EVP_DecodeBlock(t, f, n) == -1) {
+ *          throw OpensslError("Here");
+ *      }
+ */
+class OpensslError : public Exception {
+public:
+    explicit OpensslError(const std::string& where);
+};
+
 } // namespace exceptions
 } // namespace utils
 } // namespace rayalto
