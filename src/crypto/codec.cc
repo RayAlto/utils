@@ -80,6 +80,13 @@ std::vector<unsigned char> base64_decode(const unsigned char* input_data,
         // failed to decode
         return std::vector<unsigned char> {};
     }
+    if (input_length > 3 && input_data[input_length - 1] == '='
+        && input_data[input_length - 2] == '=') {
+        result_length -= 2;
+    }
+    else if (input_length > 2 && input_data[input_length - 1] == '=') {
+        result_length -= 1;
+    }
     return std::vector<unsigned char>(result, result + result_length);
 }
 
