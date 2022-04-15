@@ -405,9 +405,9 @@ std::string hex_string(const unsigned char* data,
                        const bool& upper_case) {
     char result[data_length * 2 + 1];
     result[data_length * 2] = '\0';
-    unsigned char hex_str_lower[] {"0123456789abcdef"};
-    unsigned char hex_str_upper[] {"0123456789ABCDEF"};
-    unsigned char* hex_str = upper_case ? hex_str_upper : hex_str_lower;
+    unsigned char hex_map_lower[] {"0123456789abcdef"};
+    unsigned char hex_map_upper[] {"0123456789ABCDEF"};
+    unsigned char* hex_str = upper_case ? hex_map_upper : hex_map_lower;
     for (int i = 0; i < data_length; ++i) {
         // clang-format off
         result[2 * i    ] = hex_str[(data[i] >> 4) & 0x0f];
@@ -442,6 +442,37 @@ std::string data_string(const char* data) {
 
 std::string data_string(const char* data, const std::size_t& data_length) {
     return std::string(data, data_length);
+}
+
+std::vector<unsigned char> to_data(const std::string& source) {
+    return to_data(reinterpret_cast<const unsigned char*>(source.data()),
+                   source.length());
+}
+
+std::vector<unsigned char> to_data(const std::string& source,
+                                   const std::size_t& source_length) {
+    return to_data(reinterpret_cast<const unsigned char*>(source.data()),
+                   source_length);
+}
+
+std::vector<unsigned char> to_data(const char* source) {
+    return to_data(reinterpret_cast<const unsigned char*>(source),
+                   std::strlen(source));
+}
+
+std::vector<unsigned char> to_data(const char* source,
+                                   const std::size_t& source_length) {
+    return to_data(reinterpret_cast<const unsigned char*>(source),
+                   source_length);
+}
+
+std::vector<unsigned char> to_data(const unsigned char* source) {
+    return to_data(source, std::strlen(reinterpret_cast<const char*>(source)));
+}
+
+std::vector<unsigned char> to_data(const unsigned char* source,
+                                   const std::size_t& source_length) {
+    return std::vector<unsigned char>(source, source + source_length);
 }
 
 } // namespace string

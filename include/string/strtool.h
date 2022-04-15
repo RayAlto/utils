@@ -154,6 +154,16 @@ std::string data_string(const unsigned char* data,
 std::string data_string(const char* data);
 std::string data_string(const char* data, const std::size_t& data_length);
 
+std::vector<unsigned char> to_data(const std::string& source);
+std::vector<unsigned char> to_data(const std::string& source,
+                                   const std::size_t& source_length);
+std::vector<unsigned char> to_data(const char* source);
+std::vector<unsigned char> to_data(const char* source,
+                                   const std::size_t& source_length);
+std::vector<unsigned char> to_data(const unsigned char* source);
+std::vector<unsigned char> to_data(const unsigned char* source,
+                                   const std::size_t& source_length);
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto
