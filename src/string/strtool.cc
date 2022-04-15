@@ -417,6 +417,33 @@ std::string hex_string(const unsigned char* data,
     return std::string(result);
 }
 
+std::string data_string(const std::vector<unsigned char>& data) {
+    return data_string(data.data(), data.size());
+}
+
+std::string data_string(const std::vector<unsigned char>& data,
+                        const std::size_t& data_length) {
+    return data_string(data.data(), data_length);
+}
+
+std::string data_string(const unsigned char* data) {
+    return data_string(reinterpret_cast<const char*>(data),
+                       std::strlen(reinterpret_cast<const char*>(data)));
+}
+
+std::string data_string(const unsigned char* data,
+                        const std::size_t& data_length) {
+    return data_string(reinterpret_cast<const char*>(data), data_length);
+}
+
+std::string data_string(const char* data) {
+    return data_string(data, std::strlen(data));
+}
+
+std::string data_string(const char* data, const std::size_t& data_length) {
+    return std::string(data, data_length);
+}
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto

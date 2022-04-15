@@ -145,6 +145,15 @@ std::string hex_string(const unsigned char* data,
                        const std::size_t& data_length,
                        const bool& upper_case = false);
 
+std::string data_string(const std::vector<unsigned char>& data);
+std::string data_string(const std::vector<unsigned char>& data,
+                        const std::size_t& data_length);
+std::string data_string(const unsigned char* data);
+std::string data_string(const unsigned char* data,
+                        const std::size_t& data_length);
+std::string data_string(const char* data);
+std::string data_string(const char* data, const std::size_t& data_length);
+
 } // namespace string
 } // namespace utils
 } // namespace rayalto
