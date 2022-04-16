@@ -18,6 +18,19 @@ namespace rayalto {
 namespace utils {
 namespace string {
 
+unsigned char hex2bin(const char& c) {
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    }
+    if (c >= 'A' && c <= 'F') {
+        return c - 'A' + 10;
+    }
+    if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    }
+    return -1;
+}
+
 std::string lstrip(std::string&& str) {
     return lstrip(str);
 }
@@ -473,6 +486,32 @@ std::vector<unsigned char> to_data(const unsigned char* source) {
 std::vector<unsigned char> to_data(const unsigned char* source,
                                    const std::size_t& source_length) {
     return std::vector<unsigned char>(source, source + source_length);
+}
+
+std::vector<unsigned char> parse_hex(const std::string& hex) {
+    return parse_hex(hex.data(), hex.length());
+}
+
+std::vector<unsigned char> parse_hex(const std::string& hex,
+                                     const std::size_t& hex_length) {
+    return parse_hex(hex.data(), hex_length);
+}
+
+std::vector<unsigned char> parse_hex(const char* hex) {
+    return parse_hex(hex, std::strlen(hex));
+}
+
+std::vector<unsigned char> parse_hex(const char* hex,
+                                     const std::size_t& hex_length) {
+    std::vector<unsigned char> result;
+    unsigned char b;
+    for (int i = 0; i < hex_length; i += 2) {
+        b = 0;
+        b |= ((hex2bin(hex[i]) << 4) & 0xf0);
+        b |= (hex2bin(hex[i + 1]) & 0x0f);
+        result.push_back(b);
+    }
+    return result;
 }
 
 } // namespace string

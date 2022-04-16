@@ -126,6 +126,7 @@ std::string random_string(const std::size_t& len = 16);
 std::string random_string(const std::size_t& len,
                           const std::vector<char>& characters);
 
+// convert byte data to hex string
 std::string hex_string(const std::vector<unsigned char>& data,
                        const bool& upper_case = false);
 std::string hex_string(const std::vector<unsigned char>& data,
@@ -145,6 +146,7 @@ std::string hex_string(const unsigned char* data,
                        const std::size_t& data_length,
                        const bool& upper_case = false);
 
+// put bytes in std::vector<unsigned char>/c-str into std::string
 std::string data_string(const std::vector<unsigned char>& data);
 std::string data_string(const std::vector<unsigned char>& data,
                         const std::size_t& data_length);
@@ -154,6 +156,7 @@ std::string data_string(const unsigned char* data,
 std::string data_string(const char* data);
 std::string data_string(const char* data, const std::size_t& data_length);
 
+// put bytes in std::string/c-str into std::vector<unsigned char>
 std::vector<unsigned char> to_data(const std::string& source);
 std::vector<unsigned char> to_data(const std::string& source,
                                    const std::size_t& source_length);
@@ -163,6 +166,13 @@ std::vector<unsigned char> to_data(const char* source,
 std::vector<unsigned char> to_data(const unsigned char* source);
 std::vector<unsigned char> to_data(const unsigned char* source,
                                    const std::size_t& source_length);
+
+std::vector<unsigned char> parse_hex(const std::string& hex);
+std::vector<unsigned char> parse_hex(const std::string& hex,
+                                     const std::size_t& hex_length);
+std::vector<unsigned char> parse_hex(const char* hex);
+std::vector<unsigned char> parse_hex(const char* hex,
+                                     const std::size_t& hex_length);
 
 } // namespace string
 } // namespace utils
