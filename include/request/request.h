@@ -2,6 +2,7 @@
 #define RA_UTILS_REQUEST_REQUEST_HPP_
 
 #include <cstddef>
+#include <cstdio>
 #include <ctime>
 #include <string>
 
@@ -201,6 +202,9 @@ public:
 protected:
     CURL* handle_;
 
+    char error_info_buffer[CURL_ERROR_SIZE];
+    std::FILE* temp_stderr = nullptr;
+
     request::Method method_ = request::Method::DEFAULT;
     request::IP_Resolve ip_resolve_ = request::IP_Resolve::WHATEVER;
     std::string url_;
@@ -219,6 +223,10 @@ protected:
     request::Response response_;
 
     const static std::string curl_version_;
+
+    void init_curl_handle_();
+    void set_options_();
+    bool perform_request_();
 };
 
 /* ========== other func ========== */

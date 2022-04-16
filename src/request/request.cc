@@ -105,6 +105,9 @@ Request::Request() {
 }
 
 Request::~Request() {
+    if (temp_stderr != nullptr) {
+        std::fclose(temp_stderr);
+    }
     if (curl_mime_) {
         curl_mime_free(curl_mime_);
         curl_mime_ = nullptr;
@@ -418,6 +421,51 @@ void Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
 }
 
 bool Request::request() {
+    init_curl_handle_();
+    set_options_();
+    return perform_request_();
+}
+
+const request::Response& Request::response() const {
+    return response_;
+}
+
+request::Response& Request::response() {
+    return response_;
+}
+
+std::string Request::url_encode(const std::string& url) {
+    char* result_c_str = curl_easy_escape(handle_, url.c_str(), url.length());
+    std::string result = result_c_str;
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_encode(const char* url, std::size_t len) {
+    char* result_c_str = curl_easy_escape(handle_, url, len);
+    std::string result = result_c_str;
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_decode(const std::string& url) {
+    int result_length;
+    char* result_c_str =
+        curl_easy_unescape(handle_, url.c_str(), url.length(), &result_length);
+    std::string result(result_c_str, result_length);
+    curl_free(result_c_str);
+    return result;
+}
+
+std::string Request::url_decode(const char* url, std::size_t len) {
+    int result_length;
+    char* result_c_str = curl_easy_unescape(handle_, url, len, &result_length);
+    std::string result(result_c_str, result_length);
+    curl_free(result_c_str);
+    return result;
+}
+
+void Request::init_curl_handle_() {
     // useful for multithreading??
     curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1l);
     // enable TCP keep-alive
@@ -429,7 +477,6 @@ bool Request::request() {
     // receive cert info
     curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1l);
     // receive error
-    char error_info_buffer[CURL_ERROR_SIZE];
     error_info_buffer[0] = 0;
     curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer);
     // receive response text
@@ -441,8 +488,13 @@ bool Request::request() {
         handle_, CURLOPT_HEADERFUNCTION, curl_custom_header_function);
     curl_easy_setopt(handle_, CURLOPT_HEADERDATA, &response_.header);
     // verbose information
-    std::FILE* temp_stderr = std::tmpfile();
+    if (temp_stderr == nullptr) {
+        temp_stderr = std::tmpfile();
+    }
     curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr);
+}
+
+void Request::set_options_() {
     // [option] method
     curl_easy_setopt(
         handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
@@ -544,6 +596,9 @@ bool Request::request() {
                          CURLOPT_DNS_LOCAL_IP6,
                          local_setting_.dns_local_ipv6.c_str());
     }
+}
+
+bool Request::perform_request_() {
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
     // receive message
@@ -595,46 +650,8 @@ bool Request::request() {
     return (curl_result == CURLE_OK);
 }
 
-const request::Response& Request::response() const {
-    return response_;
-}
-
-request::Response& Request::response() {
-    return response_;
-}
-
-std::string Request::url_encode(const std::string& url) {
-    char* result_c_str = curl_easy_escape(handle_, url.c_str(), url.length());
-    std::string result = result_c_str;
-    curl_free(result_c_str);
-    return result;
-}
-
-std::string Request::url_encode(const char* url, std::size_t len) {
-    char* result_c_str = curl_easy_escape(handle_, url, len);
-    std::string result = result_c_str;
-    curl_free(result_c_str);
-    return result;
-}
-
-std::string Request::url_decode(const std::string& url) {
-    int result_length;
-    char* result_c_str =
-        curl_easy_unescape(handle_, url.c_str(), url.length(), &result_length);
-    std::string result(result_c_str, result_length);
-    curl_free(result_c_str);
-    return result;
-}
-
-std::string Request::url_decode(const char* url, std::size_t len) {
-    int result_length;
-    char* result_c_str = curl_easy_unescape(handle_, url, len, &result_length);
-    std::string result(result_c_str, result_length);
-    curl_free(result_c_str);
-    return result;
-}
-
 namespace request {
+
 std::time_t parse_time_str(const char* time_str) {
     return curl_getdate(time_str, nullptr);
 }
