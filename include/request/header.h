@@ -5,8 +5,6 @@
 #include <string>
 #include <utility>
 
-#include <curl/curl.h>
-
 #include "util/map_handler.h"
 
 namespace rayalto {
@@ -25,13 +23,7 @@ public:
     Header& operator=(const Header& header);
     Header& operator=(Header&& header) noexcept;
 
-    virtual ~Header();
-
-    // get curl_slist pointer
-    curl_slist* curl_header();
-
-protected:
-    curl_slist* curl_header_ = nullptr;
+    virtual ~Header() = default;
 };
 
 } // namespace request

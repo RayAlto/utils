@@ -216,6 +216,7 @@ protected:
     request::MimeParts mime_parts_;
     // why the FUCK curl_mime_init() need a curl handle?
     curl_mime* curl_mime_ = nullptr;
+    curl_slist* curl_header_ = nullptr;
     request::Proxy proxy_;
     LocalSetting local_setting_;
     TimeoutSetting timeout_setting_;

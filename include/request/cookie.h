@@ -5,8 +5,6 @@
 #include <string>
 #include <utility>
 
-#include <curl/curl.h>
-
 #include "util/map_handler.h"
 
 namespace rayalto {
@@ -27,8 +25,6 @@ public:
 
     virtual ~Cookie() = default;
 
-    // read from curl_slist
-    void from_curl_slist(curl_slist* curl_cookies);
     // format as "key1=value1; key2=value2; ..."
     const char* c_str();
 

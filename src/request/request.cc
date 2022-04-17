@@ -4,13 +4,13 @@
 #include <cstdio>
 #include <cstring> // std::strlen, std::size_t
 #include <ctime>
-#include <iostream>
 #include <string>
 #include <utility>
 
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include "curl/curl.h"
+#include "curl/easy.h"
 
+#include "request/cookie.h"
 #include "request/header.h"
 #include "request/ip_resolve.h"
 #include "request/method.h"
@@ -43,6 +43,33 @@ void parse_header(const char* data,
         }
         result[string::strip(header.substr(0, colon))] =
             string::strip(header.substr(colon + 1));
+    }
+}
+
+void init_curl_header(const request::Header& headers,
+                      curl_slist** curl_header) {
+    if (*curl_header != nullptr) {
+        curl_slist_free_all(*curl_header);
+        *curl_header = nullptr;
+    }
+    if (headers.empty()) {
+        return;
+    }
+    std::string header_line;
+    for (const std::pair<std::string, std::string>& header : headers) {
+        header_line = header.first + ": " + header.second;
+        *curl_header = curl_slist_append(*curl_header, header_line.c_str());
+    }
+}
+
+void parse_cookie_slist(curl_slist* curl_cookies, request::Cookie& cookie) {
+    if (!curl_cookies) {
+        return;
+    }
+    for (curl_slist* curl_cookie = curl_cookies; curl_cookie;
+         curl_cookie = curl_cookie->next) {
+        std::vector<std::string> parts = string::split(curl_cookie->data, '\t');
+        cookie[parts[5]] = parts[6];
     }
 }
 
@@ -111,6 +138,9 @@ Request::~Request() {
     if (curl_mime_) {
         curl_mime_free(curl_mime_);
         curl_mime_ = nullptr;
+    }
+    if (curl_header_) {
+        curl_slist_free_all(curl_header_);
     }
     curl_easy_cleanup(handle_);
     curl_global_cleanup();
@@ -492,6 +522,7 @@ void Request::init_curl_handle_() {
         temp_stderr = std::tmpfile();
     }
     curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr);
+    init_curl_header(header_, &curl_header_);
 }
 
 void Request::set_options_() {
@@ -499,9 +530,13 @@ void Request::set_options_() {
     curl_easy_setopt(
         handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
     // [option] ip resolve
-    curl_easy_setopt(handle_,
-                     CURLOPT_IPRESOLVE,
-                     request::ip_resolve::as_option(ip_resolve_));
+    curl_easy_setopt(
+        handle_,
+        CURLOPT_IPRESOLVE,
+        (ip_resolve_ == request::IP_Resolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
+         : ip_resolve_ == request::IP_Resolve::IPv6_ONLY
+             ? CURL_IPRESOLVE_V6
+             : CURL_IPRESOLVE_WHATEVER));
     // [option] url
     if (!url_.empty()) {
         curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
@@ -511,8 +546,8 @@ void Request::set_options_() {
         curl_easy_setopt(handle_, CURLOPT_COOKIE, cookie_.c_str());
     }
     // [option] header
-    if (!header_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, header_.curl_header());
+    if (curl_header_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, curl_header_);
     }
     // [option] useragent
     if (!useragent_.empty()) {
@@ -610,7 +645,7 @@ bool Request::perform_request_() {
     // receive response cookie
     curl_slist* curl_cookies = nullptr;
     curl_easy_getinfo(handle_, CURLINFO_COOKIELIST, &curl_cookies);
-    response_.cookie.from_curl_slist(curl_cookies);
+    parse_cookie_slist(curl_cookies, response_.cookie);
     curl_slist_free_all(curl_cookies);
     // receive connection http version
     curl_easy_getinfo(handle_, CURLINFO_HTTP_VERSION, &response_.http_version);

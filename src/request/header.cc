@@ -32,26 +32,6 @@ Header& Header::operator=(Header&& header) noexcept {
     return *this;
 }
 
-Header::~Header() {
-    if (curl_header_) {
-        curl_slist_free_all(curl_header_);
-        curl_header_ = nullptr;
-    }
-}
-
-curl_slist* Header::curl_header() {
-    if (curl_header_) {
-        curl_slist_free_all(curl_header_);
-        curl_header_ = nullptr;
-    }
-    std::string header_line;
-    for (const std::pair<std::string, std::string>& header : map_) {
-        header_line = header.first + ": " + header.second;
-        curl_header_ = curl_slist_append(curl_header_, header_line.c_str());
-    }
-    return curl_header_;
-}
-
 } // namespace request
 } // namespace utils
 } // namespace rayalto

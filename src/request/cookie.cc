@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include <curl/curl.h>
+#include "curl/curl.h"
 
 #include "string/strtool.h"
 #include "util/map_handler.h"
@@ -34,16 +34,6 @@ Cookie& Cookie::operator=(const Cookie& cookie) {
 Cookie& Cookie::operator=(Cookie&& cookie) noexcept {
     this->map_ = std::move(cookie.map_);
     return *this;
-}
-
-void Cookie::from_curl_slist(curl_slist* curl_cookies) {
-    if (!curl_cookies) {
-        return;
-    }
-    for (curl_slist* cookie = curl_cookies; cookie; cookie = cookie->next) {
-        std::vector<std::string> parts = string::split(cookie->data, '\t');
-        map_[parts[5]] = parts[6];
-    }
 }
 
 const char* Cookie::c_str() {

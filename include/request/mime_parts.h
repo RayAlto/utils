@@ -4,8 +4,6 @@
 #include <initializer_list>
 #include <utility>
 
-#include <curl/curl.h>
-
 #include "request/mime_part.h"
 #include "util/map_handler.h"
 

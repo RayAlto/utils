@@ -2,8 +2,6 @@
 
 #include <utility>
 
-#include <curl/curl.h>
-
 namespace rayalto {
 namespace utils {
 namespace request {
