@@ -505,10 +505,16 @@ std::vector<unsigned char> parse_hex(const char* hex,
                                      const std::size_t& hex_length) {
     std::vector<unsigned char> result;
     unsigned char b;
-    for (int i = 0; i < hex_length; i += 2) {
+    std::size_t i;
+    for (i = 0; i < hex_length - 1; i += 2) {
         b = 0;
         b |= ((hex2bin(hex[i]) << 4) & 0xf0);
         b |= (hex2bin(hex[i + 1]) & 0x0f);
+        result.push_back(b);
+    }
+    if (i == hex_length - 1) {
+        b = 0;
+        b |= ((hex2bin(hex[i]) << 4) & 0xf0);
         result.push_back(b);
     }
     return result;
