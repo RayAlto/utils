@@ -4,11 +4,11 @@
 #include <cstdio>
 #include <cstring> // std::strlen, std::size_t
 #include <ctime>
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "curl/curl.h"
-#include "curl/easy.h"
 
 #include "request/cookie.h"
 #include "request/header.h"
@@ -128,18 +128,18 @@ const std::string Request::curl_version_ =
 Request::Request() {
     curl_global_init(CURL_GLOBAL_ALL);
     handle_ = curl_easy_init();
-    useragent_ = "curl/" + curl_version_;
+    useragent_ = std::make_unique<std::string>("curl/" + curl_version_);
 }
 
 Request::~Request() {
-    if (temp_stderr != nullptr) {
-        std::fclose(temp_stderr);
+    if (temp_stderr_ != nullptr) {
+        std::fclose(temp_stderr_);
     }
-    if (curl_mime_) {
+    if (curl_mime_ != nullptr) {
         curl_mime_free(curl_mime_);
         curl_mime_ = nullptr;
     }
-    if (curl_header_) {
+    if (curl_header_ != nullptr) {
         curl_slist_free_all(curl_header_);
     }
     curl_easy_cleanup(handle_);
@@ -152,302 +152,378 @@ std::string Request::curl_version() {
 
 void Request::reset() {
     curl_easy_reset(handle_);
+    if (temp_stderr_ != nullptr) {
+        std::fclose(temp_stderr_);
+        temp_stderr_ = std::tmpfile();
+    }
     method_ = request::Method::DEFAULT;
-    ip_resolve_ = request::IP_Resolve::WHATEVER;
-    url_.clear();
-    cookie_.clear();
-    header_.clear();
-    useragent_ = "curl/" + curl_version_;
-    authentication_.clear();
-    body_.clear();
-    mime_parts_.clear();
+    ip_resolve_ = request::IpResolve::WHATEVER;
+    url_.reset();
+    cookie_.reset();
+    header_.reset();
+    useragent_ = std::make_unique<std::string>("curl/" + curl_version_);
+    authentication_.reset();
+    body_.reset();
+    mime_parts_.reset();
+    proxy_.reset();
+    local_setting_.reset();
+    timeout_setting_.reset();
+    response_.reset();
     if (curl_mime_) {
         curl_mime_free(curl_mime_);
         curl_mime_ = nullptr;
     }
-    proxy_.clear();
-    local_setting_.interface.clear();
-    local_setting_.port = 0;
-    local_setting_.port_range = 1;
-    local_setting_.dns_interface.clear();
-    local_setting_.dns_local_ipv4.clear();
-    local_setting_.dns_local_ipv6.clear();
-    timeout_setting_.timeout = 0l;
-    timeout_setting_.connect_timeout = 300000l;
+    if (curl_header_ != nullptr) {
+        curl_slist_free_all(curl_header_);
+    }
 }
 
-const request::Method& Request::method() const {
+request::Method Request::method() {
     return method_;
 }
 
-request::Method& Request::method() {
-    return method_;
-}
-
-void Request::method(const request::Method& method) {
+Request& Request::method(request::Method method) {
     method_ = method;
+    return *this;
 }
 
-const request::IP_Resolve& Request::ip_resolve() const {
+request::IpResolve Request::ip_resolve() {
     return ip_resolve_;
 }
 
-request::IP_Resolve& Request::ip_resolve() {
-    return ip_resolve_;
-}
-
-void Request::ip_resolve(const request::IP_Resolve& ip_resolve) {
+Request& Request::ip_resolve(request::IpResolve ip_resolve) {
     ip_resolve_ = ip_resolve;
+    return *this;
 }
 
-const std::string& Request::url() const {
-    return url_;
+std::string Request::url() {
+    if (url_ == nullptr) {
+        url_ = std::make_unique<std::string>();
+    }
+    return *url_;
 }
 
-std::string& Request::url() {
-    return url_;
+Request& Request::url(const std::string& url) {
+    url_ = std::make_unique<std::string>(url);
+    return *this;
 }
 
-void Request::url(const std::string& url) {
-    url_ = url;
+Request& Request::url(std::string&& url) {
+    url_ = std::make_unique<std::string>(std::move(url));
+    return *this;
 }
 
-void Request::url(std::string&& url) {
-    url_ = std::move(url);
+request::Cookie Request::cookie() {
+    if (cookie_ == nullptr) {
+        cookie_ = std::make_unique<request::Cookie>();
+    }
+    return *cookie_;
 }
 
-const request::Cookie& Request::cookie() const {
-    return cookie_;
+Request& Request::cookie(const request::Cookie& cookie) {
+    cookie_ = std::make_unique<request::Cookie>(cookie);
+    return *this;
 }
 
-request::Cookie& Request::cookie() {
-    return cookie_;
+Request& Request::cookie(request::Cookie&& cookie) {
+    cookie_ = std::make_unique<request::Cookie>(std::move(cookie));
+    return *this;
 }
 
-void Request::cookie(const request::Cookie& cookie) {
-    cookie_ = cookie;
+request::Header Request::header() {
+    if (header_ == nullptr) {
+        header_ = std::make_unique<request::Header>();
+    }
+    return *header_;
 }
 
-void Request::cookie(request::Cookie&& cookie) {
-    cookie_ = std::move(cookie);
+Request& Request::header(const request::Header& header) {
+    header_ = std::make_unique<request::Header>(header);
+    return *this;
 }
 
-const request::Header& Request::header() const {
-    return header_;
+Request& Request::header(request::Header&& header) {
+    header_ = std::make_unique<request::Header>(std::move(header));
+    return *this;
 }
 
-request::Header& Request::header() {
-    return header_;
+std::string Request::useragent() {
+    if (useragent_ == nullptr) {
+        useragent_ = std::make_unique<std::string>();
+    }
+    return *useragent_;
 }
 
-void Request::header(const request::Header& header) {
-    header_ = header;
+Request& Request::useragent(const std::string& useragent) {
+    useragent_ = std::make_unique<std::string>(useragent);
+    return *this;
 }
 
-void Request::header(request::Header&& header) {
-    header_ = std::move(header);
+Request& Request::useragent(std::string&& useragent) {
+    useragent_ = std::make_unique<std::string>(std::move(useragent));
+    return *this;
 }
 
-const std::string& Request::useragent() const {
-    return useragent_;
+request::Authentication Request::authentication() {
+    if (authentication_ == nullptr) {
+        authentication_ = std::make_unique<request::Authentication>();
+    }
+    return *authentication_;
 }
 
-std::string& Request::useragent() {
-    return useragent_;
+Request& Request::authentication(
+    const request::Authentication& authentication) {
+    authentication_ = std::make_unique<request::Authentication>(authentication);
+    return *this;
 }
 
-void Request::useragent(const std::string& useragent) {
-    useragent_ = useragent;
+Request& Request::authentication(request::Authentication&& authentication) {
+    authentication_ =
+        std::make_unique<request::Authentication>(std::move(authentication));
+    return *this;
 }
 
-void Request::useragent(std::string&& useragent) {
-    useragent_ = std::move(useragent);
+std::string Request::body() {
+    if (body_ == nullptr) {
+        body_ = std::make_unique<std::string>();
+    }
+    return *body_;
 }
 
-const request::Authentication& Request::authentication() const {
-    return authentication_;
+Request& Request::body(const std::string& body, const std::string& mime_type) {
+    body_ = std::make_unique<std::string>(body);
+    if (header_ == nullptr) {
+        header_ = std::make_unique<request::Header>();
+    }
+    (*header_)["content-type"] = mime_type;
+    return *this;
 }
 
-request::Authentication& Request::authentication() {
-    return authentication_;
+Request& Request::body(std::string&& body, std::string&& mime_type) {
+    body_ = std::make_unique<std::string>(std::move(body));
+    if (header_ == nullptr) {
+        header_ = std::make_unique<request::Header>();
+    }
+    (*header_)["content-type"] = std::move(mime_type);
+    return *this;
 }
 
-void Request::authentication(const request::Authentication& authentication) {
-    authentication_ = authentication;
+request::MimeParts Request::mime_parts() {
+    if (mime_parts_ == nullptr) {
+        mime_parts_ = std::make_unique<request::MimeParts>();
+    }
+    return *mime_parts_;
 }
 
-void Request::authentication(request::Authentication&& authentication) {
-    authentication_ = std::move(authentication);
+Request& Request::mime_parts(const request::MimeParts& mime_parts) {
+    mime_parts_ = std::make_unique<request::MimeParts>(mime_parts);
+    return *this;
 }
 
-const std::string& Request::body() const {
-    return body_;
+Request& Request::mime_parts(request::MimeParts&& mime_parts) {
+    mime_parts_ = std::make_unique<request::MimeParts>(std::move(mime_parts));
+    return *this;
 }
 
-std::string& Request::body() {
-    return body_;
+request::Proxy Request::proxy() {
+    if (proxy_ == nullptr) {
+        proxy_ = std::make_unique<request::Proxy>();
+    }
+    return *proxy_;
 }
 
-void Request::body(const std::string& body, const std::string& mime_type) {
-    body_ = body;
-    header_["content-type"] = mime_type;
+Request& Request::proxy(const request::Proxy& proxy) {
+    proxy_ = std::make_unique<request::Proxy>(proxy);
+    return *this;
 }
 
-void Request::body(std::string&& body, std::string&& mime_type) {
-    body_ = std::move(body);
-    header_["content-type"] = std::move(mime_type);
+Request& Request::proxy(request::Proxy&& proxy) {
+    proxy_ = std::make_unique<request::Proxy>(std::move(proxy));
+    return *this;
 }
 
-request::MimeParts& Request::mime_parts() {
-    return mime_parts_;
+long Request::timeout() {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    return timeout_setting_->timeout;
 }
 
-const request::MimeParts& Request::mime_parts() const {
-    return mime_parts_;
+Request& Request::timeout(const long& timeout) {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    timeout_setting_->timeout = timeout;
+    return *this;
 }
 
-void Request::mime_parts(const request::MimeParts& mime_parts) {
-    mime_parts_ = mime_parts;
+Request& Request::timeout(long&& timeout) {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    timeout_setting_->timeout = std::move(timeout);
+    return *this;
 }
 
-void Request::mime_parts(request::MimeParts&& mime_parts) {
-    mime_parts_ = std::move(mime_parts);
+long Request::connect_timeout() {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    return timeout_setting_->connect_timeout;
 }
 
-const request::Proxy& Request::proxy() const {
-    return proxy_;
+Request& Request::connect_timeout(const long& connect_timeout) {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    timeout_setting_->connect_timeout = connect_timeout;
+    return *this;
 }
 
-request::Proxy& Request::proxy() {
-    return proxy_;
+Request& Request::connect_timeout(long&& connect_timeout) {
+    if (timeout_setting_ == nullptr) {
+        timeout_setting_ = std::make_unique<TimeoutSetting>();
+    }
+    timeout_setting_->connect_timeout = std::move(connect_timeout);
+    return *this;
 }
 
-void Request::proxy(const request::Proxy& proxy) {
-    proxy_ = proxy;
+std::string Request::local_interface() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->interface;
 }
 
-void Request::proxy(request::Proxy&& proxy) {
-    proxy_ = std::move(proxy);
+Request& Request::local_interface(const std::string& local_interface) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->interface = local_interface;
+    return *this;
 }
 
-const long& Request::timeout() const {
-    return timeout_setting_.timeout;
+Request& Request::local_interface(std::string&& local_interface) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->interface = std::move(local_interface);
+    return *this;
 }
 
-long& Request::timeout() {
-    return timeout_setting_.timeout;
+long Request::local_port() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->port;
 }
 
-void Request::timeout(const long& timeout) {
-    timeout_setting_.timeout = timeout;
+Request& Request::local_port(const long& local_port) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->port = local_port;
+    return *this;
 }
 
-const long& Request::connect_timeout() const {
-    return timeout_setting_.connect_timeout;
+Request& Request::local_port(long&& local_port) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->port = std::move(local_port);
+    return *this;
 }
 
-long& Request::connect_timeout() {
-    return timeout_setting_.connect_timeout;
+long Request::local_port_range() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->port_range;
 }
 
-void Request::connect_timeout(const long& connect_timeout) {
-    timeout_setting_.connect_timeout = connect_timeout;
+Request& Request::local_port_range(const long& local_port_range) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->port_range = local_port_range;
+    return *this;
 }
 
-const std::string& Request::local_interface() const {
-    return local_setting_.interface;
+Request& Request::local_port_range(long&& local_port_range) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->port_range = std::move(local_port_range);
+    return *this;
 }
 
-std::string& Request::local_interface() {
-    return local_setting_.interface;
+std::string Request::dns_interface() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->dns_interface;
 }
 
-void Request::local_interface(const std::string& interface) {
-    local_setting_.interface = interface;
+Request& Request::dns_interface(const std::string& dns_interface) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_interface = dns_interface;
+    return *this;
 }
 
-void Request::local_interface(std::string&& interface) {
-    local_setting_.interface = std::move(interface);
+Request& Request::dns_interface(std::string&& dns_interface) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_interface = std::move(dns_interface);
+    return *this;
 }
 
-long& Request::local_port() {
-    return local_setting_.port;
+std::string Request::dns_local_ipv4() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->dns_local_ipv4;
 }
 
-const long& Request::local_port() const {
-    return local_setting_.port;
+Request& Request::dns_local_ipv4(const std::string& dns_local_ipv4) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_local_ipv4 = dns_local_ipv4;
+    return *this;
 }
 
-void Request::local_port(const long& port) {
-    local_setting_.port = port;
+Request& Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_local_ipv4 = std::move(dns_local_ipv4);
+    return *this;
 }
 
-void Request::local_port(long&& port) {
-    local_setting_.port = std::move(port);
+std::string Request::dns_local_ipv6() {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    return local_setting_->dns_local_ipv6;
 }
 
-long& Request::local_port_range() {
-    return local_setting_.port_range;
+Request& Request::dns_local_ipv6(const std::string& dns_local_ipv6) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_local_ipv6 = dns_local_ipv6;
+    return *this;
 }
 
-const long& Request::local_port_range() const {
-    return local_setting_.port_range;
-}
-
-void Request::local_port_range(const long& range) {
-    local_setting_.port_range = range;
-}
-
-void Request::local_port_range(long&& range) {
-    local_setting_.port_range = std::move(range);
-}
-
-const std::string& Request::dns_interface() const {
-    return local_setting_.dns_interface;
-}
-
-std::string& Request::dns_interface() {
-    return local_setting_.dns_interface;
-}
-
-void Request::dns_interface(const std::string& dns_interface) {
-    local_setting_.dns_interface = dns_interface;
-}
-
-void Request::dns_interface(std::string&& dns_interface) {
-    local_setting_.dns_interface = std::move(dns_interface);
-}
-
-const std::string& Request::dns_local_ipv4() const {
-    return local_setting_.dns_local_ipv4;
-}
-
-std::string& Request::dns_local_ipv4() {
-    return local_setting_.dns_local_ipv4;
-}
-
-void Request::dns_local_ipv4(const std::string& dns_local_ipv4) {
-    local_setting_.dns_local_ipv4 = dns_local_ipv4;
-}
-
-void Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
-    local_setting_.dns_local_ipv4 = std::move(dns_local_ipv4);
-}
-
-const std::string& Request::dns_local_ipv6() const {
-    return local_setting_.dns_local_ipv6;
-}
-
-std::string& Request::dns_local_ipv6() {
-    return local_setting_.dns_local_ipv6;
-}
-
-void Request::dns_local_ipv6(const std::string& dns_local_ipv6) {
-    local_setting_.dns_local_ipv6 = dns_local_ipv6;
-}
-
-void Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
-    local_setting_.dns_local_ipv6 = std::move(dns_local_ipv6);
+Request& Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
+    if (local_setting_ == nullptr) {
+        local_setting_ = std::make_unique<LocalSetting>();
+    }
+    local_setting_->dns_local_ipv6 = std::move(dns_local_ipv6);
+    return *this;
 }
 
 bool Request::request() {
@@ -456,12 +532,11 @@ bool Request::request() {
     return perform_request_();
 }
 
-const request::Response& Request::response() const {
-    return response_;
-}
-
-request::Response& Request::response() {
-    return response_;
+request::Response Request::response() {
+    if (response_ == nullptr) {
+        response_ = std::make_unique<request::Response>();
+    }
+    return *response_;
 }
 
 std::string Request::url_encode(const std::string& url) {
@@ -507,22 +582,22 @@ void Request::init_curl_handle_() {
     // receive cert info
     curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1l);
     // receive error
-    error_info_buffer[0] = 0;
-    curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer);
+    error_info_buffer_[0] = 0;
+    curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer_);
     // receive response text
     curl_easy_setopt(
         handle_, CURLOPT_WRITEFUNCTION, curl_custom_write_function);
-    curl_easy_setopt(handle_, CURLOPT_WRITEDATA, &response_.body);
+    curl_easy_setopt(handle_, CURLOPT_WRITEDATA, &response_->body);
     // receive response header
     curl_easy_setopt(
         handle_, CURLOPT_HEADERFUNCTION, curl_custom_header_function);
-    curl_easy_setopt(handle_, CURLOPT_HEADERDATA, &response_.header);
+    curl_easy_setopt(handle_, CURLOPT_HEADERDATA, &response_->header);
     // verbose information
-    if (temp_stderr == nullptr) {
-        temp_stderr = std::tmpfile();
+    if (temp_stderr_ == nullptr) {
+        temp_stderr_ = std::tmpfile();
     }
-    curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr);
-    init_curl_header(header_, &curl_header_);
+    curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr_);
+    init_curl_header(*header_, &curl_header_);
 }
 
 void Request::set_options_() {
@@ -533,37 +608,37 @@ void Request::set_options_() {
     curl_easy_setopt(
         handle_,
         CURLOPT_IPRESOLVE,
-        (ip_resolve_ == request::IP_Resolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
-         : ip_resolve_ == request::IP_Resolve::IPv6_ONLY
+        (ip_resolve_ == request::IpResolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
+         : ip_resolve_ == request::IpResolve::IPv6_ONLY
              ? CURL_IPRESOLVE_V6
              : CURL_IPRESOLVE_WHATEVER));
     // [option] url
-    if (!url_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str());
+    if (url_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_URL, url_->c_str());
     }
     // [option] cookie
-    if (!cookie_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_COOKIE, cookie_.c_str());
+    if (cookie_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_COOKIE, cookie_->c_str());
     }
     // [option] header
     if (curl_header_ != nullptr) {
         curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, curl_header_);
     }
     // [option] useragent
-    if (!useragent_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_USERAGENT, useragent_.c_str());
+    if (useragent_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_USERAGENT, useragent_->c_str());
     }
     // [option] authentication
-    if (!authentication_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_.c_str());
+    if (authentication_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_USERPWD, authentication_->c_str());
     }
     // [option] body
-    if (!body_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body_.c_str());
-        curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE_LARGE, body_.length());
+    if (body_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, body_->c_str());
+        curl_easy_setopt(handle_, CURLOPT_POSTFIELDSIZE_LARGE, body_->length());
     }
     // [option] multi part
-    if (!mime_parts_.empty()) {
+    if (mime_parts_ != nullptr) {
         // clean previous curl_mime
         if (curl_mime_) {
             curl_mime_free(curl_mime_);
@@ -573,63 +648,68 @@ void Request::set_options_() {
         curl_mime_ = curl_mime_init(handle_);
         // add parts
         for (const std::pair<std::string, request::MimePart>& mime_part :
-             mime_parts_) {
+             *mime_parts_) {
             curl_add_mime_part(curl_mime_, mime_part.first, mime_part.second);
         }
         curl_easy_setopt(handle_, CURLOPT_MIMEPOST, curl_mime_);
     }
     // [option] proxy
-    if (!proxy_.empty()) {
-        curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_.c_str());
+    if (proxy_ != nullptr) {
+        curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_->c_str());
+        // [option] http proxy tunnel
+        if (proxy_->http_proxy_tunnel()) {
+            curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
+        }
     }
-    // [option] http proxy tunnel
-    if (proxy_.http_proxy_tunnel()) {
-        curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
+    if (timeout_setting_ != nullptr) {
+        // [option] timeout
+        if (timeout_setting_->timeout != 0l) {
+            curl_easy_setopt(
+                handle_,
+                CURLOPT_TIMEOUT_MS,
+                static_cast<curl_off_t>(timeout_setting_->timeout));
+        }
+        // [option] connect timeout
+        if (timeout_setting_->connect_timeout != 300000l) {
+            curl_easy_setopt(
+                handle_,
+                CURLOPT_CONNECTTIMEOUT_MS,
+                static_cast<curl_off_t>(timeout_setting_->connect_timeout));
+        }
     }
-    // [option] timeout
-    if (timeout_setting_.timeout) {
-        curl_easy_setopt(handle_,
-                         CURLOPT_TIMEOUT_MS,
-                         static_cast<curl_off_t>(timeout_setting_.timeout));
-    }
-    // [option] connect timeout
-    if (timeout_setting_.connect_timeout != 300000l) {
-        curl_easy_setopt(
-            handle_,
-            CURLOPT_CONNECTTIMEOUT_MS,
-            static_cast<curl_off_t>(timeout_setting_.connect_timeout));
-    }
-    // [option] local interface
-    if (!local_setting_.interface.empty()) {
-        curl_easy_setopt(
-            handle_, CURLOPT_INTERFACE, local_setting_.interface.c_str());
-    }
-    // [option] local port
-    if (local_setting_.port != 0) {
-        curl_easy_setopt(handle_, CURLOPT_LOCALPORT, &local_setting_.port);
-    }
-    // [option] local port range
-    if (local_setting_.port_range != 1) {
-        curl_easy_setopt(
-            handle_, CURLOPT_LOCALPORTRANGE, &local_setting_.port_range);
-    }
-    // [option] dns interface
-    if (!local_setting_.dns_interface.empty()) {
-        curl_easy_setopt(handle_,
-                         CURLOPT_DNS_INTERFACE,
-                         local_setting_.dns_interface.c_str());
-    }
-    // [option] dns local ipv4 address
-    if (!local_setting_.dns_local_ipv4.empty()) {
-        curl_easy_setopt(handle_,
-                         CURLOPT_DNS_LOCAL_IP4,
-                         local_setting_.dns_local_ipv4.c_str());
-    }
-    // [option] dns local ipv6 address
-    if (!local_setting_.dns_local_ipv6.empty()) {
-        curl_easy_setopt(handle_,
-                         CURLOPT_DNS_LOCAL_IP6,
-                         local_setting_.dns_local_ipv6.c_str());
+    if (local_setting_ != nullptr) {
+        // [option] local interface
+        if (!local_setting_->interface.empty()) {
+            curl_easy_setopt(
+                handle_, CURLOPT_INTERFACE, local_setting_->interface.c_str());
+        }
+        // [option] local port
+        if (local_setting_->port != 0) {
+            curl_easy_setopt(handle_, CURLOPT_LOCALPORT, &local_setting_->port);
+        }
+        // [option] local port range
+        if (local_setting_->port_range != 1) {
+            curl_easy_setopt(
+                handle_, CURLOPT_LOCALPORTRANGE, &local_setting_->port_range);
+        }
+        // [option] dns interface
+        if (!local_setting_->dns_interface.empty()) {
+            curl_easy_setopt(handle_,
+                             CURLOPT_DNS_INTERFACE,
+                             local_setting_->dns_interface.c_str());
+        }
+        // [option] dns local ipv4 address
+        if (!local_setting_->dns_local_ipv4.empty()) {
+            curl_easy_setopt(handle_,
+                             CURLOPT_DNS_LOCAL_IP4,
+                             local_setting_->dns_local_ipv4.c_str());
+        }
+        // [option] dns local ipv6 address
+        if (!local_setting_->dns_local_ipv6.empty()) {
+            curl_easy_setopt(handle_,
+                             CURLOPT_DNS_LOCAL_IP6,
+                             local_setting_->dns_local_ipv6.c_str());
+        }
     }
 }
 
@@ -637,50 +717,53 @@ bool Request::perform_request_() {
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
     // receive message
-    response_.message = (std::strlen(error_info_buffer) == 0)
-                            ? error_info_buffer
-                            : curl_easy_strerror(curl_result);
+    response_ = std::make_unique<request::Response>();
+    response_->message = (std::strlen(error_info_buffer_) == 0)
+                             ? error_info_buffer_
+                             : curl_easy_strerror(curl_result);
     // receive response code
-    curl_easy_getinfo(handle_, CURLINFO_RESPONSE_CODE, &response_.code);
+    curl_easy_getinfo(handle_, CURLINFO_RESPONSE_CODE, &response_->code);
     // receive response cookie
     curl_slist* curl_cookies = nullptr;
     curl_easy_getinfo(handle_, CURLINFO_COOKIELIST, &curl_cookies);
-    parse_cookie_slist(curl_cookies, response_.cookie);
+    parse_cookie_slist(curl_cookies, response_->cookie);
     curl_slist_free_all(curl_cookies);
     // receive connection http version
-    curl_easy_getinfo(handle_, CURLINFO_HTTP_VERSION, &response_.http_version);
+    curl_easy_getinfo(handle_, CURLINFO_HTTP_VERSION, &response_->http_version);
     // receive time elapsed
     curl_easy_getinfo(
-        handle_, CURLINFO_TOTAL_TIME, &response_.time_elapsed.all);
+        handle_, CURLINFO_TOTAL_TIME, &response_->time_elapsed.all);
     curl_easy_getinfo(handle_,
                       CURLINFO_NAMELOOKUP_TIME,
-                      &response_.time_elapsed.name_resolve);
+                      &response_->time_elapsed.name_resolve);
     curl_easy_getinfo(
-        handle_, CURLINFO_CONNECT_TIME, &response_.time_elapsed.connect);
+        handle_, CURLINFO_CONNECT_TIME, &response_->time_elapsed.connect);
     curl_easy_getinfo(
-        handle_, CURLINFO_APPCONNECT_TIME, &response_.time_elapsed.handshake);
+        handle_, CURLINFO_APPCONNECT_TIME, &response_->time_elapsed.handshake);
     curl_easy_getinfo(handle_,
                       CURLINFO_PRETRANSFER_TIME,
-                      &response_.time_elapsed.pre_transfer);
+                      &response_->time_elapsed.pre_transfer);
     curl_easy_getinfo(handle_,
                       CURLINFO_STARTTRANSFER_TIME,
-                      &response_.time_elapsed.start_transfer);
+                      &response_->time_elapsed.start_transfer);
     curl_easy_getinfo(
-        handle_, CURLINFO_SIZE_UPLOAD_T, &response_.byte_transfered.upload);
+        handle_, CURLINFO_SIZE_UPLOAD_T, &response_->byte_transfered.upload);
+    curl_easy_getinfo(handle_,
+                      CURLINFO_SIZE_DOWNLOAD_T,
+                      &response_->byte_transfered.download);
     curl_easy_getinfo(
-        handle_, CURLINFO_SIZE_DOWNLOAD_T, &response_.byte_transfered.download);
+        handle_, CURLINFO_SPEED_UPLOAD_T, &response_->speed.upload);
     curl_easy_getinfo(
-        handle_, CURLINFO_SPEED_UPLOAD_T, &response_.speed.upload);
-    curl_easy_getinfo(
-        handle_, CURLINFO_SPEED_DOWNLOAD_T, &response_.speed.download);
+        handle_, CURLINFO_SPEED_DOWNLOAD_T, &response_->speed.download);
     char* local_ip;
     curl_easy_getinfo(handle_, CURLINFO_LOCAL_IP, &local_ip);
-    response_.local_info.ip = local_ip;
-    curl_easy_getinfo(handle_, CURLINFO_LOCAL_PORT, &response_.local_info.port);
-    std::rewind(temp_stderr);
+    response_->local_info.ip = local_ip;
+    curl_easy_getinfo(
+        handle_, CURLINFO_LOCAL_PORT, &response_->local_info.port);
+    std::rewind(temp_stderr_);
     char temp_buffer[64];
-    while (std::fgets(temp_buffer, 64, temp_stderr) != nullptr) {
-        response_.verbose.append(temp_buffer);
+    while (std::fgets(temp_buffer, 64, temp_stderr_) != nullptr) {
+        response_->verbose.append(temp_buffer);
     }
     return (curl_result == CURLE_OK);
 }

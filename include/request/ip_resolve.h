@@ -7,7 +7,7 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
-enum class IP_Resolve : std::uint8_t { WHATEVER, IPv4_ONLY, IPv6_ONLY };
+enum class IpResolve : std::uint8_t { WHATEVER, IPv4_ONLY, IPv6_ONLY };
 
 } // namespace request
 } // namespace utils
