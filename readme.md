@@ -72,39 +72,52 @@ application/octet-stream
 A stupid curl wrapper
 
 ```c++
+#include <iostream>
+
+#include "request/mime_parts.h"
+#include "request/request.h"
+#include "util/mime_types.h"
+
 using rayalto::utils::util::MimeTypes;
 using rayalto::utils::Request;
 using namespace rayalto::utils::request;
 
-Request request;
-request.url("https://httpbin.org/anything");
-request.method(Method::POST);
-request.useragent("RayAlto/114514");
-request.header({
-    {"foo", "bar"},
-    {"114514", "1919810"}
-});
-request.cookie({
-    {"brand", "Nabisco Oreo"},
-    {"comment", "delicious"}
-});
-request.mime_parts().add({
-    {/* part name */ "file",
-     /* part data */ MimePart()
-          .is_file(true)
-          .data("example.png")
-          .file_name("senpai.png")
-          .type(MimeTypes::get("png"))
-    },
-    {/* part name */ "data",
-     /* part data */ MimePart()
-          .data(R"+*+*({"kimochi": "1919810", "come": "114514"})+*+*")
-          .type(MimeTypes::get("json"))
-    }
-});
-request.request();
-Response response = request.response();
-std::cout << response.body << std::endl;
+int main(int argc, char const *argv[]) {
+    Request request;
+    // clang-format off
+    request.url("https://httpbin.org/anything")
+           .method(Method::POST)
+           .useragent("RayAlto/114514")
+           .header({
+                {"foo",    "bar"    },
+                {"114514", "1919810"}
+           })
+           .cookie({
+                {"brand",   "Nabisco Oreo"},
+                {"comment", "delicious"   }
+           })
+           .mime_parts({
+                {/* part name */ "file",
+                 /* part data */ MimePart()
+                     .is_file(true)
+                     .data(/* local file name */"example.png")
+                     .file_name(/* remote file name */"senpai.png")
+                     .type(MimeTypes::get("png"))
+                },
+                {/* part name */ "data",
+                 /* part data */ MimePart()
+                     .data(R"+*({"kimochi": "1919810", "come": "114514"})+*")
+                     .type(MimeTypes::get("json"))
+                }
+           })
+           .request();
+    // clang-format on
+    /* request.body(R"+*+*({"age": 114514, "role": "student"})+*+*", */
+    /*              MimeTypes::get("json")); */
+    Response response = request.response();
+    std::cout << response.body << std::endl;
+    return 0;
+}
 ```
 
 output
@@ -349,4 +362,27 @@ int main(int argc, char const *argv[]) {
 
     return 0;
 }
+```
+
+output:
+
+```plain
+04b261ea1b78cb5fb4407a03b88e00a1b545075f6b52cf2c753b0c45cceeed8d
+54GM5rOo5rC46ZuP5aGU6I+y5Za177yM54GM5rOo5rC46ZuP5aGU6I+y6LCi6LCi5Za177yBCg==
+6f551245
+6abd67bbe343665df02a67f70fd9fabfacb79e01c624622b4ec43c219a27b54a02ac8b29c1754a105ca82e9bf52ee6f4d66591c6a55c835109fdc527ad85b
+4cb
+灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！
+===== shared key256 =====
+CVhm455+C6ylOP4UgRAk8F5VRkRlM8K8/ujPnpf4P6R2RlDstJAjlW2SoxY0IvK4VwwIx8PaoxWrL9HWDn/jqhdgK6EpbqLDmQI4O1b5iAyVnp8w7qrJlgQQbyZgiPYrnnkXZvEmKUlr/klzJ1VinxmqAC2XlInTT2KqDoPiz3+1Nn8BVILqhIdFjr9Aq3v7l7v/en8n4OnYHFH8JlQBdM2KLblYxKtktx6HIuLaCEEuWJu4PdhcmrRd70dbqdd+gTBG70Sx81qFPV8x2oAxFSl65LQb3yxx/hPpmxDNBfmt+E8ud+lPvwmP3tMkJuQc2GSgsSlfnDodfJsFV4YJNw==
+===== public key =====
+AAABAFT62/ivadDkzWcPwQxLOs3bWCex16Wj96FTlVjMMQiIm633au8Y64UlJ/E/lS344MNN8V43FDHYOqkbLy98ftt4CHjnvnB7Qb56Dnl6oLubSMYV0NvWDA06I0vwJm5/T2mZ9Zk2CRfM8eDS0psLtBk+WrJFClomJgucZv9Sb6eTVNQWn3/vJTJx14sH0MK29sqb1frFHZwL8VWxmPV/usAEYfoexTuC/y8VTaypaMnzR/z+gXSeL5bMXeLvjIsUvTT6bCkE1bBLRaVDkCD0gaLCm8wIKwkG8lRNSs/nWvg4Xe8RKt57rCubddn0U8Hi2zUs3jdjQRkL7zormxSJtxY=
+===== private key =====
+AAAAIEApv5wXaCVwKbZZge8oxQT7lKPAROcXZDOev/IxLgQa/X8AAIOfFbfIVQAAAAABAFT62/ivadDkzWcPwQxLOs3bWCex16Wj96FTlVjMMQiI
+===== param p =====
+AAABAQCInR/DefsGtJ2uECMbdDVaEOJRB+6cn86I+35udWrHcVzdhiElnMRuSWLdEkTahdJ7IG5k0qKyP02RFch432Km74QOosGsbiMm6XwMoXmH5TwI8wV96+MWhySYoRDrNHbx0ZbQOuLjiiSTh3Ccim/aXNymq4WIvxERKIy7Hg8SRyk3AeR8BoV3eR1ySKRCsGYKNmh1OGtGenyIeAQKkHYqStnivwnodXaCiHSUA/PbFi5Ng+G06JTyGkVHmkduuuTNjsmCB/YjtaGk0BKraQPdcZXsos+cq93S7ajC+ej/ud40OMNFmfXCeh3KuT50AVQPfAlChqOZYQD/P+eV5ofT
+===== param q =====
+AAAAIQCHUyuspW42aIvMdWW/srwsY4Hb4PMWg1se3Iwq86zGsQ==
+===== param g =====
+AAABAFOW0YHLmXsnt/PUKIHEuyONMk7URML9idRXsZLrmTUyMxwVWov1h93O4ep5Ue50G5aZ1qo4GbL8aK8Fgp1FMRm4E6zWIp6NDom7+BY3nDZF5TG09d2w8ZzChlH1E1giLacv1riG6WvbS6MWpV4QvQ/B9Pp8ySyeEDCWOcAN7sjcQu7TNj+CfHmYGNFlpMuye8s3CiWz6ocaZ8aj7kiqpN+jORQzgLyQKfd+C6Ai/3mYaDJpF3mBsYrqjsoarX/q8yZnPfTxia/RSnnZZzTTb/JPiOivoPWwWiC9X0IIXwXFpgxy8yWk83xVIwAGPuPG2i1+Z4vyv0k/p9KvHX+dUs4=
 ```
