@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+#include "request/mime_parts.h"
 #include "request/request.h"
 #include "util/mime_types.h"
 
@@ -18,18 +19,18 @@ int main(int argc, char const *argv[]) {
     /* request.body(R"+*+*({"age": 114514, "role": "student"})+*+*", */
     /*              MimeTypes::get("json")); */
     // clang-format off
-    request.mime_parts().add({
+    request.mime_parts({
         {/* part name */ "file",
          /* part data */ MimePart()
-              .is_file(true)
-              .data("example.png")
-              .file_name("senpai.png")
-              .type(MimeTypes::get("png"))
+            .is_file(true)
+            .data("example.png")
+            .file_name("senpai.png")
+            .type(MimeTypes::get("png"))
         },
         {/* part name */ "data",
          /* part data */ MimePart()
-              .data(R"+*+*({"kimochi": "1919810", "come": "114514"})+*+*")
-              .type(MimeTypes::get("json"))
+            .data(R"+*({"kimochi": "1919810", "come": "114514"})+*")
+            .type(MimeTypes::get("json"))
         }
     });
     // clang-format on

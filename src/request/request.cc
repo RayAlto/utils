@@ -587,15 +587,20 @@ void Request::init_curl_handle_() {
     // receive response text
     curl_easy_setopt(
         handle_, CURLOPT_WRITEFUNCTION, curl_custom_write_function);
+    // allocate response
+    if (response_ == nullptr) {
+        response_ = std::make_unique<request::Response>();
+    }
     curl_easy_setopt(handle_, CURLOPT_WRITEDATA, &response_->body);
     // receive response header
     curl_easy_setopt(
         handle_, CURLOPT_HEADERFUNCTION, curl_custom_header_function);
     curl_easy_setopt(handle_, CURLOPT_HEADERDATA, &response_->header);
-    // verbose information
+    // init FILE*
     if (temp_stderr_ == nullptr) {
         temp_stderr_ = std::tmpfile();
     }
+    // verbose information
     curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr_);
     init_curl_header(*header_, &curl_header_);
 }
@@ -716,8 +721,11 @@ void Request::set_options_() {
 bool Request::perform_request_() {
     // perform
     CURLcode curl_result = curl_easy_perform(handle_);
+    // init response
+    if (response_ == nullptr) {
+        response_ = std::make_unique<request::Response>();
+    }
     // receive message
-    response_ = std::make_unique<request::Response>();
     response_->message = (std::strlen(error_info_buffer_) == 0)
                              ? error_info_buffer_
                              : curl_easy_strerror(curl_result);
