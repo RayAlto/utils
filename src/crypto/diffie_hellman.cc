@@ -746,9 +746,7 @@ void DiffieHellman::Impl::store_params_() {
                                           param_g_data + param_g_data_length);
 }
 
-DiffieHellman::DiffieHellman() {
-    impl_ = std::make_unique<Impl>();
-}
+DiffieHellman::DiffieHellman() : impl_(std::make_unique<Impl>()) {}
 
 DiffieHellman::~DiffieHellman() = default;
 
