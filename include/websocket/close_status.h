@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+
 namespace rayalto {
 namespace utils {
 namespace websocket {

@@ -231,29 +231,34 @@ void WsClient::release_() {
 
 void WsClient::release_(const websocket::CloseStatus& status) {
     // release websocket client
-    if (with_ssl_ && client_ssl_) {
+    if (with_ssl_ && client_ssl_ != nullptr) {
         if (connected_) {
             client_ssl_->close(connection_handle_, status.code, status.reason);
         }
         client_ssl_->stop_perpetual();
+        release_work_thread_();
         client_ssl_.reset();
     }
-    else if (!with_ssl_ && client_no_ssl_) {
+    else if (!with_ssl_ && client_no_ssl_ != nullptr) {
         if (connected_) {
             client_no_ssl_->close(
                 connection_handle_, status.code, status.reason);
         }
         client_no_ssl_->stop_perpetual();
+        release_work_thread_();
         client_no_ssl_.reset();
     }
     // release work thread
-    if (work_thread_) {
+    connected_ = false;
+}
+
+void WsClient::release_work_thread_() {
+    if (work_thread_ != nullptr) {
         if (work_thread_->joinable()) {
             work_thread_->join();
         }
         work_thread_.reset();
     }
-    connected_ = false;
 }
 
 void WsClient::connect_(std::error_code& error) {
@@ -261,7 +266,7 @@ void WsClient::connect_(std::error_code& error) {
         // wss
 
         with_ssl_ = true;
-        client_ssl_ = std::make_shared<
+        client_ssl_ = std::make_unique<
             websocketpp::client<websocketpp::config::asio_tls_client>>();
         client_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_ssl_->clear_error_channels(websocketpp::log::elevel::all);
@@ -349,9 +354,9 @@ void WsClient::connect_(std::error_code& error) {
             });
 
         client_ssl_->start_perpetual();
-        work_thread_ = std::make_shared<std::thread>(
+        work_thread_ = std::make_unique<std::thread>(
             &websocketpp::client<websocketpp::config::asio_tls_client>::run,
-            client_ssl_);
+            client_ssl_.get());
 
         websocketpp::client<
             websocketpp::config::asio_tls_client>::connection_ptr connection =
@@ -365,7 +370,7 @@ void WsClient::connect_(std::error_code& error) {
         // ws
 
         with_ssl_ = false;
-        client_no_ssl_ = std::make_shared<
+        client_no_ssl_ = std::make_unique<
             websocketpp::client<websocketpp::config::asio_client>>();
         client_no_ssl_->clear_access_channels(websocketpp::log::alevel::all);
         client_no_ssl_->clear_error_channels(websocketpp::log::elevel::all);
@@ -440,9 +445,9 @@ void WsClient::connect_(std::error_code& error) {
             });
 
         client_no_ssl_->start_perpetual();
-        work_thread_ = std::make_shared<std::thread>(
+        work_thread_ = std::make_unique<std::thread>(
             &websocketpp::client<websocketpp::config::asio_client>::run,
-            client_no_ssl_);
+            client_no_ssl_.get());
 
         // get connection
         websocketpp::client<websocketpp::config::asio_client>::connection_ptr

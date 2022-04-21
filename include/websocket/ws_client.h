@@ -91,12 +91,12 @@ public:
 protected:
     bool with_ssl_ = true;
 
-    std::shared_ptr<websocketpp::client<websocketpp::config::asio_tls_client>>
+    std::unique_ptr<websocketpp::client<websocketpp::config::asio_tls_client>>
         client_ssl_ {nullptr};
-    std::shared_ptr<websocketpp::client<websocketpp::config::asio_client>>
+    std::unique_ptr<websocketpp::client<websocketpp::config::asio_client>>
         client_no_ssl_ {nullptr};
 
-    std::shared_ptr<std::thread> work_thread_;
+    std::unique_ptr<std::thread> work_thread_;
 
     websocketpp::connection_hdl connection_handle_;
 
@@ -117,6 +117,7 @@ protected:
 
     void release_();
     void release_(const websocket::CloseStatus& status);
+    void release_work_thread_();
     void connect_(std::error_code& error);
 };
 
