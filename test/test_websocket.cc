@@ -1,5 +1,4 @@
 #include <chrono>
-#include <cstdint>
 #include <iostream>
 #include <system_error>
 #include <thread>
@@ -16,7 +15,7 @@ int main(int argc, char const* argv[]) {
     std::error_code ws_error;
 
     // default close reason
-    WsClient::default_close_status.reason = "shut up";
+    WsClient::default_close_status().reason = "shut up";
     WsClient client;
 
     client.on_receive([&](WsClient& client,
