@@ -1,40 +1,21 @@
 #ifndef RA_UTILS_REQUEST_REQUEST_HPP_
 #define RA_UTILS_REQUEST_REQUEST_HPP_
 
-#include <cstddef>
-#include <cstdio>
 #include <ctime>
 #include <memory>
 #include <string>
-
-#include "curl/curl.h"
 
 #include "request/authentication.h"
 #include "request/cookie.h"
 #include "request/header.h"
 #include "request/ip_resolve.h"
 #include "request/method.h"
-#include "request/proxy.h"
 #include "request/mime_parts.h"
-#include "request/mime_part.h"
+#include "request/proxy.h"
 #include "request/response.h"
 
 namespace rayalto {
 namespace utils {
-
-struct LocalSetting {
-    std::string interface;
-    long port = 0;
-    long port_range = 1;
-    std::string dns_interface;
-    std::string dns_local_ipv4;
-    std::string dns_local_ipv6;
-};
-
-struct TimeoutSetting {
-    long timeout = 0l;
-    long connect_timeout = 300000l;
-};
 
 /**
  * Make http request easily, super heavy shitty wrapper for the great curl
@@ -47,9 +28,9 @@ class Request {
 public:
     Request();
     Request(const Request&) = delete;
-    Request(Request&&) noexcept = delete;
+    Request(Request&&) noexcept = default;
     Request& operator=(const Request&) = delete;
-    Request& operator=(Request&&) noexcept = delete;
+    Request& operator=(Request&&) noexcept = default;
 
     virtual ~Request();
 
@@ -182,41 +163,9 @@ public:
     // get the last response
     request::Response response();
 
-    /* ===== other func ===== */
-    std::string url_encode(const std::string& url);
-    std::string url_encode(const char* url, std::size_t len = 0);
-    std::string url_decode(const std::string& url);
-    std::string url_decode(const char* url, std::size_t len = 0);
-
 protected:
-    CURL* handle_;
-
-    char error_info_buffer_[CURL_ERROR_SIZE];
-    std::FILE* temp_stderr_ = nullptr;
-
-    request::Method method_ = request::Method::DEFAULT;
-    request::IpResolve ip_resolve_ = request::IpResolve::WHATEVER;
-    std::unique_ptr<std::string> url_ = nullptr;
-    std::unique_ptr<request::Cookie> cookie_ = nullptr;
-    std::unique_ptr<request::Header> header_ = nullptr;
-    std::unique_ptr<std::string> useragent_ = nullptr;
-    std::unique_ptr<request::Authentication> authentication_ = nullptr;
-    std::unique_ptr<std::string> body_ = nullptr;
-    std::unique_ptr<request::MimeParts> mime_parts_ = nullptr;
-    std::unique_ptr<request::Proxy> proxy_ = nullptr;
-    std::unique_ptr<TimeoutSetting> timeout_setting_ = nullptr;
-    std::unique_ptr<LocalSetting> local_setting_ = nullptr;
-    std::unique_ptr<request::Response> response_ = nullptr;
-
-    // why the FUCK curl_mime_init() need a curl handle?
-    curl_mime* curl_mime_ = nullptr;
-    curl_slist* curl_header_ = nullptr;
-
-    const static std::string curl_version_;
-
-    void init_curl_handle_();
-    void set_options_();
-    bool perform_request_();
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 };
 
 /* ========== other func ========== */
