@@ -5,14 +5,14 @@
  * update time: 2022-02-20 02:22:33.779274 (UTC)
  */
 
-#include "util/mime_types.h"
+#include "rautils/misc/mime_types.h"
 
 #include <map>
 #include <string>
 
 namespace rayalto {
 namespace utils {
-namespace util {
+namespace misc {
 
 // clang-format off
 const std::map<std::string, std::string> MimeTypes::ext2mime_ {
@@ -1025,6 +1025,6 @@ const std::map<std::string, std::string> MimeTypes::ext2mime_ {
 };
 // clang-format on
 
-} // namespace util
+} // namespace misc
 } // namespace utils
 } // namespace rayalto

@@ -1,12 +1,12 @@
 #include <iostream>
 
-#include "crypto/codec.h"
-#include "crypto/diffie_hellman.h"
-#include "crypto/hash.h"
-#include "crypto/random.h"
-#include "crypto/encrypt.h"
+#include "rautils/crypto/codec.h"
+#include "rautils/crypto/diffie_hellman.h"
+#include "rautils/crypto/hash.h"
+#include "rautils/crypto/random.h"
+#include "rautils/crypto/encrypt.h"
 
-#include "string/strtool.h"
+#include "rautils/string/strtool.h"
 
 using namespace rayalto::utils;
 

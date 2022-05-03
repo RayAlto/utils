@@ -1,4 +1,4 @@
-#include "crypto/diffie_hellman.h"
+#include "rautils/crypto/diffie_hellman.h"
 
 #include <cstddef>
 #include <cstring>
@@ -12,7 +12,7 @@
 #include "openssl/evp.h"
 #include "openssl/ossl_typ.h"
 
-#include "exceptions/exceptions.h"
+#include "rautils/exceptions/exceptions.h"
 
 namespace rayalto {
 namespace utils {

@@ -24,14 +24,14 @@ output_template = '''\
  * update time: ${time} (UTC)
  */
 
-#include "util/mime_types.h"
+#include "rautils/mime_types.h"
 
 #include <map>
 #include <string>
 
 namespace rayalto {
 namespace utils {
-namespace util {
+namespace misc {
 
 // clang-format off
 const std::map<std::string, std::string> MimeTypes::ext2mime_ {
@@ -39,7 +39,7 @@ ${data}
 };
 // clang-format on
 
-} // namespace util
+} // namespace misc
 } // namespace utils
 } // namespace rayalto'''
 

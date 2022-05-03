@@ -1,11 +1,11 @@
-#include "util/mime_types.h"
+#include "rautils/misc/mime_types.h"
 
 #include <cstddef>
 #include <string>
 
 namespace rayalto {
 namespace utils {
-namespace util {
+namespace misc {
 
 namespace {
 
@@ -33,6 +33,6 @@ std::string MimeTypes::get(const std::string& filename,
 const std::string MimeTypes::default_text {"text/plain"};
 const std::string MimeTypes::default_binary {"application/octet-stream"};
 
-} // namespace util
+} // namespace misc
 } // namespace utils
 } // namespace rayalto

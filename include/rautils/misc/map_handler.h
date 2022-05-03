@@ -11,7 +11,7 @@
 
 namespace rayalto {
 namespace utils {
-namespace util {
+namespace misc {
 
 /**
  * Ignore case version of std::less
@@ -417,7 +417,7 @@ protected:
 using DictHandler = Map<std::string>;
 using DictIcHandler = MapIc<std::string>;
 
-} // namespace util
+} // namespace misc
 } // namespace utils
 } // namespace rayalto
 

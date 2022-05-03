@@ -1,4 +1,4 @@
-#include "request/request.h"
+#include "rautils/network/request.h"
 
 #include <cstddef>
 #include <cstdio>
@@ -10,24 +10,17 @@
 
 #include "curl/curl.h"
 
-#include "request/authentication.h"
-#include "request/cookie.h"
-#include "request/header.h"
-#include "request/ip_resolve.h"
-#include "request/mime_part.h"
-#include "request/mime_parts.h"
-#include "request/proxy.h"
-#include "request/response.h"
-#include "string/strtool.h"
+#include "rautils/string/strtool.h"
 
 namespace rayalto {
 namespace utils {
+namespace network {
 
 namespace {
 
 void parse_header(const char* data,
                   const std::size_t& size,
-                  request::Header& result) {
+                  Request::Header& result) {
     for (std::string& header : string::split(std::string(data, size), '\n')) {
         if (header.empty()) {
             // empty line
@@ -47,7 +40,7 @@ void parse_header(const char* data,
     }
 }
 
-void init_curl_header(const request::Header& headers,
+void init_curl_header(const Request::Header& headers,
                       curl_slist** curl_header) {
     if (*curl_header != nullptr) {
         curl_slist_free_all(*curl_header);
@@ -63,7 +56,7 @@ void init_curl_header(const request::Header& headers,
     }
 }
 
-void parse_cookie_slist(curl_slist* curl_cookies, request::Cookie& cookie) {
+void parse_cookie_slist(curl_slist* curl_cookies, Request::Cookie& cookie) {
     if (!curl_cookies) {
         return;
     }
@@ -86,7 +79,7 @@ std::size_t curl_custom_write_function(char* ptr,
 std::size_t curl_custom_header_function(char* buffer,
                                         std::size_t size,
                                         std::size_t nitems,
-                                        request::Header* userdata) {
+                                        Request::Header* userdata) {
     std::size_t actual_size = size * nitems;
     parse_header(buffer, actual_size, *userdata);
     return actual_size;
@@ -94,7 +87,7 @@ std::size_t curl_custom_header_function(char* buffer,
 
 void curl_add_mime_part(curl_mime* mime,
                         const std::string& part_name,
-                        const request::MimePart& mime_part) {
+                        const Request::MimePart& mime_part) {
     curl_mimepart* curl_mimepart_ = curl_mime_addpart(mime);
     if (!part_name.empty()) {
         curl_mime_name(curl_mimepart_, part_name.c_str());
@@ -153,28 +146,28 @@ public:
     Method method();
     Impl& method(Method method);
 
-    request::IpResolve ip_resolve();
-    Impl& ip_resolve(request::IpResolve ip_resolve);
+    IpResolve ip_resolve();
+    Impl& ip_resolve(IpResolve ip_resolve);
 
     std::string url();
     Impl& url(const std::string& url);
     Impl& url(std::string&& url);
 
-    request::Cookie cookie();
-    Impl& cookie(const request::Cookie& cookie);
-    Impl& cookie(request::Cookie&& cookie);
+    Cookie cookie();
+    Impl& cookie(const Cookie& cookie);
+    Impl& cookie(Cookie&& cookie);
 
-    request::Header header();
-    Impl& header(const request::Header& header);
-    Impl& header(request::Header&& header);
+    Header header();
+    Impl& header(const Header& header);
+    Impl& header(Header&& header);
 
     std::string useragent();
     Impl& useragent(const std::string& useragent);
     Impl& useragent(std::string&& useragent);
 
-    request::Authentication authentication();
-    Impl& authentication(const request::Authentication& authentication);
-    Impl& authentication(request::Authentication&& authentication);
+    Authentication authentication();
+    Impl& authentication(const Authentication& authentication);
+    Impl& authentication(Authentication&& authentication);
 
     std::string body();
     Impl& body(
@@ -183,13 +176,13 @@ public:
     Impl& body(std::string&& body,
                std::string&& mime_type = "application/x-www-form-urlencoded");
 
-    request::MimeParts mime_parts();
-    Impl& mime_parts(const request::MimeParts& mime_parts);
-    Impl& mime_parts(request::MimeParts&& mime_parts);
+    MimeParts mime_parts();
+    Impl& mime_parts(const MimeParts& mime_parts);
+    Impl& mime_parts(MimeParts&& mime_parts);
 
-    request::Proxy proxy();
-    Impl& proxy(const request::Proxy& proxy);
-    Impl& proxy(request::Proxy&& proxy);
+    Proxy proxy();
+    Impl& proxy(const Proxy& proxy);
+    Impl& proxy(Proxy&& proxy);
 
     long timeout();
     Impl& timeout(const long& timeout);
@@ -225,7 +218,7 @@ public:
 
     bool request();
 
-    request::Response response();
+    Response response();
 
     /* ===== other func ===== */
     std::string url_encode(const std::string& url);
@@ -240,18 +233,18 @@ protected:
     std::FILE* temp_stderr_ = nullptr;
 
     Method method_ = Method::DEFAULT;
-    request::IpResolve ip_resolve_ = request::IpResolve::WHATEVER;
+    IpResolve ip_resolve_ = IpResolve::WHATEVER;
     std::unique_ptr<std::string> url_ = nullptr;
-    std::unique_ptr<request::Cookie> cookie_ = nullptr;
-    std::unique_ptr<request::Header> header_ = nullptr;
+    std::unique_ptr<Cookie> cookie_ = nullptr;
+    std::unique_ptr<Header> header_ = nullptr;
     std::unique_ptr<std::string> useragent_ = nullptr;
-    std::unique_ptr<request::Authentication> authentication_ = nullptr;
+    std::unique_ptr<Authentication> authentication_ = nullptr;
     std::unique_ptr<std::string> body_ = nullptr;
-    std::unique_ptr<request::MimeParts> mime_parts_ = nullptr;
-    std::unique_ptr<request::Proxy> proxy_ = nullptr;
+    std::unique_ptr<MimeParts> mime_parts_ = nullptr;
+    std::unique_ptr<Proxy> proxy_ = nullptr;
     std::unique_ptr<TimeoutSetting> timeout_setting_ = nullptr;
     std::unique_ptr<LocalSetting> local_setting_ = nullptr;
-    std::unique_ptr<request::Response> response_ = nullptr;
+    std::unique_ptr<Response> response_ = nullptr;
 
     // why the FUCK curl_mime_init() need a curl handle?
     curl_mime* curl_mime_ = nullptr;
@@ -299,7 +292,7 @@ void Request::Impl::reset() {
         temp_stderr_ = std::tmpfile();
     }
     method_ = Method::DEFAULT;
-    ip_resolve_ = request::IpResolve::WHATEVER;
+    ip_resolve_ = IpResolve::WHATEVER;
     url_.reset();
     cookie_.reset();
     header_.reset();
@@ -329,11 +322,11 @@ Request::Impl& Request::Impl::method(Method method) {
     return *this;
 }
 
-request::IpResolve Request::Impl::ip_resolve() {
+Request::IpResolve Request::Impl::ip_resolve() {
     return ip_resolve_;
 }
 
-Request::Impl& Request::Impl::ip_resolve(request::IpResolve ip_resolve) {
+Request::Impl& Request::Impl::ip_resolve(IpResolve ip_resolve) {
     ip_resolve_ = ip_resolve;
     return *this;
 }
@@ -355,37 +348,37 @@ Request::Impl& Request::Impl::url(std::string&& url) {
     return *this;
 }
 
-request::Cookie Request::Impl::cookie() {
+Request::Cookie Request::Impl::cookie() {
     if (cookie_ == nullptr) {
-        cookie_ = std::make_unique<request::Cookie>();
+        cookie_ = std::make_unique<Cookie>();
     }
     return *cookie_;
 }
 
-Request::Impl& Request::Impl::cookie(const request::Cookie& cookie) {
-    cookie_ = std::make_unique<request::Cookie>(cookie);
+Request::Impl& Request::Impl::cookie(const Cookie& cookie) {
+    cookie_ = std::make_unique<Cookie>(cookie);
     return *this;
 }
 
-Request::Impl& Request::Impl::cookie(request::Cookie&& cookie) {
-    cookie_ = std::make_unique<request::Cookie>(std::move(cookie));
+Request::Impl& Request::Impl::cookie(Cookie&& cookie) {
+    cookie_ = std::make_unique<Cookie>(std::move(cookie));
     return *this;
 }
 
-request::Header Request::Impl::header() {
+Request::Header Request::Impl::header() {
     if (header_ == nullptr) {
-        header_ = std::make_unique<request::Header>();
+        header_ = std::make_unique<Header>();
     }
     return *header_;
 }
 
-Request::Impl& Request::Impl::header(const request::Header& header) {
-    header_ = std::make_unique<request::Header>(header);
+Request::Impl& Request::Impl::header(const Header& header) {
+    header_ = std::make_unique<Header>(header);
     return *this;
 }
 
-Request::Impl& Request::Impl::header(request::Header&& header) {
-    header_ = std::make_unique<request::Header>(std::move(header));
+Request::Impl& Request::Impl::header(Header&& header) {
+    header_ = std::make_unique<Header>(std::move(header));
     return *this;
 }
 
@@ -406,23 +399,22 @@ Request::Impl& Request::Impl::useragent(std::string&& useragent) {
     return *this;
 }
 
-request::Authentication Request::Impl::authentication() {
+Request::Authentication Request::Impl::authentication() {
     if (authentication_ == nullptr) {
-        authentication_ = std::make_unique<request::Authentication>();
+        authentication_ = std::make_unique<Authentication>();
     }
     return *authentication_;
 }
 
 Request::Impl& Request::Impl::authentication(
-    const request::Authentication& authentication) {
-    authentication_ = std::make_unique<request::Authentication>(authentication);
+    const Authentication& authentication) {
+    authentication_ = std::make_unique<Authentication>(authentication);
     return *this;
 }
 
-Request::Impl& Request::Impl::authentication(
-    request::Authentication&& authentication) {
+Request::Impl& Request::Impl::authentication(Authentication&& authentication) {
     authentication_ =
-        std::make_unique<request::Authentication>(std::move(authentication));
+        std::make_unique<Authentication>(std::move(authentication));
     return *this;
 }
 
@@ -437,7 +429,7 @@ Request::Impl& Request::Impl::body(const std::string& body,
                                    const std::string& mime_type) {
     body_ = std::make_unique<std::string>(body);
     if (header_ == nullptr) {
-        header_ = std::make_unique<request::Header>();
+        header_ = std::make_unique<Header>();
     }
     (*header_)["content-type"] = mime_type;
     return *this;
@@ -447,43 +439,43 @@ Request::Impl& Request::Impl::body(std::string&& body,
                                    std::string&& mime_type) {
     body_ = std::make_unique<std::string>(std::move(body));
     if (header_ == nullptr) {
-        header_ = std::make_unique<request::Header>();
+        header_ = std::make_unique<Header>();
     }
     (*header_)["content-type"] = std::move(mime_type);
     return *this;
 }
 
-request::MimeParts Request::Impl::mime_parts() {
+Request::MimeParts Request::Impl::mime_parts() {
     if (mime_parts_ == nullptr) {
-        mime_parts_ = std::make_unique<request::MimeParts>();
+        mime_parts_ = std::make_unique<MimeParts>();
     }
     return *mime_parts_;
 }
 
-Request::Impl& Request::Impl::mime_parts(const request::MimeParts& mime_parts) {
-    mime_parts_ = std::make_unique<request::MimeParts>(mime_parts);
+Request::Impl& Request::Impl::mime_parts(const MimeParts& mime_parts) {
+    mime_parts_ = std::make_unique<MimeParts>(mime_parts);
     return *this;
 }
 
-Request::Impl& Request::Impl::mime_parts(request::MimeParts&& mime_parts) {
-    mime_parts_ = std::make_unique<request::MimeParts>(std::move(mime_parts));
+Request::Impl& Request::Impl::mime_parts(MimeParts&& mime_parts) {
+    mime_parts_ = std::make_unique<MimeParts>(std::move(mime_parts));
     return *this;
 }
 
-request::Proxy Request::Impl::proxy() {
+Request::Proxy Request::Impl::proxy() {
     if (proxy_ == nullptr) {
-        proxy_ = std::make_unique<request::Proxy>();
+        proxy_ = std::make_unique<Proxy>();
     }
     return *proxy_;
 }
 
-Request::Impl& Request::Impl::proxy(const request::Proxy& proxy) {
-    proxy_ = std::make_unique<request::Proxy>(proxy);
+Request::Impl& Request::Impl::proxy(const Proxy& proxy) {
+    proxy_ = std::make_unique<Proxy>(proxy);
     return *this;
 }
 
-Request::Impl& Request::Impl::proxy(request::Proxy&& proxy) {
-    proxy_ = std::make_unique<request::Proxy>(std::move(proxy));
+Request::Impl& Request::Impl::proxy(Proxy&& proxy) {
+    proxy_ = std::make_unique<Proxy>(std::move(proxy));
     return *this;
 }
 
@@ -680,9 +672,9 @@ bool Request::Impl::request() {
     return perform_request_();
 }
 
-request::Response Request::Impl::response() {
+Request::Response Request::Impl::response() {
     if (response_ == nullptr) {
-        response_ = std::make_unique<request::Response>();
+        response_ = std::make_unique<Response>();
     }
     return *response_;
 }
@@ -737,7 +729,7 @@ void Request::Impl::init_curl_handle_() {
         handle_, CURLOPT_WRITEFUNCTION, curl_custom_write_function);
     // allocate response
     if (response_ == nullptr) {
-        response_ = std::make_unique<request::Response>();
+        response_ = std::make_unique<Response>();
     }
     curl_easy_setopt(handle_, CURLOPT_WRITEDATA, &response_->body);
     // receive response header
@@ -760,10 +752,9 @@ void Request::Impl::set_options_() {
     curl_easy_setopt(
         handle_,
         CURLOPT_IPRESOLVE,
-        (ip_resolve_ == request::IpResolve::IPv4_ONLY ? CURL_IPRESOLVE_V4
-         : ip_resolve_ == request::IpResolve::IPv6_ONLY
-             ? CURL_IPRESOLVE_V6
-             : CURL_IPRESOLVE_WHATEVER));
+        (ip_resolve_ == IpResolve::IPv4_ONLY   ? CURL_IPRESOLVE_V4
+         : ip_resolve_ == IpResolve::IPv6_ONLY ? CURL_IPRESOLVE_V6
+                                               : CURL_IPRESOLVE_WHATEVER));
     // [option] url
     if (url_ != nullptr) {
         curl_easy_setopt(handle_, CURLOPT_URL, url_->c_str());
@@ -799,8 +790,7 @@ void Request::Impl::set_options_() {
         // init fresh curl_mime
         curl_mime_ = curl_mime_init(handle_);
         // add parts
-        for (const std::pair<std::string, request::MimePart>& mime_part :
-             *mime_parts_) {
+        for (const std::pair<std::string, MimePart>& mime_part : *mime_parts_) {
             curl_add_mime_part(curl_mime_, mime_part.first, mime_part.second);
         }
         curl_easy_setopt(handle_, CURLOPT_MIMEPOST, curl_mime_);
@@ -870,7 +860,7 @@ bool Request::Impl::perform_request_() {
     CURLcode curl_result = curl_easy_perform(handle_);
     // init response
     if (response_ == nullptr) {
-        response_ = std::make_unique<request::Response>();
+        response_ = std::make_unique<Response>();
     }
     // receive message
     response_->message = (std::strlen(error_info_buffer_) == 0)
@@ -953,11 +943,11 @@ Request& Request::method(Method method) {
     return *this;
 }
 
-request::IpResolve Request::ip_resolve() {
+Request::IpResolve Request::ip_resolve() {
     return impl_->ip_resolve();
 }
 
-Request& Request::ip_resolve(request::IpResolve ip_resolve) {
+Request& Request::ip_resolve(IpResolve ip_resolve) {
     impl_->ip_resolve(ip_resolve);
     return *this;
 }
@@ -976,30 +966,30 @@ Request& Request::url(std::string&& url) {
     return *this;
 }
 
-request::Cookie Request::cookie() {
+Request::Cookie Request::cookie() {
     return impl_->cookie();
 }
 
-Request& Request::cookie(const request::Cookie& cookie) {
+Request& Request::cookie(const Cookie& cookie) {
     impl_->cookie(cookie);
     return *this;
 }
 
-Request& Request::cookie(request::Cookie&& cookie) {
+Request& Request::cookie(Cookie&& cookie) {
     impl_->cookie(std::move(cookie));
     return *this;
 }
 
-request::Header Request::header() {
+Request::Header Request::header() {
     return impl_->header();
 }
 
-Request& Request::header(const request::Header& header) {
+Request& Request::header(const Header& header) {
     impl_->header(header);
     return *this;
 }
 
-Request& Request::header(request::Header&& header) {
+Request& Request::header(Header&& header) {
     impl_->header(std::move(header));
     return *this;
 }
@@ -1018,17 +1008,16 @@ Request& Request::useragent(std::string&& useragent) {
     return *this;
 }
 
-request::Authentication Request::authentication() {
+Request::Authentication Request::authentication() {
     return impl_->authentication();
 }
 
-Request& Request::authentication(
-    const request::Authentication& authentication) {
+Request& Request::authentication(const Authentication& authentication) {
     impl_->authentication(authentication);
     return *this;
 }
 
-Request& Request::authentication(request::Authentication&& authentication) {
+Request& Request::authentication(Authentication&& authentication) {
     impl_->authentication(std::move(authentication));
     return *this;
 }
@@ -1047,30 +1036,30 @@ Request& Request::body(std::string&& body, std::string&& mime_type) {
     return *this;
 }
 
-request::MimeParts Request::mime_parts() {
+Request::MimeParts Request::mime_parts() {
     return impl_->mime_parts();
 }
 
-Request& Request::mime_parts(const request::MimeParts& mime_parts) {
+Request& Request::mime_parts(const MimeParts& mime_parts) {
     impl_->mime_parts(mime_parts);
     return *this;
 }
 
-Request& Request::mime_parts(request::MimeParts&& mime_parts) {
+Request& Request::mime_parts(MimeParts&& mime_parts) {
     impl_->mime_parts(std::move(mime_parts));
     return *this;
 }
 
-request::Proxy Request::proxy() {
+Request::Proxy Request::proxy() {
     return impl_->proxy();
 }
 
-Request& Request::proxy(const request::Proxy& proxy) {
+Request& Request::proxy(const Proxy& proxy) {
     impl_->proxy(proxy);
     return *this;
 }
 
-Request& Request::proxy(request::Proxy&& proxy) {
+Request& Request::proxy(Proxy&& proxy) {
     impl_->proxy(std::move(proxy));
     return *this;
 }
@@ -1191,17 +1180,14 @@ bool Request::request() {
     return impl_->request();
 }
 
-request::Response Request::response() {
+Request::Response Request::response() {
     return impl_->response();
 }
 
-namespace request {
-
-std::time_t parse_time_str(const char* time_str) {
+std::time_t Request::parse_time_str(const char* time_str) {
     return curl_getdate(time_str, nullptr);
 }
 
-} // namespace request
-
+} // namespace network
 } // namespace utils
 } // namespace rayalto

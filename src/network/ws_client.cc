@@ -1,6 +1,6 @@
 #define ASIO_STANDALONE
 
-#include "websocket/ws_client.h"
+#include "rautils/network/ws_client.h"
 
 #include <cstdint>
 #include <functional>
@@ -16,15 +16,13 @@
 #include "websocketpp/config/asio_no_tls_client.hpp"
 #include "websocketpp/close.hpp"
 
-#include "websocket/close_status.h"
-#include "websocket/message_type.h"
-
 namespace rayalto {
 namespace utils {
+namespace network {
 
 class WsClient::Impl {
 public:
-    static websocket::CloseStatus default_close_status;
+    static CloseStatus default_close_status;
 
 public:
     Impl(WsClient& client);
@@ -40,30 +38,26 @@ public:
     void on_establish(std::function<void(WsClient&)>&& callback);
 
     void on_fail(
-        const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-            callback);
-    void on_fail(std::function<void(WsClient&, const websocket::CloseStatus&)>&&
-                     callback);
+        const std::function<void(WsClient&, const CloseStatus&)>& callback);
+    void on_fail(std::function<void(WsClient&, const CloseStatus&)>&& callback);
 
-    void on_receive(const std::function<void(WsClient&,
-                                             const websocket::MessageType&,
-                                             const std::string&)>& callback);
-    void on_receive(std::function<void(WsClient&,
-                                       const websocket::MessageType&,
-                                       const std::string&)>&& callback);
+    void on_receive(
+        const std::function<
+            void(WsClient&, const MessageType&, const std::string&)>& callback);
+    void on_receive(
+        std::function<void(WsClient&, const MessageType&, const std::string&)>&&
+            callback);
 
     void on_close(
-        const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-            callback);
+        const std::function<void(WsClient&, const CloseStatus&)>& callback);
     void on_close(
-        std::function<void(WsClient&, const websocket::CloseStatus&)>&&
-            callback);
+        std::function<void(WsClient&, const CloseStatus&)>&& callback);
 
     void connect(std::error_code& error);
 
     void disconnect();
-    void disconnect(const websocket::CloseStatus& status);
-    void disconnect(websocket::CloseStatus&& status);
+    void disconnect(const CloseStatus& status);
+    void disconnect(CloseStatus&& status);
 
     void url(const std::string& url);
     void url(std::string&& url);
@@ -74,10 +68,10 @@ public:
     std::string& useragent();
     const std::string& useragent() const;
 
-    void send(const websocket::MessageType& type,
+    void send(const MessageType& type,
               const std::string& message,
               std::error_code& error);
-    void send(const websocket::MessageType& type,
+    void send(const MessageType& type,
               std::string&& message,
               std::error_code& error);
 
@@ -98,14 +92,11 @@ protected:
     websocketpp::connection_hdl connection_handle_;
 
     std::function<void(WsClient&)> establish_callback_;
-    std::function<void(WsClient&, const websocket::CloseStatus&)>
-        fail_callback_;
-    std::function<void(WsClient&,
-                       const websocket::MessageType& message_type,
-                       const std ::string&)>
+    std::function<void(WsClient&, const CloseStatus&)> fail_callback_;
+    std::function<void(
+        WsClient&, const MessageType& message_type, const std ::string&)>
         receive_callback_;
-    std::function<void(WsClient&, const websocket::CloseStatus&)>
-        close_callback_;
+    std::function<void(WsClient&, const CloseStatus&)> close_callback_;
 
     std::atomic<bool> connected_ {false};
 
@@ -113,15 +104,15 @@ protected:
     std::string useragent_;
 
     void release_();
-    void release_(const websocket::CloseStatus& status);
+    void release_(const CloseStatus& status);
     void release_work_thread_();
     void connect_(std::error_code& error);
     void connect_no_ssl_(std::error_code& error);
     void connect_ssl_(std::error_code& error);
 };
 
-websocket::CloseStatus WsClient::Impl::default_close_status(
-    websocket::CloseStatus::Code::NORMAL);
+WsClient::CloseStatus WsClient::Impl::default_close_status(
+    CloseStatus::Code::NORMAL);
 
 WsClient::Impl::Impl(WsClient& client) : client_(client) {}
 
@@ -163,38 +154,34 @@ void WsClient::Impl::on_establish(std::function<void(WsClient&)>&& callback) {
 }
 
 void WsClient::Impl::on_fail(
-    const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-        callback) {
+    const std::function<void(WsClient&, const CloseStatus&)>& callback) {
     fail_callback_ = callback;
 }
 
 void WsClient::Impl::on_fail(
-    std::function<void(WsClient&, const websocket::CloseStatus&)>&& callback) {
+    std::function<void(WsClient&, const CloseStatus&)>&& callback) {
     fail_callback_ = std::move(callback);
 }
 
 void WsClient::Impl::on_receive(
-    const std::function<void(WsClient&,
-                             const websocket::MessageType&,
-                             const std::string&)>& callback) {
+    const std::function<
+        void(WsClient&, const MessageType&, const std::string&)>& callback) {
     receive_callback_ = callback;
 }
 
 void WsClient::Impl::on_receive(
-    std::function<void(WsClient&,
-                       const websocket::MessageType&,
-                       const std::string&)>&& callback) {
+    std::function<void(WsClient&, const MessageType&, const std::string&)>&&
+        callback) {
     receive_callback_ = std::move(callback);
 }
 
 void WsClient::Impl::on_close(
-    const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-        callback) {
+    const std::function<void(WsClient&, const CloseStatus&)>& callback) {
     close_callback_ = callback;
 }
 
 void WsClient::Impl::on_close(
-    std::function<void(WsClient&, const websocket::CloseStatus&)>&& callback) {
+    std::function<void(WsClient&, const CloseStatus&)>&& callback) {
     close_callback_ = std::move(callback);
 }
 
@@ -207,11 +194,11 @@ void WsClient::Impl::disconnect() {
     release_();
 }
 
-void WsClient::Impl::disconnect(const websocket::CloseStatus& status) {
+void WsClient::Impl::disconnect(const CloseStatus& status) {
     release_(status);
 }
 
-void WsClient::Impl::disconnect(websocket::CloseStatus&& status) {
+void WsClient::Impl::disconnect(CloseStatus&& status) {
     release_(std::move(status));
 }
 
@@ -243,7 +230,7 @@ const std::string& WsClient::Impl::useragent() const {
     return useragent_;
 }
 
-void WsClient::Impl::send(const websocket::MessageType& type,
+void WsClient::Impl::send(const MessageType& type,
                           const std::string& message,
                           std::error_code& error) {
     if (!connected_) {
@@ -251,13 +238,13 @@ void WsClient::Impl::send(const websocket::MessageType& type,
     }
     if (with_ssl_) {
         switch (type) {
-        case websocket::MessageType::TEXT:
+        case MessageType::TEXT:
             client_ssl_->send(connection_handle_,
                               std::move(message),
                               websocketpp::frame::opcode::text,
                               error);
             break;
-        case websocket::MessageType::BINARY:
+        case MessageType::BINARY:
             client_ssl_->send(connection_handle_,
                               std::move(message),
                               websocketpp::frame::opcode::binary,
@@ -268,13 +255,13 @@ void WsClient::Impl::send(const websocket::MessageType& type,
     }
     else if (!with_ssl_) {
         switch (type) {
-        case websocket::MessageType::TEXT:
+        case MessageType::TEXT:
             client_no_ssl_->send(connection_handle_,
                                  std::move(message),
                                  websocketpp::frame::opcode::text,
                                  error);
             break;
-        case websocket::MessageType::BINARY:
+        case MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
                                  std::move(message),
                                  websocketpp::frame::opcode::binary,
@@ -285,7 +272,7 @@ void WsClient::Impl::send(const websocket::MessageType& type,
     }
 }
 
-void WsClient::Impl::send(const websocket::MessageType& type,
+void WsClient::Impl::send(const MessageType& type,
                           std::string&& message,
                           std::error_code& error) {
     if (!connected_) {
@@ -293,13 +280,13 @@ void WsClient::Impl::send(const websocket::MessageType& type,
     }
     if (with_ssl_) {
         switch (type) {
-        case websocket::MessageType::TEXT:
+        case MessageType::TEXT:
             client_ssl_->send(connection_handle_,
                               message,
                               websocketpp::frame::opcode::text,
                               error);
             break;
-        case websocket::MessageType::BINARY:
+        case MessageType::BINARY:
             client_ssl_->send(connection_handle_,
                               message,
                               websocketpp::frame::opcode::binary,
@@ -310,13 +297,13 @@ void WsClient::Impl::send(const websocket::MessageType& type,
     }
     else if (!with_ssl_) {
         switch (type) {
-        case websocket::MessageType::TEXT:
+        case MessageType::TEXT:
             client_no_ssl_->send(connection_handle_,
                                  message,
                                  websocketpp::frame::opcode::text,
                                  error);
             break;
-        case websocket::MessageType::BINARY:
+        case MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
                                  message,
                                  websocketpp::frame::opcode::binary,
@@ -335,7 +322,7 @@ void WsClient::Impl::release_() {
     release_(default_close_status);
 }
 
-void WsClient::Impl::release_(const websocket::CloseStatus& status) {
+void WsClient::Impl::release_(const CloseStatus& status) {
     // release websocket client
     if (with_ssl_ && client_ssl_ != nullptr) {
         if (connected_) {
@@ -403,12 +390,11 @@ void WsClient::Impl::connect_no_ssl_(std::error_code& error) {
             connection = client_no_ssl_->get_con_from_hdl(handle);
         if (fail_callback_) {
             std::uint16_t local_close_code = connection->get_local_close_code();
-            fail_callback_(
-                client_,
-                websocket::CloseStatus(
-                    local_close_code,
-                    websocketpp::close::status::get_string(local_close_code),
-                    connection->get_local_close_reason()));
+            fail_callback_(client_,
+                           CloseStatus(local_close_code,
+                                       websocketpp::close::status::get_string(
+                                           local_close_code),
+                                       connection->get_local_close_reason()));
         }
     });
 
@@ -420,12 +406,11 @@ void WsClient::Impl::connect_no_ssl_(std::error_code& error) {
         if (close_callback_) {
             std::uint16_t remote_close_code =
                 connection->get_remote_close_code();
-            close_callback_(
-                client_,
-                websocket::CloseStatus(
-                    remote_close_code,
-                    websocketpp::close::status::get_string(remote_close_code),
-                    connection->get_remote_close_reason()));
+            close_callback_(client_,
+                            CloseStatus(remote_close_code,
+                                        websocketpp::close::status::get_string(
+                                            remote_close_code),
+                                        connection->get_remote_close_reason()));
         }
     });
 
@@ -438,14 +423,12 @@ void WsClient::Impl::connect_no_ssl_(std::error_code& error) {
             }
             switch (message->get_opcode()) {
             case websocketpp::frame::opcode::text:
-                receive_callback_(client_,
-                                  websocket::MessageType::TEXT,
-                                  message->get_payload());
+                receive_callback_(
+                    client_, MessageType::TEXT, message->get_payload());
                 break;
             case websocketpp::frame::opcode::binary:
-                receive_callback_(client_,
-                                  websocket::MessageType::BINARY,
-                                  message->get_payload());
+                receive_callback_(
+                    client_, MessageType::BINARY, message->get_payload());
                 break;
             default: break;
             }
@@ -504,12 +487,11 @@ void WsClient::Impl::connect_ssl_(std::error_code& error) {
             client_ssl_->get_con_from_hdl(handle);
         if (fail_callback_) {
             std::uint16_t local_close_code = connection->get_local_close_code();
-            fail_callback_(
-                client_,
-                websocket::CloseStatus(
-                    local_close_code,
-                    websocketpp::close::status::get_string(local_close_code),
-                    connection->get_local_close_reason()));
+            fail_callback_(client_,
+                           CloseStatus(local_close_code,
+                                       websocketpp::close::status::get_string(
+                                           local_close_code),
+                                       connection->get_local_close_reason()));
         }
     });
 
@@ -522,12 +504,11 @@ void WsClient::Impl::connect_ssl_(std::error_code& error) {
         if (close_callback_) {
             std::uint16_t remote_close_code =
                 connection->get_remote_close_code();
-            close_callback_(
-                client_,
-                websocket::CloseStatus(
-                    remote_close_code,
-                    websocketpp::close::status::get_string(remote_close_code),
-                    connection->get_remote_close_reason()));
+            close_callback_(client_,
+                            CloseStatus(remote_close_code,
+                                        websocketpp::close::status::get_string(
+                                            remote_close_code),
+                                        connection->get_remote_close_reason()));
         }
     });
 
@@ -540,14 +521,12 @@ void WsClient::Impl::connect_ssl_(std::error_code& error) {
             }
             switch (message->get_opcode()) {
             case websocketpp::frame::opcode::text:
-                receive_callback_(client_,
-                                  websocket::MessageType::TEXT,
-                                  message->get_payload());
+                receive_callback_(
+                    client_, MessageType::TEXT, message->get_payload());
                 break;
             case websocketpp::frame::opcode::binary:
-                receive_callback_(client_,
-                                  websocket::MessageType::BINARY,
-                                  message->get_payload());
+                receive_callback_(
+                    client_, MessageType::BINARY, message->get_payload());
                 break;
             default: break;
             }
@@ -570,7 +549,7 @@ WsClient::WsClient() : impl_(std::make_unique<Impl>(*this)) {}
 
 WsClient::~WsClient() = default;
 
-websocket::CloseStatus& WsClient::default_close_status() {
+WsClient::CloseStatus& WsClient::default_close_status() {
     return Impl::default_close_status;
 }
 
@@ -586,43 +565,39 @@ WsClient& WsClient::on_establish(std::function<void(WsClient&)>&& callback) {
 }
 
 WsClient& WsClient::on_fail(
-    const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-        callback) {
+    const std::function<void(WsClient&, const CloseStatus&)>& callback) {
     impl_->on_fail(callback);
     return *this;
 }
 
 WsClient& WsClient::on_fail(
-    std::function<void(WsClient&, const websocket::CloseStatus&)>&& callback) {
+    std::function<void(WsClient&, const CloseStatus&)>&& callback) {
     impl_->on_fail(std::move(callback));
     return *this;
 }
 
 WsClient& WsClient::on_receive(
-    const std::function<void(WsClient&,
-                             const websocket::MessageType&,
-                             const std::string&)>& callback) {
+    const std::function<
+        void(WsClient&, const MessageType&, const std::string&)>& callback) {
     impl_->on_receive(callback);
     return *this;
 }
 
 WsClient& WsClient::on_receive(
-    std::function<void(WsClient&,
-                       const websocket::MessageType&,
-                       const std::string&)>&& callback) {
+    std::function<void(WsClient&, const MessageType&, const std::string&)>&&
+        callback) {
     impl_->on_receive(std::move(callback));
     return *this;
 }
 
 WsClient& WsClient::on_close(
-    const std::function<void(WsClient&, const websocket::CloseStatus&)>&
-        callback) {
+    const std::function<void(WsClient&, const CloseStatus&)>& callback) {
     impl_->on_close(callback);
     return *this;
 }
 
 WsClient& WsClient::on_close(
-    std::function<void(WsClient&, const websocket::CloseStatus&)>&& callback) {
+    std::function<void(WsClient&, const CloseStatus&)>&& callback) {
     impl_->on_close(std::move(callback));
     return *this;
 }
@@ -637,12 +612,12 @@ WsClient& WsClient::disconnect() {
     return *this;
 }
 
-WsClient& WsClient::disconnect(const websocket::CloseStatus& status) {
+WsClient& WsClient::disconnect(const CloseStatus& status) {
     impl_->disconnect(status);
     return *this;
 }
 
-WsClient& WsClient::disconnect(websocket::CloseStatus&& status) {
+WsClient& WsClient::disconnect(CloseStatus&& status) {
     impl_->disconnect(std::move(status));
     return *this;
 }
@@ -679,14 +654,14 @@ const std::string& WsClient::useragent() const {
     return impl_->useragent();
 }
 
-WsClient& WsClient::send(const websocket::MessageType& type,
+WsClient& WsClient::send(const MessageType& type,
                          const std::string& message,
                          std::error_code& error) {
     impl_->send(type, message, error);
     return *this;
 }
 
-WsClient& WsClient::send(const websocket::MessageType& type,
+WsClient& WsClient::send(const MessageType& type,
                          std::string&& message,
                          std::error_code& error) {
     impl_->send(type, std::move(message), error);
@@ -697,5 +672,6 @@ bool WsClient::connected() const {
     return impl_->connected();
 }
 
+} // namespace network
 } // namespace utils
 } // namespace rayalto

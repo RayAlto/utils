@@ -3,12 +3,9 @@
 #include <system_error>
 #include <thread>
 
-#include "websocket/close_status.h"
-#include "websocket/ws_client.h"
+#include "rautils/network/ws_client.h"
 
-using namespace rayalto::utils;
-using websocket::CloseStatus;
-using websocket::MessageType;
+using rayalto::utils::network::WsClient;
 
 int main(int argc, char const* argv[]) {
     // error
@@ -19,7 +16,7 @@ int main(int argc, char const* argv[]) {
     WsClient client;
 
     client.on_receive([&](WsClient& client,
-                          const MessageType& type,
+                          const WsClient::MessageType& type,
                           const std::string& message) -> void {
         std::cout << "receive: " << message << std::endl;
     });
@@ -30,19 +27,19 @@ int main(int argc, char const* argv[]) {
     });
 
     // connection failed
-    client.on_fail(
-        [&](WsClient& client, const CloseStatus& local_status) -> void {
-            std::cout << "failed to connect (" << local_status.code
-                      << "): " << local_status.status << std::endl;
-        });
+    client.on_fail([&](WsClient& client,
+                       const WsClient::CloseStatus& local_status) -> void {
+        std::cout << "failed to connect (" << local_status.code
+                  << "): " << local_status.status << std::endl;
+    });
 
     // connection closed
-    client.on_close(
-        [&](WsClient& client, const CloseStatus& remote_status) -> void {
-            std::cout << "closed (" << remote_status.code
-                      << "): " << remote_status.status << ", "
-                      << remote_status.reason << std::endl;
-        });
+    client.on_close([&](WsClient& client,
+                        const WsClient::CloseStatus& remote_status) -> void {
+        std::cout << "closed (" << remote_status.code
+                  << "): " << remote_status.status << ", "
+                  << remote_status.reason << std::endl;
+    });
 
     // local echo server
     client.url("ws://127.0.0.1:8080");
@@ -57,7 +54,7 @@ int main(int argc, char const* argv[]) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // say hello
-        client.send(MessageType::TEXT, "hello", ws_error);
+        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         if (ws_error) {
@@ -66,7 +63,8 @@ int main(int argc, char const* argv[]) {
         }
 
         // fuck off
-        client.disconnect(CloseStatus(CloseStatus::Code::NORMAL, "fuck off"));
+        client.disconnect(WsClient::CloseStatus(
+            WsClient::CloseStatus::Code::NORMAL, "fuck off"));
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
@@ -83,7 +81,7 @@ int main(int argc, char const* argv[]) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // say hello
-        client.send(MessageType::TEXT, "hello", ws_error);
+        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
 
         if (ws_error) {
             std::cout << "error send message: " << ws_error.message()

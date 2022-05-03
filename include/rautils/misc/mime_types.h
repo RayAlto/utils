@@ -1,13 +1,12 @@
 #ifndef RA_UTILS_UTIL_MIME_TYPES_H_
 #define RA_UTILS_UTIL_MIME_TYPES_H_
 
-#include <iostream>
 #include <map>
 #include <string>
 
 namespace rayalto {
 namespace utils {
-namespace util {
+namespace misc {
 
 class MimeTypes {
 public:
@@ -35,7 +34,7 @@ protected:
     static const std::map<std::string, std::string> ext2mime_;
 };
 
-} // namespace util
+} // namespace misc
 } // namespace utils
 } // namespace rayalto
 
