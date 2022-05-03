@@ -15,8 +15,6 @@ Some tools for string, for example:
 
 using namespace rayalto::utils;
 
-// ...
-
 std::string foo {"127.0.0.114514"};
 for (auto i : string::split(foo, '.', [](std::string& line) -> bool {
             if (line == "114514") {
@@ -41,13 +39,13 @@ output:
 Get MIME Type from file.
 
 ```c++
-std::cout << std::boolalpha << util::MimeTypes::know("foo.png") << std::endl;
-std::cout << util::MimeTypes::get("foo.png") << std::endl;
-std::cout << std::boolalpha << util::MimeTypes::know("foo.wtf") << std::endl;
-std::cout << util::MimeTypes::get("foo.wtf") << std::endl;
-std::cout << util::MimeTypes::get("foo.wtf", "application/what-the-fuck") << std::endl;
-std::cout << util::MimeTypes::default_text << std::endl;
-std::cout << util::MimeTypes::default_binary << std::endl;
+std::cout << std::boolalpha << MimeTypes::know("foo.png") << std::endl;
+std::cout << MimeTypes::get("foo.png") << std::endl;
+std::cout << std::boolalpha << MimeTypes::know("foo.wtf") << std::endl;
+std::cout << MimeTypes::get("foo.wtf") << std::endl;
+std::cout << MimeTypes::get("foo.wtf", "application/what-the-fuck") << std::endl;
+std::cout << MimeTypes::default_text << std::endl;
+std::cout << MimeTypes::default_binary << std::endl;
 ```
 
 output:
@@ -73,20 +71,19 @@ A stupid curl wrapper
 
 ```c++
 #include <iostream>
+#include <string>
 
-#include "request/mime_parts.h"
-#include "request/request.h"
-#include "util/mime_types.h"
+#include "rautils/network/request.h"
+#include "rautils/misc/mime_types.h"
 
-using rayalto::utils::util::MimeTypes;
-using rayalto::utils::Request;
-using namespace rayalto::utils::request;
+using rayalto::utils::misc::MimeTypes;
+using rayalto::utils::network::Request;
 
 int main(int argc, char const *argv[]) {
     Request request;
     // clang-format off
     request.url("https://httpbin.org/anything")
-           .method(Method::POST)
+           .method(Request::Method::POST)
            .useragent("RayAlto/114514")
            .header({
                 {"foo",    "bar"    },
@@ -98,14 +95,14 @@ int main(int argc, char const *argv[]) {
            })
            .mime_parts({
                 {/* part name */ "file",
-                 /* part data */ MimePart()
+                /* part data */ Request::MimePart()
                      .is_file(true)
                      .data(/* local file name */"example.png")
                      .file_name(/* remote file name */"senpai.png")
                      .type(MimeTypes::get("png"))
                 },
                 {/* part name */ "data",
-                 /* part data */ MimePart()
+                /* part data */ Request::MimePart()
                      .data(R"+*({"kimochi": "1919810", "come": "114514"})+*")
                      .type(MimeTypes::get("json"))
                 }
@@ -114,7 +111,7 @@ int main(int argc, char const *argv[]) {
     // clang-format on
     /* request.body(R"+*+*({"age": 114514, "role": "student"})+*+*", */
     /*              MimeTypes::get("json")); */
-    Response response = request.response();
+    Request::Response response = request.response();
     std::cout << response.body << std::endl;
     return 0;
 }
@@ -159,28 +156,24 @@ Because the client is multi-threaded, it takes a certain amount of time for the 
 
 ```c++
 #include <chrono>
-#include <cstdint>
 #include <iostream>
 #include <system_error>
 #include <thread>
 
-#include "websocket/ws_client.h"
+#include "rautils/network/ws_client.h"
 
-using namespace rayalto::utils;
-using websocket::CloseStatus;
-using websocket::MessageType;
-using websocket::close_status::Code;
+using rayalto::utils::network::WsClient;
 
 int main(int argc, char const* argv[]) {
     // error
     std::error_code ws_error;
 
     // default close reason
-    WsClient::default_close_status.reason = "shut up";
+    WsClient::default_close_status().reason = "shut up";
     WsClient client;
 
     client.on_receive([&](WsClient& client,
-                          const MessageType& type,
+                          const WsClient::MessageType& type,
                           const std::string& message) -> void {
         std::cout << "receive: " << message << std::endl;
     });
@@ -191,19 +184,19 @@ int main(int argc, char const* argv[]) {
     });
 
     // connection failed
-    client.on_fail(
-        [&](WsClient& client, const CloseStatus& local_status) -> void {
-            std::cout << "failed to connect (" << local_status.code
-                      << "): " << local_status.status << std::endl;
-        });
+    client.on_fail([&](WsClient& client,
+                       const WsClient::CloseStatus& local_status) -> void {
+        std::cout << "failed to connect (" << local_status.code
+                  << "): " << local_status.status << std::endl;
+    });
 
     // connection closed
-    client.on_close(
-        [&](WsClient& client, const CloseStatus& remote_status) -> void {
-            std::cout << "closed (" << remote_status.code
-                      << "): " << remote_status.status << ", "
-                      << remote_status.reason << std::endl;
-        });
+    client.on_close([&](WsClient& client,
+                        const WsClient::CloseStatus& remote_status) -> void {
+        std::cout << "closed (" << remote_status.code
+                  << "): " << remote_status.status << ", "
+                  << remote_status.reason << std::endl;
+    });
 
     // local echo server
     client.url("ws://127.0.0.1:8080");
@@ -218,7 +211,7 @@ int main(int argc, char const* argv[]) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // say hello
-        client.send(MessageType::TEXT, "hello", ws_error);
+        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         if (ws_error) {
@@ -227,7 +220,8 @@ int main(int argc, char const* argv[]) {
         }
 
         // fuck off
-        client.disconnect(CloseStatus(Code::NORMAL, "fuck off"));
+        client.disconnect(WsClient::CloseStatus(
+            WsClient::CloseStatus::Code::NORMAL, "fuck off"));
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
@@ -244,7 +238,7 @@ int main(int argc, char const* argv[]) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
         // say hello
-        client.send(MessageType::TEXT, "hello", ws_error);
+        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
 
         if (ws_error) {
             std::cout << "error send message: " << ws_error.message()
@@ -277,88 +271,77 @@ Encode & decode, hash, random byte, ... stuff
 ```c++
 #include <iostream>
 
-#include "crypto/codec.h"
-#include "crypto/diffie_hellman.h"
-#include "crypto/hash.h"
-#include "crypto/random.h"
-#include "crypto/encrypt.h"
+#include "rautils/crypto/codec.h"
+#include "rautils/crypto/diffie_hellman.h"
+#include "rautils/crypto/hash.h"
+#include "rautils/crypto/random.h"
+#include "rautils/crypto/encrypt.h"
+#include "rautils/string/strtool.h"
 
-#include "string/strtool.h"
-
-using namespace rayalto::utils;
+using namespace rayalto::utils::crypto;
+using rayalto::utils::string::hex_string;
+using rayalto::utils::string::data_string;
+using rayalto::utils::string::to_data;
 
 int main(int argc, char const *argv[]) {
-    // echo 'I am nearly dead\n' | openssl dgst -sha256
-    std::cout << string::hex_string(
-        crypto::hash::sha256("I am nearly dead\n"))
+    // echo '灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n' | openssl dgst -sha256
+    std::cout << hex_string(
+        hash::sha256("灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n"))
               << std::endl;
 
-    // echo 'I am nearly dead\n' | openssl enc -d -base64
-    std::cout << string::data_string(
-        crypto::codec::base64_encode("I am nearly dead\n"))
+    // echo '灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n' | openssl enc -d -base64
+    std::cout << data_string(
+        codec::base64_encode("灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n"))
               << std::endl;
 
-    // openssl rand -hex 4
-    std::cout << string::hex_string(crypto::random::bytes(4)) << std::endl;
+    std::cout << hex_string(random::bytes(4)) << std::endl;
 
-    // openssl enc -e -aes256cbc
     std::vector<unsigned char> encrypted =
-        crypto::encrypt::aes256cbc("I am nearly dead",
-                                   54,
-                                   "01234567890123456789012345678901",
-                                   "0123456789012345");
-    std::cout << string::hex_string(encrypted) << std::endl;
+        encrypt::aes256cbc("灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！",
+                           54,
+                           "01234567890123456789012345678901",
+                           "0123456789012345");
+    std::cout << hex_string(encrypted) << std::endl;
 
-    // openssl enc -d -aes256cbc
-    std::vector<unsigned char> decrypted = crypto::decrypt::aes256cbc(
+    std::vector<unsigned char> decrypted = decrypt::aes256cbc(
         encrypted.data(),
         encrypted.size(),
         reinterpret_cast<const unsigned char *>(
             "01234567890123456789012345678901"),
         reinterpret_cast<const unsigned char *>("0123456789012345"));
-    std::cout << string::data_string(decrypted) << std::endl;
+    std::cout << data_string(decrypted) << std::endl;
 
-    // Diffie Hellman key exchange
-    std::vector<unsigned char> public_key_b64 = string::to_data(
+    std::vector<unsigned char> public_key_b64 = to_data(
         "AAABAHJuXLnNjrPxIFRN9TL77ML0KSL6iCDRGYPseiyYIahJRgMMrI8Umn5R9zP9gzaM6bpTObK/rOEy6fClj3H5udKDqVsU/71qIf8oo1KadvqwYMz1OpKiFTQlbdarEwbeGjL/C+eZD22kD4xG5VDZFz8tAt2+HMe2waxNna/ERyx1TlOyur7dBSjb0Wlg9kk2R3qufBKSzVz6TWoB+tzDc0wciMEXB6iu5aZutUyd0S9IGoawl/xTSQay2NPDjKIQnnwpj5kYFGVLXAexcpjFH0NedDE/zddM093sW+6wHSsDFfykYYvCqY0VwlawB8N63sAZB50oARyuV2OUQiT4RMQ=");
-    std::vector<unsigned char> param_p_b64 = string::to_data(
+    std::vector<unsigned char> param_p_b64 = to_data(
         "AAABAQCInR/DefsGtJ2uECMbdDVaEOJRB+6cn86I+35udWrHcVzdhiElnMRuSWLdEkTahdJ7IG5k0qKyP02RFch432Km74QOosGsbiMm6XwMoXmH5TwI8wV96+MWhySYoRDrNHbx0ZbQOuLjiiSTh3Ccim/aXNymq4WIvxERKIy7Hg8SRyk3AeR8BoV3eR1ySKRCsGYKNmh1OGtGenyIeAQKkHYqStnivwnodXaCiHSUA/PbFi5Ng+G06JTyGkVHmkduuuTNjsmCB/YjtaGk0BKraQPdcZXsos+cq93S7ajC+ej/ud40OMNFmfXCeh3KuT50AVQPfAlChqOZYQD/P+eV5ofT");
     std::vector<unsigned char> param_q_b64 =
-        string::to_data("AAAAIQCHUyuspW42aIvMdWW/srwsY4Hb4PMWg1se3Iwq86zGsQ==");
-    std::vector<unsigned char> param_g_b64 = string::to_data(
+        to_data("AAAAIQCHUyuspW42aIvMdWW/srwsY4Hb4PMWg1se3Iwq86zGsQ==");
+    std::vector<unsigned char> param_g_b64 = to_data(
         "AAABAFOW0YHLmXsnt/PUKIHEuyONMk7URML9idRXsZLrmTUyMxwVWov1h93O4ep5Ue50G5aZ1qo4GbL8aK8Fgp1FMRm4E6zWIp6NDom7+BY3nDZF5TG09d2w8ZzChlH1E1giLacv1riG6WvbS6MWpV4QvQ/B9Pp8ySyeEDCWOcAN7sjcQu7TNj+CfHmYGNFlpMuye8s3CiWz6ocaZ8aj7kiqpN+jORQzgLyQKfd+C6Ai/3mYaDJpF3mBsYrqjsoarX/q8yZnPfTxia/RSnnZZzTTb/JPiOivoPWwWiC9X0IIXwXFpgxy8yWk83xVIwAGPuPG2i1+Z4vyv0k/p9KvHX+dUs4=");
-    crypto::DiffieHellman foo;
-    foo.param_p(crypto::codec::base64_decode(param_p_b64));
-    foo.param_q(crypto::codec::base64_decode(param_q_b64));
-    foo.param_g(crypto::codec::base64_decode(param_g_b64));
-    foo.peer_public_key(crypto::codec::base64_decode(public_key_b64));
+    DiffieHellman foo;
+    foo.param_p(codec::base64_decode(param_p_b64));
+    foo.param_q(codec::base64_decode(param_q_b64));
+    foo.param_g(codec::base64_decode(param_g_b64));
+    foo.peer_public_key(codec::base64_decode(public_key_b64));
     foo.generate_key_pair();
     foo.derive_shared_key();
     std::cout << "===== shared key" << foo.shared_key().size()
               << " =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.shared_key()))
+    std::cout << data_string(codec::base64_encode(foo.shared_key()))
               << std::endl;
     std::cout << "===== public key =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.public_key()))
+    std::cout << data_string(codec::base64_encode(foo.public_key()))
               << std::endl;
     std::cout << "===== private key =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.private_key()))
+    std::cout << data_string(codec::base64_encode(foo.private_key()))
               << std::endl;
     std::cout << "===== param p =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.param_p()))
-              << std::endl;
+    std::cout << data_string(codec::base64_encode(foo.param_p())) << std::endl;
     std::cout << "===== param q =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.param_q()))
-              << std::endl;
+    std::cout << data_string(codec::base64_encode(foo.param_q())) << std::endl;
     std::cout << "===== param g =====" << std::endl;
-    std::cout << string::data_string(
-        crypto::codec::base64_encode(foo.param_g()))
-              << std::endl;
+    std::cout << data_string(codec::base64_encode(foo.param_g())) << std::endl;
 
     return 0;
 }
