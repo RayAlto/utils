@@ -1,6 +1,6 @@
 # RA-Utils
 
-RayAlto's Stupid Self-use Noob Utils
+RayAlto's Stupid Self-taught Noob Utils
 
 ## How To
 
