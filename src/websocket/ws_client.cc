@@ -121,7 +121,7 @@ protected:
 };
 
 websocket::CloseStatus WsClient::Impl::default_close_status(
-    websocket::close_status::Code::NORMAL);
+    websocket::CloseStatus::Code::NORMAL);
 
 WsClient::Impl::Impl(WsClient& client) : client_(client) {}
 

@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
     Request request;
     // clang-format off
     request.url("https://httpbin.org/anything")
-           .method(Method::POST)
+           .method(Request::Method::POST)
            .useragent("RayAlto/114514")
            .header({
                 {"foo",    "bar"    },

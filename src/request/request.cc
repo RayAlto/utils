@@ -14,7 +14,6 @@
 #include "request/cookie.h"
 #include "request/header.h"
 #include "request/ip_resolve.h"
-#include "request/method.h"
 #include "request/mime_part.h"
 #include "request/mime_parts.h"
 #include "request/proxy.h"
@@ -151,8 +150,8 @@ public:
     static std::string curl_version();
     void reset();
 
-    request::Method method();
-    Impl& method(request::Method method);
+    Method method();
+    Impl& method(Method method);
 
     request::IpResolve ip_resolve();
     Impl& ip_resolve(request::IpResolve ip_resolve);
@@ -240,7 +239,7 @@ protected:
     char error_info_buffer_[CURL_ERROR_SIZE];
     std::FILE* temp_stderr_ = nullptr;
 
-    request::Method method_ = request::Method::DEFAULT;
+    Method method_ = Method::DEFAULT;
     request::IpResolve ip_resolve_ = request::IpResolve::WHATEVER;
     std::unique_ptr<std::string> url_ = nullptr;
     std::unique_ptr<request::Cookie> cookie_ = nullptr;
@@ -299,7 +298,7 @@ void Request::Impl::reset() {
         std::fclose(temp_stderr_);
         temp_stderr_ = std::tmpfile();
     }
-    method_ = request::Method::DEFAULT;
+    method_ = Method::DEFAULT;
     ip_resolve_ = request::IpResolve::WHATEVER;
     url_.reset();
     cookie_.reset();
@@ -321,11 +320,11 @@ void Request::Impl::reset() {
     }
 }
 
-request::Method Request::Impl::method() {
+Request::Method Request::Impl::method() {
     return method_;
 }
 
-Request::Impl& Request::Impl::method(request::Method method) {
+Request::Impl& Request::Impl::method(Method method) {
     method_ = method;
     return *this;
 }
@@ -756,8 +755,7 @@ void Request::Impl::init_curl_handle_() {
 
 void Request::Impl::set_options_() {
     // [option] method
-    curl_easy_setopt(
-        handle_, CURLOPT_CUSTOMREQUEST, request::method::c_str(method_));
+    curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, method_c_str(method_));
     // [option] ip resolve
     curl_easy_setopt(
         handle_,
@@ -925,6 +923,15 @@ bool Request::Impl::perform_request_() {
     return (curl_result == CURLE_OK);
 }
 
+constexpr const char* Request::method_c_str(const Method& method) {
+    return method == Method::GET      ? "GET"
+           : method == Method::POST   ? "POST"
+           : method == Method::PUT    ? "PUT"
+           : method == Method::DELETE ? "DELETE"
+           : method == Method::PATCH  ? "PATCH"
+                                      : nullptr;
+}
+
 Request::Request() : impl_(std::make_unique<Impl>()) {}
 
 Request::~Request() = default;
@@ -937,11 +944,11 @@ void Request::reset() {
     impl_->reset();
 }
 
-request::Method Request::method() {
+Request::Method Request::method() {
     return impl_->method();
 }
 
-Request& Request::method(request::Method method) {
+Request& Request::method(Method method) {
     impl_->method(method);
     return *this;
 }

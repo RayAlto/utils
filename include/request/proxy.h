@@ -8,38 +8,22 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
-namespace proxy {
-
-enum class Type : std::uint8_t {
-    HTTP,
-    HTTPS,
-    SOCKS4,
-    SOCKS4A,
-    SOCKS5,
-    SOCKS5H
-};
-
-namespace type {
-
-constexpr const char* c_str(const Type& type) {
-    return type == Type::HTTP      ? "http://"
-           : type == Type::HTTPS   ? "https://"
-           : type == Type::SOCKS4  ? "socks4://"
-           : type == Type::SOCKS4A ? "socks4a://"
-           : type == Type::SOCKS5  ? "socks5://"
-           : type == Type::SOCKS5H ? "socks5h://"
-                                   : nullptr;
-}
-
-} // namespace type
-
-} // namespace proxy
-
 class Proxy {
+public:
+    enum class Type : std::uint8_t {
+        HTTP,
+        HTTPS,
+        SOCKS4,
+        SOCKS4A,
+        SOCKS5,
+        SOCKS5H
+    };
+    static constexpr const char* type_c_str(const Type& type);
+
 public:
     Proxy(const std::string& proxy);
     Proxy(std::string&& proxy);
-    Proxy(const proxy::Type& type, const std::string& ip, const long& port);
+    Proxy(const Proxy::Type& type, const std::string& ip, const long& port);
     Proxy() = default;
     Proxy(const Proxy&) = default;
     Proxy(Proxy&&) noexcept = default;

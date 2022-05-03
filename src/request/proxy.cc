@@ -7,12 +7,22 @@ namespace rayalto {
 namespace utils {
 namespace request {
 
+constexpr const char* Proxy::type_c_str(const Type& type) {
+    return type == Type::HTTP      ? "http://"
+           : type == Type::HTTPS   ? "https://"
+           : type == Type::SOCKS4  ? "socks4://"
+           : type == Type::SOCKS4A ? "socks4a://"
+           : type == Type::SOCKS5  ? "socks5://"
+           : type == Type::SOCKS5H ? "socks5h://"
+                                   : nullptr;
+}
+
 Proxy::Proxy(const std::string& proxy) : proxy_(proxy) {}
 
 Proxy::Proxy(std::string&& proxy) : proxy_(std::move(proxy)) {}
 
-Proxy::Proxy(const proxy::Type& type, const std::string& ip, const long& port) :
-    proxy_(proxy::type::c_str(type) + ip + ':' + std::to_string(port)) {}
+Proxy::Proxy(const Proxy::Type& type, const std::string& ip, const long& port) :
+    proxy_(type_c_str(type) + ip + ':' + std::to_string(port)) {}
 
 std::string& Proxy::str() {
     return proxy_;

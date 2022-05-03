@@ -13,21 +13,6 @@ namespace rayalto {
 namespace utils {
 namespace string {
 
-namespace __private__ {
-
-template <typename Iter>
-std::string join(std::string&& str, Iter begin, Iter end) {
-    return std::accumulate(std::next(begin),
-                           end,
-                           *begin,
-                           [&str](std::string l, std::string r) -> std::string {
-                               return std::move(l) + std::move(str)
-                                      + std::move(r);
-                           });
-}
-
-} // namespace __private__
-
 // trim out space characters from string (from start)
 std::string lstrip(std::string&& str);
 std::string lstrip(std::string& str);
@@ -119,7 +104,13 @@ std::string join(std::string&& str,
                  std::initializer_list<std::string>&& between);
 template <typename Iter>
 std::string join(std::string&& str, Iter begin, Iter end) {
-    return __private__::join(std::move(str), begin, end);
+    return std::accumulate(std::next(begin),
+                           end,
+                           *begin,
+                           [&str](std::string l, std::string r) -> std::string {
+                               return std::move(l) + std::move(str)
+                                      + std::move(r);
+                           });
 }
 
 std::string random_string(const std::size_t& len = 16);

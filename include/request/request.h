@@ -9,7 +9,6 @@
 #include "request/cookie.h"
 #include "request/header.h"
 #include "request/ip_resolve.h"
-#include "request/method.h"
 #include "request/mime_parts.h"
 #include "request/proxy.h"
 #include "request/response.h"
@@ -26,6 +25,10 @@ namespace utils {
  */
 class Request {
 public:
+    enum class Method : std::uint8_t { GET, POST, PUT, DELETE, PATCH, DEFAULT };
+    static constexpr const char* method_c_str(const Method& method);
+
+public:
     Request();
     Request(const Request&) = delete;
     Request(Request&&) noexcept = default;
@@ -40,9 +43,9 @@ public:
     void reset();
 
     // get current request method
-    request::Method method();
+    Method method();
     // set request method
-    Request& method(request::Method method);
+    Request& method(Method method);
 
     // get current setting for ip resolve (whatever/IPv4 only/IPv6 only)
     request::IpResolve ip_resolve();

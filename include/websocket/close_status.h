@@ -8,36 +8,31 @@ namespace rayalto {
 namespace utils {
 namespace websocket {
 
-namespace close_status {
-
-// https://developer.mozilla.org/zh-CN/docs/Web/API/CloseEvent
-// https://github.com/Luka967/websocket-close-codes
-enum class Code : std::uint16_t {
-    UNKNOWN,
-    NORMAL = 1000,
-    GOING_AWAY,
-    PROTOCOL_ERROR,
-    UNSUPPORTED,
-    RESERVED,
-    NO_STATUS,
-    ABNORMAL,
-    UNSUPPORTED_DATA,
-    POLICY_VIOLATION,
-    TOO_LARGE,
-    MISSING_EXTENSION,
-    INTERNAL_ERROR,
-    SERVICE_RESTART,
-    TRY_AGAIN_LATER,
-    BAD_GATEWAY,
-    TLS_HANDSHAKE
-};
-
-constexpr Code code_of(const std::uint16_t& code);
-constexpr std::uint16_t value_of(const Code& code);
-
-} // namespace close_status
-
 struct CloseStatus {
+    // https://developer.mozilla.org/zh-CN/docs/Web/API/CloseEvent
+    // https://github.com/Luka967/websocket-close-codes
+    enum class Code : std::uint16_t {
+        UNKNOWN,
+        NORMAL = 1000,
+        GOING_AWAY,
+        PROTOCOL_ERROR,
+        UNSUPPORTED,
+        RESERVED,
+        NO_STATUS,
+        ABNORMAL,
+        UNSUPPORTED_DATA,
+        POLICY_VIOLATION,
+        TOO_LARGE,
+        MISSING_EXTENSION,
+        INTERNAL_ERROR,
+        SERVICE_RESTART,
+        TRY_AGAIN_LATER,
+        BAD_GATEWAY,
+        TLS_HANDSHAKE
+    };
+    static constexpr Code code_of(const std::uint16_t& code);
+    static constexpr std::uint16_t value_of(const Code& code);
+
     std::uint16_t code;
     std::string status;
     std::string reason;
@@ -50,11 +45,11 @@ struct CloseStatus {
                 std::string close_reason) :
         code(close_code), status(close_status), reason(close_reason) {}
 
-    CloseStatus(close_status::Code close_code) :
+    CloseStatus(CloseStatus::Code close_code) :
         CloseStatus(static_cast<std::uint16_t>(close_code)) {}
-    CloseStatus(close_status::Code close_code, const std::string close_reason) :
+    CloseStatus(CloseStatus::Code close_code, const std::string close_reason) :
         CloseStatus(static_cast<std::uint16_t>(close_code), close_reason) {}
-    CloseStatus(close_status::Code close_code,
+    CloseStatus(CloseStatus::Code close_code,
                 std::string close_status,
                 std::string close_reason) :
         CloseStatus(static_cast<std::uint16_t>(close_code),

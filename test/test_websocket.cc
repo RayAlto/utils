@@ -3,12 +3,12 @@
 #include <system_error>
 #include <thread>
 
+#include "websocket/close_status.h"
 #include "websocket/ws_client.h"
 
 using namespace rayalto::utils;
 using websocket::CloseStatus;
 using websocket::MessageType;
-using websocket::close_status::Code;
 
 int main(int argc, char const* argv[]) {
     // error
@@ -66,7 +66,7 @@ int main(int argc, char const* argv[]) {
         }
 
         // fuck off
-        client.disconnect(CloseStatus(Code::NORMAL, "fuck off"));
+        client.disconnect(CloseStatus(CloseStatus::Code::NORMAL, "fuck off"));
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
