@@ -24,6 +24,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/db/sqlite.cc
 )
 set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
@@ -42,6 +43,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OpenSSL::Crypto)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OpenSSL::SSL)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE websocketpp::websocketpp)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SQLite::SQLite3)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
