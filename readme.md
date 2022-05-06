@@ -8,6 +8,9 @@ RayAlto's Stupid Self-taught Noob Utils
 
 Some tools for string, for example:
 
+<details>
+<summary>Split "127.0.0.114514" with '.' and get rid of "114514"</summary>
+
 ```c++
 /**
  * Split "127.0.0.114514" with '.' and get rid of "114514"
@@ -34,9 +37,12 @@ output:
 0
 ```
 
+</details>
+
 ### 2. MIME Type
 
-Get MIME Type from file.
+<details>
+<summary>Get MIME Type from file.</summary>
 
 ```c++
 std::cout << std::boolalpha << MimeTypes::know("foo.png") << std::endl;
@@ -65,9 +71,12 @@ application/octet-stream
 > - [Apache HTTPD](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
 > - [Nginx](https://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
 
+</details>
+
 ### 3. Request
 
-A stupid curl wrapper
+<details>
+<summary>A stupid curl wrapper</summary>
 
 ```c++
 #include <iostream>
@@ -148,11 +157,16 @@ AAFiJjajQWiDDg/4C5gBFLqBMjR1Q0EgUAOTcME3wmR8oAAAAASUVORK5CYII="
 }
 ```
 
+</details>
+
 ### 4. WebSocket
 
 A stupid WebSocket client, thanks to [zaphoyd (Peter Thorson)](https://github.com/zaphoyd) and his great work [websocketpp](https://github.com/zaphoyd/websocketpp) which is much more simple to use than the self-proclaimed "simple-to-use" libwebsockets.
 
 Because the client is multi-threaded, it takes a certain amount of time for the client to actually connect to server after `url()` called. You can call `connected()` to check whether client is really connected to server.
+
+<details>
+<summary>A simple example</summary>
 
 ```c++
 #include <chrono>
@@ -264,9 +278,14 @@ receive: hello
 closed (1000): Normal close, shut up
 ```
 
+</details>
+
 ### 5. Crypto
 
 Encode & decode, hash, random byte, ... stuff
+
+<details>
+<summary>Some examples</summary>
 
 ```c++
 #include <iostream>
@@ -369,3 +388,64 @@ AAAAIQCHUyuspW42aIvMdWW/srwsY4Hb4PMWg1se3Iwq86zGsQ==
 ===== param g =====
 AAABAFOW0YHLmXsnt/PUKIHEuyONMk7URML9idRXsZLrmTUyMxwVWov1h93O4ep5Ue50G5aZ1qo4GbL8aK8Fgp1FMRm4E6zWIp6NDom7+BY3nDZF5TG09d2w8ZzChlH1E1giLacv1riG6WvbS6MWpV4QvQ/B9Pp8ySyeEDCWOcAN7sjcQu7TNj+CfHmYGNFlpMuye8s3CiWz6ocaZ8aj7kiqpN+jORQzgLyQKfd+C6Ai/3mYaDJpF3mBsYrqjsoarX/q8yZnPfTxia/RSnnZZzTTb/JPiOivoPWwWiC9X0IIXwXFpgxy8yWk83xVIwAGPuPG2i1+Z4vyv0k/p9KvHX+dUs4=
 ```
+
+</details>
+
+### 6. Sqlite
+
+A simple SQLite3 wrapper with few features
+
+<details>
+<summary>A simple example of parameterized query</summary>
+
+```c++
+#include <iostream>
+
+#include "rautils/db/sqlite.h"
+#include "rautils/misc/status.h"
+
+using rayalto::utils::db::Sqlite;
+using rayalto::utils::misc::Status;
+
+void shit_happens(const Status& status) {
+    if (status) {
+        std::cout << static_cast<std::string>(status) << std::endl;
+        std::exit(1);
+    }
+}
+
+int main(int argc, char const* argv[]) {
+    Sqlite database;
+    Status status;
+    database.connect("./test/test.db", status);
+    shit_happens(status);
+    Sqlite::Cursor cursor = database.cursor();
+    cursor.prepare("SELECT * FROM Friends WHERE Sex IS ?;", status);
+    shit_happens(status);
+    cursor.bind(1, "F", status);
+    shit_happens(status);
+    cursor.execute(status);
+    shit_happens(status);
+    std::cout << "Total column: " << cursor.column_count() << std::endl;
+    while (cursor.has_next_row()) {
+        std::cout << cursor.column(0).integer() << ". "
+                  << cursor.column(1).text() << "(" << cursor.column(2).text()
+                  << ")" << std::endl;
+        cursor.advance(status);
+        shit_happens(status);
+    }
+    return 0;
+}
+```
+
+output:
+
+```plain
+Total column: 3
+1. Jane(F)
+4. Elisabeth(F)
+5. Mary(F)
+6. Lucy(F)
+```
+
+</details>
