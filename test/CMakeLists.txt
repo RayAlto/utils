@@ -6,6 +6,7 @@ project(
 
 macro(ra_test_add target_name target_src)
   add_executable(${target_name} ${target_src})
+  set_property(TARGET ${target_name} PROPERTY CXX_STANDARD 17)
   target_include_directories(${target_name} PRIVATE ${RA_UTILS_INCLUDES})
   target_link_libraries(${target_name} PRIVATE ra-utils)
 endmacro()
@@ -15,3 +16,4 @@ ra_test_add(strtool test_strtool.cc)
 ra_test_add(mimetype test_mimetype.cc)
 ra_test_add(wsclient test_websocket.cc)
 ra_test_add(crypto test_crypto.cc)
+ra_test_add(sqlite test_sqlite.cc)
