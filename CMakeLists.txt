@@ -22,8 +22,8 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/network/ws_client.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/ws_client/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/util/mime_types_data.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types_data.cc
 )
 set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
