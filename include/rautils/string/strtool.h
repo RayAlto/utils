@@ -113,6 +113,13 @@ std::string join(std::string&& str, Iter begin, Iter end) {
                            });
 }
 
+// count substring
+std::size_t count(const std::string& str, const std::string& substr);
+
+// if substring exists
+bool exists(const std::string& str, const std::string& substr);
+
+// random string
 std::string random_string(const std::size_t& len = 16);
 std::string random_string(const std::size_t& len,
                           const std::vector<char>& characters);

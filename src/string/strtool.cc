@@ -346,6 +346,22 @@ std::string join(std::string&& str,
                            });
 }
 
+std::size_t count(const std::string& str, const std::string& substr) {
+    std::size_t substr_length = substr.length();
+    std::size_t index = 0;
+    std::size_t num = 0;
+    index = str.find(substr);
+    while (index != std::string::npos) {
+        ++num;
+        index = str.find(substr, index + substr_length);
+    }
+    return num;
+}
+
+bool exists(const std::string& str, const std::string& substr) {
+    return (str.find_first_of(substr) == std::string::npos);
+}
+
 std::string random_string(const std::size_t& len) {
     return random_string(
         len, {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',

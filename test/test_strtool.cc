@@ -16,7 +16,8 @@ int main(int argc, char const* argv[]) {
         << std::endl
         << string::data_string(string::parse_hex(
                "e7818ce6b3a8e6b0b8e99b8fe5a194e88fb2e596b5efbc8ce7818ce6b3a8e6b0b8e99b8fe5a194e88fb2e8b0a2e8b0a2e596b5efbc81"))
-        << std::endl;
+        << std::endl
+        << string::count("😄😄😄😅😄😄😄😄😄😅😄😄😄😄", "😅") << std::endl;
 
     return 0;
 }
