@@ -240,13 +240,13 @@ void WsClient::Impl::send(const MessageType& type,
         switch (type) {
         case MessageType::TEXT:
             client_ssl_->send(connection_handle_,
-                              std::move(message),
+                              message,
                               websocketpp::frame::opcode::text,
                               error);
             break;
         case MessageType::BINARY:
             client_ssl_->send(connection_handle_,
-                              std::move(message),
+                              message,
                               websocketpp::frame::opcode::binary,
                               error);
             break;
@@ -257,13 +257,13 @@ void WsClient::Impl::send(const MessageType& type,
         switch (type) {
         case MessageType::TEXT:
             client_no_ssl_->send(connection_handle_,
-                                 std::move(message),
+                                 message,
                                  websocketpp::frame::opcode::text,
                                  error);
             break;
         case MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
-                                 std::move(message),
+                                 message,
                                  websocketpp::frame::opcode::binary,
                                  error);
             break;
@@ -282,13 +282,13 @@ void WsClient::Impl::send(const MessageType& type,
         switch (type) {
         case MessageType::TEXT:
             client_ssl_->send(connection_handle_,
-                              message,
+                              std::move(message),
                               websocketpp::frame::opcode::text,
                               error);
             break;
         case MessageType::BINARY:
             client_ssl_->send(connection_handle_,
-                              message,
+                              std::move(message),
                               websocketpp::frame::opcode::binary,
                               error);
             break;
@@ -299,13 +299,13 @@ void WsClient::Impl::send(const MessageType& type,
         switch (type) {
         case MessageType::TEXT:
             client_no_ssl_->send(connection_handle_,
-                                 message,
+                                 std::move(message),
                                  websocketpp::frame::opcode::text,
                                  error);
             break;
         case MessageType::BINARY:
             client_no_ssl_->send(connection_handle_,
-                                 message,
+                                 std::move(message),
                                  websocketpp::frame::opcode::binary,
                                  error);
             break;
