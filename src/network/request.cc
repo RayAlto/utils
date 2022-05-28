@@ -40,17 +40,17 @@ void parse_header(const char* data,
     }
 }
 
-void init_curl_header(const Request::Header& headers,
+void init_curl_header(const std::unique_ptr<Request::Header>& headers,
                       curl_slist** curl_header) {
     if (*curl_header != nullptr) {
         curl_slist_free_all(*curl_header);
         *curl_header = nullptr;
     }
-    if (headers.empty()) {
+    if (headers == nullptr) {
         return;
     }
     std::string header_line;
-    for (const std::pair<std::string, std::string>& header : headers) {
+    for (const std::pair<std::string, std::string>& header : *headers) {
         header_line = header.first + ": " + header.second;
         *curl_header = curl_slist_append(*curl_header, header_line.c_str());
     }
@@ -742,7 +742,7 @@ void Request::Impl::init_curl_handle_() {
     }
     // verbose information
     curl_easy_setopt(handle_, CURLOPT_STDERR, temp_stderr_);
-    init_curl_header(*header_, &curl_header_);
+    init_curl_header(header_, &curl_header_);
 }
 
 void Request::Impl::set_options_() {
