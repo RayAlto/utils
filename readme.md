@@ -465,8 +465,10 @@ A simple unique identifier, inspired by IPv6 address, basically a 128-bit intege
 using namespace rayalto::utils;
 
 int main(int argc, char const* argv[]) {
-    misc::Uid id("ffff::ffff");
+    misc::Uid id("ffff:f::ffff");
     std::cout << id.to_string(false, '0') << std::endl;
+    std::cout << id.to_string(true, '0') << std::endl;
+    std::cout << id.to_string() << std::endl;
     ++id;
     std::cout << id.to_string(false, '0') << std::endl;
     id += 0xffff;
@@ -476,6 +478,18 @@ int main(int argc, char const* argv[]) {
               << std::endl;
     return 0;
 }
+```
+
+output:
+
+```plain
+ffff:000f:0000:0000:0000:0000:0000:ffff
+ffff:000f::ffff
+ffff:f::ffff
+ffff:000f:0000:0000:0000:0000:0001:0000
+ffff:000f:0000:0000:0000:0000:0001:ffff
+true
+false
 ```
 
 </details>
