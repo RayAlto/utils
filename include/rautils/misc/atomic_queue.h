@@ -13,7 +13,7 @@ namespace misc {
 template <typename T>
 class AtomicQueue {
 public:
-    AtomicQueue();
+    AtomicQueue() = default;
     AtomicQueue(const AtomicQueue&) = default;
     AtomicQueue(AtomicQueue&&) noexcept = default;
     AtomicQueue& operator=(const AtomicQueue&) = default;
@@ -54,7 +54,7 @@ public:
     }
 
     template <typename... Args>
-    void emplace(Args&&... value) {
+    decltype(auto) emplace(Args&&... value) {
         std::lock_guard<std::mutex> lock(mutex_);
         return queue_.emplace(std::forward<Args>(value)...);
     }
