@@ -1,4 +1,4 @@
-#include "rautils/network/request.h"
+#include "rautils/network/general.h"
 
 #include <string>
 #include <utility>
@@ -6,64 +6,64 @@
 namespace rayalto {
 namespace utils {
 namespace network {
+namespace general {
 
-Request::Authentication::Authentication(const std::string& username,
-                                        const std::string& password) :
+Authentication::Authentication(const std::string& username,
+                               const std::string& password) :
     username_(username), password_(password) {}
 
-Request::Authentication::Authentication(const Authentication& authentication) :
+Authentication::Authentication(const Authentication& authentication) :
     username_(authentication.username_), password_(authentication.password_) {}
 
-Request::Authentication::Authentication(
-    Authentication&& authentication) noexcept :
+Authentication::Authentication(Authentication&& authentication) noexcept :
     username_(std::move(authentication.username_)),
     password_(std::move(authentication.password_)) {}
 
-Request::Authentication& Request::Authentication::operator=(
+Authentication& Authentication::operator=(
     const Authentication& authentication) {
     username_ = authentication.username_;
     password_ = authentication.password_;
     return *this;
 }
 
-Request::Authentication& Request::Authentication::operator=(
+Authentication& Authentication::operator=(
     Authentication&& authentication) noexcept {
     username_ = std::move(authentication.username_);
     password_ = std::move(authentication.password_);
     return *this;
 }
 
-Request::Authentication::~Authentication() {}
+Authentication::~Authentication() {}
 
-void Request::Authentication::username(const std::string& username) {
+void Authentication::username(const std::string& username) {
     username_ = username;
 }
 
-void Request::Authentication::username(std::string&& username) {
+void Authentication::username(std::string&& username) {
     username_ = std::move(username);
 }
 
-std::string Request::Authentication::username() {
+std::string Authentication::username() {
     return username_;
 }
 
-void Request::Authentication::password(const std::string& password) {
+void Authentication::password(const std::string& password) {
     password_ = password;
 }
 
-void Request::Authentication::password(std::string&& password) {
+void Authentication::password(std::string&& password) {
     password_ = std::move(password);
 }
 
-std::string Request::Authentication::password() {
+std::string Authentication::password() {
     return password_;
 }
 
-bool Request::Authentication::empty() {
+bool Authentication::empty() {
     return (username_.empty() || password_.empty());
 }
 
-void Request::Authentication::clear() {
+void Authentication::clear() {
     if (!username_.empty()) {
         username_.clear();
     }
@@ -72,7 +72,7 @@ void Request::Authentication::clear() {
     }
 }
 
-const char* Request::Authentication::c_str() {
+const char* Authentication::c_str() {
     if (empty()) {
         return nullptr;
     }
@@ -80,6 +80,7 @@ const char* Request::Authentication::c_str() {
     return auth_str_.c_str();
 }
 
+} // namespace general
 } // namespace network
 } // namespace utils
 } // namespace rayalto

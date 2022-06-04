@@ -15,10 +15,10 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/mime_types_data.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/uid.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/general/authentication.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/general/cookie.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/general/header.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/network/request/authentication.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/network/request/cookie.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/network/request/header.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_part.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_parts.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/proxy.cc

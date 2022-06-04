@@ -11,6 +11,7 @@
 #include "curl/curl.h"
 
 #include "rautils/string/strtool.h"
+#include "rautils/network/general.h"
 
 namespace rayalto {
 namespace utils {
@@ -20,7 +21,7 @@ namespace {
 
 void parse_header(const char* data,
                   const std::size_t& size,
-                  Request::Header& result) {
+                  general::Header& result) {
     for (std::string& header : string::split(std::string(data, size), '\n')) {
         if (header.empty()) {
             // empty line
@@ -40,7 +41,7 @@ void parse_header(const char* data,
     }
 }
 
-void init_curl_header(const std::unique_ptr<Request::Header>& headers,
+void init_curl_header(const std::unique_ptr<general::Header>& headers,
                       curl_slist** curl_header) {
     if (*curl_header != nullptr) {
         curl_slist_free_all(*curl_header);
@@ -56,7 +57,7 @@ void init_curl_header(const std::unique_ptr<Request::Header>& headers,
     }
 }
 
-void parse_cookie_slist(curl_slist* curl_cookies, Request::Cookie& cookie) {
+void parse_cookie_slist(curl_slist* curl_cookies, general::Cookie& cookie) {
     if (!curl_cookies) {
         return;
     }
@@ -79,7 +80,7 @@ std::size_t curl_custom_write_function(char* ptr,
 std::size_t curl_custom_header_function(char* buffer,
                                         std::size_t size,
                                         std::size_t nitems,
-                                        Request::Header* userdata) {
+                                        general::Header* userdata) {
     std::size_t actual_size = size * nitems;
     parse_header(buffer, actual_size, *userdata);
     return actual_size;
@@ -153,21 +154,21 @@ public:
     Impl& url(const std::string& url);
     Impl& url(std::string&& url);
 
-    Cookie cookie();
-    Impl& cookie(const Cookie& cookie);
-    Impl& cookie(Cookie&& cookie);
+    general::Cookie cookie();
+    Impl& cookie(const general::Cookie& cookie);
+    Impl& cookie(general::Cookie&& cookie);
 
-    Header header();
-    Impl& header(const Header& header);
-    Impl& header(Header&& header);
+    general::Header header();
+    Impl& header(const general::Header& header);
+    Impl& header(general::Header&& header);
 
     std::string useragent();
     Impl& useragent(const std::string& useragent);
     Impl& useragent(std::string&& useragent);
 
-    Authentication authentication();
-    Impl& authentication(const Authentication& authentication);
-    Impl& authentication(Authentication&& authentication);
+    general::Authentication authentication();
+    Impl& authentication(const general::Authentication& authentication);
+    Impl& authentication(general::Authentication&& authentication);
 
     std::string body();
     Impl& body(
@@ -235,10 +236,10 @@ protected:
     Method method_ = Method::DEFAULT;
     IpResolve ip_resolve_ = IpResolve::WHATEVER;
     std::unique_ptr<std::string> url_ = nullptr;
-    std::unique_ptr<Cookie> cookie_ = nullptr;
-    std::unique_ptr<Header> header_ = nullptr;
+    std::unique_ptr<general::Cookie> cookie_ = nullptr;
+    std::unique_ptr<general::Header> header_ = nullptr;
     std::unique_ptr<std::string> useragent_ = nullptr;
-    std::unique_ptr<Authentication> authentication_ = nullptr;
+    std::unique_ptr<general::Authentication> authentication_ = nullptr;
     std::unique_ptr<std::string> body_ = nullptr;
     std::unique_ptr<MimeParts> mime_parts_ = nullptr;
     std::unique_ptr<Proxy> proxy_ = nullptr;
@@ -348,37 +349,37 @@ Request::Impl& Request::Impl::url(std::string&& url) {
     return *this;
 }
 
-Request::Cookie Request::Impl::cookie() {
+general::Cookie Request::Impl::cookie() {
     if (cookie_ == nullptr) {
-        cookie_ = std::make_unique<Cookie>();
+        cookie_ = std::make_unique<general::Cookie>();
     }
     return *cookie_;
 }
 
-Request::Impl& Request::Impl::cookie(const Cookie& cookie) {
-    cookie_ = std::make_unique<Cookie>(cookie);
+Request::Impl& Request::Impl::cookie(const general::Cookie& cookie) {
+    cookie_ = std::make_unique<general::Cookie>(cookie);
     return *this;
 }
 
-Request::Impl& Request::Impl::cookie(Cookie&& cookie) {
-    cookie_ = std::make_unique<Cookie>(std::move(cookie));
+Request::Impl& Request::Impl::cookie(general::Cookie&& cookie) {
+    cookie_ = std::make_unique<general::Cookie>(std::move(cookie));
     return *this;
 }
 
-Request::Header Request::Impl::header() {
+general::Header Request::Impl::header() {
     if (header_ == nullptr) {
-        header_ = std::make_unique<Header>();
+        header_ = std::make_unique<general::Header>();
     }
     return *header_;
 }
 
-Request::Impl& Request::Impl::header(const Header& header) {
-    header_ = std::make_unique<Header>(header);
+Request::Impl& Request::Impl::header(const general::Header& header) {
+    header_ = std::make_unique<general::Header>(header);
     return *this;
 }
 
-Request::Impl& Request::Impl::header(Header&& header) {
-    header_ = std::make_unique<Header>(std::move(header));
+Request::Impl& Request::Impl::header(general::Header&& header) {
+    header_ = std::make_unique<general::Header>(std::move(header));
     return *this;
 }
 
@@ -399,22 +400,23 @@ Request::Impl& Request::Impl::useragent(std::string&& useragent) {
     return *this;
 }
 
-Request::Authentication Request::Impl::authentication() {
+general::Authentication Request::Impl::authentication() {
     if (authentication_ == nullptr) {
-        authentication_ = std::make_unique<Authentication>();
+        authentication_ = std::make_unique<general::Authentication>();
     }
     return *authentication_;
 }
 
 Request::Impl& Request::Impl::authentication(
-    const Authentication& authentication) {
-    authentication_ = std::make_unique<Authentication>(authentication);
+    const general::Authentication& authentication) {
+    authentication_ = std::make_unique<general::Authentication>(authentication);
     return *this;
 }
 
-Request::Impl& Request::Impl::authentication(Authentication&& authentication) {
+Request::Impl& Request::Impl::authentication(
+    general::Authentication&& authentication) {
     authentication_ =
-        std::make_unique<Authentication>(std::move(authentication));
+        std::make_unique<general::Authentication>(std::move(authentication));
     return *this;
 }
 
@@ -429,7 +431,7 @@ Request::Impl& Request::Impl::body(const std::string& body,
                                    const std::string& mime_type) {
     body_ = std::make_unique<std::string>(body);
     if (header_ == nullptr) {
-        header_ = std::make_unique<Header>();
+        header_ = std::make_unique<general::Header>();
     }
     (*header_)["content-type"] = mime_type;
     return *this;
@@ -439,7 +441,7 @@ Request::Impl& Request::Impl::body(std::string&& body,
                                    std::string&& mime_type) {
     body_ = std::make_unique<std::string>(std::move(body));
     if (header_ == nullptr) {
-        header_ = std::make_unique<Header>();
+        header_ = std::make_unique<general::Header>();
     }
     (*header_)["content-type"] = std::move(mime_type);
     return *this;
@@ -966,30 +968,30 @@ Request& Request::url(std::string&& url) {
     return *this;
 }
 
-Request::Cookie Request::cookie() {
+general::Cookie Request::cookie() {
     return impl_->cookie();
 }
 
-Request& Request::cookie(const Cookie& cookie) {
+Request& Request::cookie(const general::Cookie& cookie) {
     impl_->cookie(cookie);
     return *this;
 }
 
-Request& Request::cookie(Cookie&& cookie) {
+Request& Request::cookie(general::Cookie&& cookie) {
     impl_->cookie(std::move(cookie));
     return *this;
 }
 
-Request::Header Request::header() {
+general::Header Request::header() {
     return impl_->header();
 }
 
-Request& Request::header(const Header& header) {
+Request& Request::header(const general::Header& header) {
     impl_->header(header);
     return *this;
 }
 
-Request& Request::header(Header&& header) {
+Request& Request::header(general::Header&& header) {
     impl_->header(std::move(header));
     return *this;
 }
@@ -1008,16 +1010,17 @@ Request& Request::useragent(std::string&& useragent) {
     return *this;
 }
 
-Request::Authentication Request::authentication() {
+general::Authentication Request::authentication() {
     return impl_->authentication();
 }
 
-Request& Request::authentication(const Authentication& authentication) {
+Request& Request::authentication(
+    const general::Authentication& authentication) {
     impl_->authentication(authentication);
     return *this;
 }
 
-Request& Request::authentication(Authentication&& authentication) {
+Request& Request::authentication(general::Authentication&& authentication) {
     impl_->authentication(std::move(authentication));
     return *this;
 }

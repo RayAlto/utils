@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "rautils/misc/map_handler.h"
+#include "general.h"
 
 namespace rayalto {
 namespace utils {
@@ -22,9 +23,6 @@ namespace network {
  */
 class Request {
 public:
-    class Authentication;
-    class Cookie;
-    class Header;
     struct Response;
     class MimePart;
     class MimeParts;
@@ -65,16 +63,16 @@ public:
     Request& url(std::string&& url);
 
     // get cookie to send for current request
-    Cookie cookie();
+    general::Cookie cookie();
     // set cookie to send
-    Request& cookie(const Cookie& cookie);
-    Request& cookie(Cookie&& cookie);
+    Request& cookie(const general::Cookie& cookie);
+    Request& cookie(general::Cookie&& cookie);
 
     // get header for current request
-    Header header();
+    general::Header header();
     // set header for current request
-    Request& header(const Header& header);
-    Request& header(Header&& header);
+    Request& header(const general::Header& header);
+    Request& header(general::Header&& header);
 
     // get current user agent setting
     std::string useragent();
@@ -83,10 +81,10 @@ public:
     Request& useragent(std::string&& useragent);
 
     // get current server authentication setting
-    Authentication authentication();
+    general::Authentication authentication();
     // set server authentication (set authentication header will override this)
-    Request& authentication(const Authentication& authentication);
-    Request& authentication(Authentication&& authentication);
+    Request& authentication(const general::Authentication& authentication);
+    Request& authentication(general::Authentication&& authentication);
 
     // get body for current request
     std::string body();
@@ -180,73 +178,6 @@ protected:
     std::unique_ptr<Impl> impl_;
 };
 
-class Request::Authentication {
-public:
-    Authentication() = default;
-    Authentication(const std::string& username, const std::string& password);
-    Authentication(const Authentication& authentication);
-    Authentication(Authentication&& authentication) noexcept;
-    Authentication& operator=(const Authentication& authentication);
-    Authentication& operator=(Authentication&& authentication) noexcept;
-
-    virtual ~Authentication();
-
-    void username(const std::string& username);
-    void username(std::string&& username);
-    std::string username();
-    void password(const std::string& password);
-    void password(std::string&& password);
-    std::string password();
-
-    // if username or password is empty
-    bool empty();
-    // reset
-    void clear();
-
-    virtual const char* c_str();
-
-protected:
-    std::string username_;
-    std::string password_;
-    std::string auth_str_;
-};
-
-class Request::Cookie : public misc::DictHandler {
-public:
-    Cookie(
-        std::initializer_list<std::pair<const std::string, std::string>> pairs);
-    Cookie(const misc::Dict& map);
-    Cookie(misc::Dict&& map);
-    Cookie() = default;
-    Cookie(const Cookie&);
-    Cookie(Cookie&&) noexcept;
-    Cookie& operator=(const Cookie&);
-    Cookie& operator=(Cookie&&) noexcept;
-
-    virtual ~Cookie() = default;
-
-    // format as "key1=value1; key2=value2; ..."
-    const char* c_str();
-
-protected:
-    std::string str_;
-};
-
-class Request::Header : public misc::DictIcHandler {
-public:
-    Header(
-        std::initializer_list<std::pair<const std::string, std::string>> pairs);
-    Header(const misc::DictIC& map);
-    Header(misc::DictIC&& map);
-    Header() = default;
-    Header(const Header& header);
-    Header(Header&& header) noexcept;
-    Header& operator=(const Header& header);
-    Header& operator=(Header&& header) noexcept;
-
-    virtual ~Header() = default;
-};
-
 struct Request::Response {
     struct TimeElapsed {
         // total time elapsed
@@ -282,8 +213,8 @@ struct Request::Response {
     std::string body;
     long code;
     long http_version;
-    Header header;
-    Cookie cookie;
+    general::Header header;
+    general::Cookie cookie;
     Response::TimeElapsed time_elapsed;
     Response::ByteTransfered byte_transfered;
     Response::Speed speed;
