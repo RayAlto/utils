@@ -27,8 +27,8 @@ int main(int argc, char const* argv[]) {
     shit_happens(status);
     std::cout << "Total column: " << cursor.column_count() << std::endl;
     while (cursor.has_next_row()) {
-        std::cout << cursor.column(0).integer() << ". "
-                  << cursor.column(1).text() << "(" << cursor.column(2).text()
+        std::cout << *cursor.column(0).integer() << ". "
+                  << *cursor.column(1).text() << "(" << *cursor.column(2).text()
                   << ")" << std::endl;
         cursor.advance(status);
         shit_happens(status);

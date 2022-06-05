@@ -7,7 +7,7 @@
 using rayalto::utils::misc::MimeTypes;
 using rayalto::utils::network::Request;
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char const* argv[]) {
     Request request;
     // clang-format off
     request.url("https://httpbin.org/anything")
@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
     // clang-format on
     /* request.body(R"+*+*({"age": 114514, "role": "student"})+*+*", */
     /*              MimeTypes::get("json")); */
-    Request::Response response = request.response();
+    const Request::Response& response = *request.response();
     std::cout << response.body << std::endl;
     return 0;
 }
