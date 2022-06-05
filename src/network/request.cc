@@ -117,20 +117,6 @@ void curl_add_mime_part(curl_mime* mime,
 
 } // anonymous namespace
 
-struct LocalSetting {
-    std::string interface;
-    long port = 0;
-    long port_range = 1;
-    std::string dns_interface;
-    std::string dns_local_ipv4;
-    std::string dns_local_ipv6;
-};
-
-struct TimeoutSetting {
-    long timeout = 0l;
-    long connect_timeout = 300000l;
-};
-
 class Request::Impl {
 public:
     Impl();
@@ -141,85 +127,64 @@ public:
 
     virtual ~Impl();
 
-    static std::string curl_version();
+    static const std::string& curl_version();
+
     void reset();
 
-    Method method();
+    const Method& method() const;
+    Method& method();
     Impl& method(Method method);
 
-    IpResolve ip_resolve();
+    const IpResolve& ip_resolve() const;
+    IpResolve& ip_resolve();
     Impl& ip_resolve(IpResolve ip_resolve);
 
-    std::string url();
+    const std::unique_ptr<std::string>& url();
     Impl& url(const std::string& url);
     Impl& url(std::string&& url);
 
-    general::Cookie cookie();
+    const std::unique_ptr<general::Cookie>& cookie();
     Impl& cookie(const general::Cookie& cookie);
     Impl& cookie(general::Cookie&& cookie);
 
-    general::Header header();
+    const std::unique_ptr<general::Header>& header();
     Impl& header(const general::Header& header);
     Impl& header(general::Header&& header);
 
-    std::string useragent();
+    const std::unique_ptr<std::string>& useragent();
     Impl& useragent(const std::string& useragent);
     Impl& useragent(std::string&& useragent);
 
-    general::Authentication authentication();
+    const std::unique_ptr<general::Authentication>& authentication();
     Impl& authentication(const general::Authentication& authentication);
     Impl& authentication(general::Authentication&& authentication);
 
-    std::string body();
+    const std::unique_ptr<std::string>& body();
     Impl& body(
         const std::string& body,
         const std::string& mime_type = "application/x-www-form-urlencoded");
     Impl& body(std::string&& body,
                std::string&& mime_type = "application/x-www-form-urlencoded");
 
-    MimeParts mime_parts();
+    const std::unique_ptr<MimeParts>& mime_parts();
     Impl& mime_parts(const MimeParts& mime_parts);
     Impl& mime_parts(MimeParts&& mime_parts);
 
-    Proxy proxy();
+    const std::unique_ptr<Proxy>& proxy();
     Impl& proxy(const Proxy& proxy);
     Impl& proxy(Proxy&& proxy);
 
-    long timeout();
-    Impl& timeout(const long& timeout);
-    Impl& timeout(long&& timeout);
+    const std::unique_ptr<TimeoutSetting>& timeout_setting();
+    Impl& timeout_setting(const TimeoutSetting& timeout);
+    Impl& timeout_setting(TimeoutSetting&& timeout);
 
-    long connect_timeout();
-    Impl& connect_timeout(const long& connect_timeout);
-    Impl& connect_timeout(long&& connect_timeout);
-
-    std::string local_interface();
-    Impl& local_interface(const std::string& local_interface);
-    Impl& local_interface(std::string&& local_interface);
-
-    long local_port();
-    Impl& local_port(const long& local_port);
-    Impl& local_port(long&& local_port);
-
-    long local_port_range();
-    Impl& local_port_range(const long& local_port_range);
-    Impl& local_port_range(long&& local_port_range);
-
-    std::string dns_interface();
-    Impl& dns_interface(const std::string& dns_interface);
-    Impl& dns_interface(std::string&& dns_interface);
-
-    std::string dns_local_ipv4();
-    Impl& dns_local_ipv4(const std::string& dns_local_ipv4);
-    Impl& dns_local_ipv4(std::string&& dns_local_ipv4);
-
-    std::string dns_local_ipv6();
-    Impl& dns_local_ipv6(const std::string& dns_local_ipv6);
-    Impl& dns_local_ipv6(std::string&& dns_local_ipv6);
+    const std::unique_ptr<LocalSetting>& local_setting();
+    Impl& local_setting(const LocalSetting& local);
+    Impl& local_setting(LocalSetting&& local);
 
     bool request();
 
-    Response response();
+    const std::unique_ptr<Response>& response();
 
     /* ===== other func ===== */
     std::string url_encode(const std::string& url);
@@ -282,7 +247,7 @@ Request::Impl::~Impl() {
     curl_global_cleanup();
 }
 
-std::string Request::Impl::curl_version() {
+const std::string& Request::Impl::curl_version() {
     return curl_version_;
 }
 
@@ -314,7 +279,11 @@ void Request::Impl::reset() {
     }
 }
 
-Request::Method Request::Impl::method() {
+const Request::Method& Request::Impl::method() const {
+    return method_;
+}
+
+Request::Method& Request::Impl::method() {
     return method_;
 }
 
@@ -323,7 +292,11 @@ Request::Impl& Request::Impl::method(Method method) {
     return *this;
 }
 
-Request::IpResolve Request::Impl::ip_resolve() {
+const Request::IpResolve& Request::Impl::ip_resolve() const {
+    return ip_resolve_;
+}
+
+Request::IpResolve& Request::Impl::ip_resolve() {
     return ip_resolve_;
 }
 
@@ -332,11 +305,8 @@ Request::Impl& Request::Impl::ip_resolve(IpResolve ip_resolve) {
     return *this;
 }
 
-std::string Request::Impl::url() {
-    if (url_ == nullptr) {
-        url_ = std::make_unique<std::string>();
-    }
-    return *url_;
+const std::unique_ptr<std::string>& Request::Impl::url() {
+    return url_;
 }
 
 Request::Impl& Request::Impl::url(const std::string& url) {
@@ -349,11 +319,8 @@ Request::Impl& Request::Impl::url(std::string&& url) {
     return *this;
 }
 
-general::Cookie Request::Impl::cookie() {
-    if (cookie_ == nullptr) {
-        cookie_ = std::make_unique<general::Cookie>();
-    }
-    return *cookie_;
+const std::unique_ptr<general::Cookie>& Request::Impl::cookie() {
+    return cookie_;
 }
 
 Request::Impl& Request::Impl::cookie(const general::Cookie& cookie) {
@@ -366,11 +333,8 @@ Request::Impl& Request::Impl::cookie(general::Cookie&& cookie) {
     return *this;
 }
 
-general::Header Request::Impl::header() {
-    if (header_ == nullptr) {
-        header_ = std::make_unique<general::Header>();
-    }
-    return *header_;
+const std::unique_ptr<general::Header>& Request::Impl::header() {
+    return header_;
 }
 
 Request::Impl& Request::Impl::header(const general::Header& header) {
@@ -383,11 +347,8 @@ Request::Impl& Request::Impl::header(general::Header&& header) {
     return *this;
 }
 
-std::string Request::Impl::useragent() {
-    if (useragent_ == nullptr) {
-        useragent_ = std::make_unique<std::string>();
-    }
-    return *useragent_;
+const std::unique_ptr<std::string>& Request::Impl::useragent() {
+    return useragent_;
 }
 
 Request::Impl& Request::Impl::useragent(const std::string& useragent) {
@@ -400,11 +361,9 @@ Request::Impl& Request::Impl::useragent(std::string&& useragent) {
     return *this;
 }
 
-general::Authentication Request::Impl::authentication() {
-    if (authentication_ == nullptr) {
-        authentication_ = std::make_unique<general::Authentication>();
-    }
-    return *authentication_;
+const std::unique_ptr<general::Authentication>&
+Request::Impl::authentication() {
+    return authentication_;
 }
 
 Request::Impl& Request::Impl::authentication(
@@ -420,11 +379,8 @@ Request::Impl& Request::Impl::authentication(
     return *this;
 }
 
-std::string Request::Impl::body() {
-    if (body_ == nullptr) {
-        body_ = std::make_unique<std::string>();
-    }
-    return *body_;
+const std::unique_ptr<std::string>& Request::Impl::body() {
+    return body_;
 }
 
 Request::Impl& Request::Impl::body(const std::string& body,
@@ -447,11 +403,8 @@ Request::Impl& Request::Impl::body(std::string&& body,
     return *this;
 }
 
-Request::MimeParts Request::Impl::mime_parts() {
-    if (mime_parts_ == nullptr) {
-        mime_parts_ = std::make_unique<MimeParts>();
-    }
-    return *mime_parts_;
+const std::unique_ptr<Request::MimeParts>& Request::Impl::mime_parts() {
+    return mime_parts_;
 }
 
 Request::Impl& Request::Impl::mime_parts(const MimeParts& mime_parts) {
@@ -464,11 +417,8 @@ Request::Impl& Request::Impl::mime_parts(MimeParts&& mime_parts) {
     return *this;
 }
 
-Request::Proxy Request::Impl::proxy() {
-    if (proxy_ == nullptr) {
-        proxy_ = std::make_unique<Proxy>();
-    }
-    return *proxy_;
+const std::unique_ptr<Request::Proxy>& Request::Impl::proxy() {
+    return proxy_;
 }
 
 Request::Impl& Request::Impl::proxy(const Proxy& proxy) {
@@ -481,190 +431,32 @@ Request::Impl& Request::Impl::proxy(Proxy&& proxy) {
     return *this;
 }
 
-long Request::Impl::timeout() {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    return timeout_setting_->timeout;
+const std::unique_ptr<Request::TimeoutSetting>&
+Request::Impl::timeout_setting() {
+    return timeout_setting_;
 }
 
-Request::Impl& Request::Impl::timeout(const long& timeout) {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    timeout_setting_->timeout = timeout;
+Request::Impl& Request::Impl::timeout_setting(const TimeoutSetting& timeout) {
+    timeout_setting_ = std::make_unique<TimeoutSetting>(timeout);
     return *this;
 }
 
-Request::Impl& Request::Impl::timeout(long&& timeout) {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    timeout_setting_->timeout = std::move(timeout);
+Request::Impl& Request::Impl::timeout_setting(TimeoutSetting&& timeout) {
+    timeout_setting_ = std::make_unique<TimeoutSetting>(std::move(timeout));
     return *this;
 }
 
-long Request::Impl::connect_timeout() {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    return timeout_setting_->connect_timeout;
+const std::unique_ptr<Request::LocalSetting>& Request::Impl::local_setting() {
+    return local_setting_;
 }
 
-Request::Impl& Request::Impl::connect_timeout(const long& connect_timeout) {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    timeout_setting_->connect_timeout = connect_timeout;
+Request::Impl& Request::Impl::local_setting(const LocalSetting& local) {
+    local_setting_ = std::make_unique<LocalSetting>(local);
     return *this;
 }
 
-Request::Impl& Request::Impl::connect_timeout(long&& connect_timeout) {
-    if (timeout_setting_ == nullptr) {
-        timeout_setting_ = std::make_unique<TimeoutSetting>();
-    }
-    timeout_setting_->connect_timeout = std::move(connect_timeout);
-    return *this;
-}
-
-std::string Request::Impl::local_interface() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->interface;
-}
-
-Request::Impl& Request::Impl::local_interface(
-    const std::string& local_interface) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->interface = local_interface;
-    return *this;
-}
-
-Request::Impl& Request::Impl::local_interface(std::string&& local_interface) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->interface = std::move(local_interface);
-    return *this;
-}
-
-long Request::Impl::local_port() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->port;
-}
-
-Request::Impl& Request::Impl::local_port(const long& local_port) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->port = local_port;
-    return *this;
-}
-
-Request::Impl& Request::Impl::local_port(long&& local_port) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->port = std::move(local_port);
-    return *this;
-}
-
-long Request::Impl::local_port_range() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->port_range;
-}
-
-Request::Impl& Request::Impl::local_port_range(const long& local_port_range) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->port_range = local_port_range;
-    return *this;
-}
-
-Request::Impl& Request::Impl::local_port_range(long&& local_port_range) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->port_range = std::move(local_port_range);
-    return *this;
-}
-
-std::string Request::Impl::dns_interface() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->dns_interface;
-}
-
-Request::Impl& Request::Impl::dns_interface(const std::string& dns_interface) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_interface = dns_interface;
-    return *this;
-}
-
-Request::Impl& Request::Impl::dns_interface(std::string&& dns_interface) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_interface = std::move(dns_interface);
-    return *this;
-}
-
-std::string Request::Impl::dns_local_ipv4() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->dns_local_ipv4;
-}
-
-Request::Impl& Request::Impl::dns_local_ipv4(
-    const std::string& dns_local_ipv4) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_local_ipv4 = dns_local_ipv4;
-    return *this;
-}
-
-Request::Impl& Request::Impl::dns_local_ipv4(std::string&& dns_local_ipv4) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_local_ipv4 = std::move(dns_local_ipv4);
-    return *this;
-}
-
-std::string Request::Impl::dns_local_ipv6() {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    return local_setting_->dns_local_ipv6;
-}
-
-Request::Impl& Request::Impl::dns_local_ipv6(
-    const std::string& dns_local_ipv6) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_local_ipv6 = dns_local_ipv6;
-    return *this;
-}
-
-Request::Impl& Request::Impl::dns_local_ipv6(std::string&& dns_local_ipv6) {
-    if (local_setting_ == nullptr) {
-        local_setting_ = std::make_unique<LocalSetting>();
-    }
-    local_setting_->dns_local_ipv6 = std::move(dns_local_ipv6);
+Request::Impl& Request::Impl::local_setting(LocalSetting&& local) {
+    local_setting_ = std::make_unique<LocalSetting>(std::move(local));
     return *this;
 }
 
@@ -674,11 +466,8 @@ bool Request::Impl::request() {
     return perform_request_();
 }
 
-Request::Response Request::Impl::response() {
-    if (response_ == nullptr) {
-        response_ = std::make_unique<Response>();
-    }
-    return *response_;
+const std::unique_ptr<Request::Response>& Request::Impl::response() {
+    return response_;
 }
 
 std::string Request::Impl::url_encode(const std::string& url) {
@@ -936,7 +725,11 @@ void Request::reset() {
     impl_->reset();
 }
 
-Request::Method Request::method() {
+const Request::Method& Request::method() const {
+    return impl_->method();
+}
+
+Request::Method& Request::method() {
     return impl_->method();
 }
 
@@ -945,7 +738,11 @@ Request& Request::method(Method method) {
     return *this;
 }
 
-Request::IpResolve Request::ip_resolve() {
+const Request::IpResolve& Request::ip_resolve() const {
+    return impl_->ip_resolve();
+}
+
+Request::IpResolve& Request::ip_resolve() {
     return impl_->ip_resolve();
 }
 
@@ -954,7 +751,7 @@ Request& Request::ip_resolve(IpResolve ip_resolve) {
     return *this;
 }
 
-std::string Request::url() {
+const std::unique_ptr<std::string>& Request::url() {
     return impl_->url();
 }
 
@@ -968,7 +765,7 @@ Request& Request::url(std::string&& url) {
     return *this;
 }
 
-general::Cookie Request::cookie() {
+const std::unique_ptr<general::Cookie>& Request::cookie() {
     return impl_->cookie();
 }
 
@@ -982,7 +779,7 @@ Request& Request::cookie(general::Cookie&& cookie) {
     return *this;
 }
 
-general::Header Request::header() {
+const std::unique_ptr<general::Header>& Request::header() {
     return impl_->header();
 }
 
@@ -996,7 +793,7 @@ Request& Request::header(general::Header&& header) {
     return *this;
 }
 
-std::string Request::useragent() {
+const std::unique_ptr<std::string>& Request::useragent() {
     return impl_->useragent();
 }
 
@@ -1010,7 +807,7 @@ Request& Request::useragent(std::string&& useragent) {
     return *this;
 }
 
-general::Authentication Request::authentication() {
+const std::unique_ptr<general::Authentication>& Request::authentication() {
     return impl_->authentication();
 }
 
@@ -1025,7 +822,7 @@ Request& Request::authentication(general::Authentication&& authentication) {
     return *this;
 }
 
-std::string Request::body() {
+const std::unique_ptr<std::string>& Request::body() {
     return impl_->body();
 }
 
@@ -1039,7 +836,7 @@ Request& Request::body(std::string&& body, std::string&& mime_type) {
     return *this;
 }
 
-Request::MimeParts Request::mime_parts() {
+const std::unique_ptr<Request::MimeParts>& Request::mime_parts() {
     return impl_->mime_parts();
 }
 
@@ -1053,7 +850,7 @@ Request& Request::mime_parts(MimeParts&& mime_parts) {
     return *this;
 }
 
-Request::Proxy Request::proxy() {
+const std::unique_ptr<Request::Proxy>& Request::proxy() {
     return impl_->proxy();
 }
 
@@ -1067,115 +864,31 @@ Request& Request::proxy(Proxy&& proxy) {
     return *this;
 }
 
-long Request::timeout() {
-    return impl_->timeout();
+const std::unique_ptr<Request::TimeoutSetting>& Request::timeout_setting() {
+    return impl_->timeout_setting();
 }
 
-Request& Request::timeout(const long& timeout) {
-    impl_->timeout(timeout);
+Request& Request::timeout_setting(const TimeoutSetting& timeout_setting) {
+    impl_->timeout_setting(timeout_setting);
     return *this;
 }
 
-Request& Request::timeout(long&& timeout) {
-    impl_->timeout(std::move(timeout));
+Request& Request::timeout_setting(TimeoutSetting&& timeout_setting) {
+    impl_->timeout_setting(std::move(timeout_setting));
     return *this;
 }
 
-long Request::connect_timeout() {
-    return impl_->connect_timeout();
+const std::unique_ptr<Request::LocalSetting>& Request::local_setting() {
+    return impl_->local_setting();
 }
 
-Request& Request::connect_timeout(const long& connect_timeout) {
-    impl_->connect_timeout(connect_timeout);
+Request& Request::local_setting(const LocalSetting& local_setting) {
+    impl_->local_setting(local_setting);
     return *this;
 }
 
-Request& Request::connect_timeout(long&& connect_timeout) {
-    impl_->connect_timeout(std::move(connect_timeout));
-    return *this;
-}
-
-std::string Request::local_interface() {
-    return impl_->local_interface();
-}
-
-Request& Request::local_interface(const std::string& local_interface) {
-    impl_->local_interface(local_interface);
-    return *this;
-}
-
-Request& Request::local_interface(std::string&& local_interface) {
-    impl_->local_interface(std::move(local_interface));
-    return *this;
-}
-
-long Request::local_port() {
-    return impl_->local_port();
-}
-
-Request& Request::local_port(const long& local_port) {
-    impl_->local_port(local_port);
-    return *this;
-}
-
-Request& Request::local_port(long&& local_port) {
-    impl_->local_port(std::move(local_port));
-    return *this;
-}
-
-long Request::local_port_range() {
-    return impl_->local_port_range();
-}
-
-Request& Request::local_port_range(const long& local_port_range) {
-    impl_->local_port_range(local_port_range);
-    return *this;
-}
-
-Request& Request::local_port_range(long&& local_port_range) {
-    impl_->local_port_range(std::move(local_port_range));
-    return *this;
-}
-
-std::string Request::dns_interface() {
-    return impl_->dns_interface();
-}
-
-Request& Request::dns_interface(const std::string& dns_interface) {
-    impl_->dns_interface(dns_interface);
-    return *this;
-}
-
-Request& Request::dns_interface(std::string&& dns_interface) {
-    impl_->dns_interface(std::move(dns_interface));
-    return *this;
-}
-
-std::string Request::dns_local_ipv4() {
-    return impl_->dns_local_ipv4();
-}
-
-Request& Request::dns_local_ipv4(const std::string& dns_local_ipv4) {
-    impl_->dns_local_ipv4(dns_local_ipv4);
-    return *this;
-}
-
-Request& Request::dns_local_ipv4(std::string&& dns_local_ipv4) {
-    impl_->dns_local_ipv4(std::move(dns_local_ipv4));
-    return *this;
-}
-
-std::string Request::dns_local_ipv6() {
-    return impl_->dns_local_ipv6();
-}
-
-Request& Request::dns_local_ipv6(const std::string& dns_local_ipv6) {
-    impl_->dns_local_ipv6(dns_local_ipv6);
-    return *this;
-}
-
-Request& Request::dns_local_ipv6(std::string&& dns_local_ipv6) {
-    impl_->dns_local_ipv6(std::move(dns_local_ipv6));
+Request& Request::local_setting(LocalSetting&& local_setting) {
+    impl_->local_setting(std::move(local_setting));
     return *this;
 }
 
@@ -1183,7 +896,7 @@ bool Request::request() {
     return impl_->request();
 }
 
-Request::Response Request::response() {
+const std::unique_ptr<Request::Response>& Request::response() {
     return impl_->response();
 }
 

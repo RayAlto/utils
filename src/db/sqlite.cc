@@ -514,44 +514,53 @@ const Sqlite::Column::Type& Sqlite::Column::type() const {
     return type_;
 }
 
-int& Sqlite::Column::integer() {
-    return *std::get<std::unique_ptr<int>>(data_);
+const std::unique_ptr<int>& Sqlite::Column::integer() {
+    return std::get<std::unique_ptr<int>>(data_);
 }
 
-std::int64_t& Sqlite::Column::integer64() {
-    return *std::get<std::unique_ptr<std::int64_t>>(data_);
+const std::unique_ptr<std::int64_t>& Sqlite::Column::integer64() {
+    return std::get<std::unique_ptr<std::int64_t>>(data_);
 }
 
-double& Sqlite::Column::real() {
-    return *std::get<std::unique_ptr<double>>(data_);
+const std::unique_ptr<double>& Sqlite::Column::real() {
+    return std::get<std::unique_ptr<double>>(data_);
 }
 
-std::string& Sqlite::Column::text() {
-    return *std::get<std::unique_ptr<std::string>>(data_);
+const std::unique_ptr<std::string>& Sqlite::Column::text() {
+    return std::get<std::unique_ptr<std::string>>(data_);
 }
 
-std::vector<unsigned char>& Sqlite::Column::blob() {
-    return *std::get<std::unique_ptr<std::vector<unsigned char>>>(data_);
+const std::unique_ptr<std::vector<unsigned char>>& Sqlite::Column::blob() {
+    return std::get<std::unique_ptr<std::vector<unsigned char>>>(data_);
 }
 
 Sqlite::Column::operator int() {
-    return *std::get<std::unique_ptr<int>>(data_);
+    const std::unique_ptr<int>& data = std::get<std::unique_ptr<int>>(data_);
+    return (data == nullptr ? int {} : *data);
 }
 
 Sqlite::Column::operator std::int64_t() {
-    return *std::get<std::unique_ptr<std::int64_t>>(data_);
+    const std::unique_ptr<std::int64_t>& data =
+        std::get<std::unique_ptr<std::int64_t>>(data_);
+    return (data == nullptr ? std::int64_t {} : *data);
 }
 
 Sqlite::Column::operator double() {
-    return *std::get<std::unique_ptr<double>>(data_);
+    const std::unique_ptr<double>& data =
+        std::get<std::unique_ptr<double>>(data_);
+    return (data == nullptr ? double {} : *data);
 }
 
 Sqlite::Column::operator std::string() {
-    return *std::get<std::unique_ptr<std::string>>(data_);
+    const std::unique_ptr<std::string>& data =
+        std::get<std::unique_ptr<std::string>>(data_);
+    return (data == nullptr ? std::string {} : *data);
 }
 
 Sqlite::Column::operator std::vector<unsigned char>() {
-    return *std::get<std::unique_ptr<std::vector<unsigned char>>>(data_);
+    const std::unique_ptr<std::vector<unsigned char>>& data =
+        std::get<std::unique_ptr<std::vector<unsigned char>>>(data_);
+    return (data == nullptr ? std::vector<unsigned char> {} : *data);
 }
 
 Sqlite::Column::Column(const int& data) :

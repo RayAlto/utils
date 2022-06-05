@@ -125,11 +125,11 @@ public:
 
     const Type& type() const;
 
-    int& integer();
-    std::int64_t& integer64();
-    double& real();
-    std::string& text();
-    std::vector<unsigned char>& blob();
+    const std::unique_ptr<int>& integer();
+    const std::unique_ptr<std::int64_t>& integer64();
+    const std::unique_ptr<double>& real();
+    const std::unique_ptr<std::string>& text();
+    const std::unique_ptr<std::vector<unsigned char>>& blob();
 
     operator int();
     operator std::int64_t();
