@@ -10,8 +10,10 @@
 
 #include "curl/curl.h"
 
+#include "rautils/network/general/authentication.h"
+#include "rautils/network/general/cookie.h"
+#include "rautils/network/general/header.h"
 #include "rautils/string/strtool.h"
-#include "rautils/network/general.h"
 
 namespace rayalto {
 namespace utils {

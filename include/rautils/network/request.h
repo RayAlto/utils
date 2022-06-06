@@ -7,8 +7,9 @@
 #include <string>
 #include <utility>
 
-#include "rautils/misc/map_handler.h"
-#include "general.h"
+#include "rautils/network/general/authentication.h"
+#include "rautils/network/general/cookie.h"
+#include "rautils/network/general/header.h"
 
 namespace rayalto {
 namespace utils {
