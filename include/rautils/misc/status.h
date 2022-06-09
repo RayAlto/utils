@@ -15,15 +15,6 @@ struct Status {
     operator bool() const noexcept {
         return error;
     }
-
-    operator std::string() const noexcept {
-        if (message == nullptr) {
-            return {};
-        }
-        else {
-            return *message;
-        }
-    }
 };
 
 } // namespace misc

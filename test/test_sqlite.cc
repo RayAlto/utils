@@ -8,7 +8,9 @@ using rayalto::utils::misc::Status;
 
 void shit_happens(const Status& status) {
     if (status) {
-        std::cout << static_cast<std::string>(status) << std::endl;
+        if (status.message != nullptr) {
+            std::cout << *status.message << std::endl;
+        }
         std::exit(1);
     }
 }
