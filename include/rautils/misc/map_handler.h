@@ -274,6 +274,7 @@ public:
     iterator begin() {
         return map_.begin();
     }
+
     const_iterator begin() const {
         return map_.begin();
     }
@@ -285,6 +286,7 @@ public:
     iterator end() {
         return map_.end();
     }
+
     const_iterator end() const {
         return map_.end();
     }
@@ -308,6 +310,7 @@ public:
     iterator find(const std::string& key) {
         return map_.find(key);
     }
+
     const_iterator find(const std::string& key) const {
         return map_.find(key);
     }
@@ -315,9 +318,11 @@ public:
     iterator erase(iterator pos) {
         return map_.erase(pos);
     }
+
     iterator erase(const_iterator pos) {
         return map_.erase(pos);
     }
+
     iterator erase(const_iterator first, const_iterator last) {
         return map_.erase(first, last);
     }
@@ -326,13 +331,16 @@ public:
         const std::pair<std::string, ValueType>& item) {
         return map_.insert(item);
     }
+
     std::pair<iterator, bool> insert(std::pair<std::string, ValueType>&& item) {
         return map_.insert(std::move(item));
     }
+
     iterator insert(const_iterator hint,
                     const std::pair<std::string, ValueType>& item) {
         return map_.insert(hint, item);
     }
+
     iterator insert(const_iterator hint,
                     std::pair<std::string, ValueType>&& item) {
         return map_.insert(hint, std::move(item));
@@ -342,6 +350,7 @@ public:
     void insert(InputIt first, InputIt last) {
         return map_.insert(first, last);
     }
+
     void insert(
         std::initializer_list<std::pair<const std::string, ValueType>> items) {
         return map_.insert(items);
@@ -425,6 +434,14 @@ public:
             }
         }
         return count;
+    }
+
+    const MapType& base_container() const {
+        return map_;
+    }
+
+    MapType& base_container() {
+        return map_;
     }
 
 protected:
