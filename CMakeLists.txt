@@ -17,6 +17,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/misc/uid.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/general/authentication.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/general/cookie.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/general/url.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_part.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_parts.cc
