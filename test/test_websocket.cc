@@ -1,95 +1,56 @@
 #include <chrono>
 #include <iostream>
-#include <system_error>
 #include <thread>
 
-#include "rautils/network/ws_client.h"
+#include "rautils/network/general/url.h"
+#include "rautils/network/websocket.h"
+#include "rautils/network/websocket/close_status.h"
+#include "rautils/network/websocket/message.h"
+#include "rautils/string/strtool.h"
 
-using rayalto::utils::network::WsClient;
+using rayalto::utils::network::websocket::Client;
+using rayalto::utils::network::websocket::Message;
+using rayalto::utils::network::general::Url;
+using rayalto::utils::network::websocket::CloseStatus;
 
 int main(int argc, char const* argv[]) {
-    // error
-    std::error_code ws_error;
-
-    // default close reason
-    WsClient::default_close_status().reason = "shut up";
-    WsClient client;
-
-    client.on_receive([&](WsClient& client,
-                          const WsClient::MessageType& type,
-                          const std::string& message) -> void {
-        std::cout << "receive: " << message << std::endl;
+    Client client;
+    client.on_error([&](Client& client, const std::string& message) -> void {
+        std::cerr << "Error: " << message << std::endl;
     });
-
-    // connection established
-    client.on_establish([&](WsClient& client) -> void {
-        std::cout << "connected: " << client.url() << std::endl;
-    });
-
-    // connection failed
-    client.on_fail([&](WsClient& client,
-                       const WsClient::CloseStatus& local_status) -> void {
-        std::cout << "failed to connect (" << local_status.code
-                  << "): " << local_status.status << std::endl;
-    });
-
-    // connection closed
-    client.on_close([&](WsClient& client,
-                        const WsClient::CloseStatus& remote_status) -> void {
-        std::cout << "closed (" << remote_status.code
-                  << "): " << remote_status.status << ", "
-                  << remote_status.reason << std::endl;
-    });
-
-    // local echo server
-    client.url("ws://127.0.0.1:8080");
-    client.connect(ws_error);
-
-    if (ws_error) {
-        std::cout << "error get connection: " << ws_error.message()
+    client.on_close([&](Client& client,
+                        const CloseStatus& close_status,
+                        const std::string& message) -> void {
+        std::cout << "Closed(" << close_status.value() << "): " << message
                   << std::endl;
-    }
-
-    else {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        // say hello
-        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        if (ws_error) {
-            std::cout << "error send message: " << ws_error.message()
-                      << std::endl;
-        }
-
-        // fuck off
-        client.disconnect(WsClient::CloseStatus(
-            WsClient::CloseStatus::Code::NORMAL, "fuck off"));
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-    }
-
-    // my echo server with tls, DO NOT mess around
-    client.url("wss://test.rayalto.top:8443");
-    client.connect(ws_error);
-
-    if (ws_error) {
-        std::cout << "error get connection: " << ws_error.message()
+    });
+    client.on_establish([&](Client& client) -> void {
+        std::cout << "Connected: " << client.url()->to_string() << std::endl;
+    });
+    client.on_receive([&](Client& client, const Message& message) -> void {
+        std::cout << "Message from " << client.url()->to_string() << " : "
+                  << (message.type() == Message::Type::TEXT
+                          ? message.text()
+                          : rayalto::utils::string::hex_string(
+                              message.binary()))
                   << std::endl;
-    }
+    });
+    client.connect(Url("wss://test.rayalto.top:8443"));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    client.send(Message("hello world"));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "call disconnect" << std::endl;
+    client.disconnect("bye", CloseStatus::NORMAL);
+    std::cout << "after disconnect" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    client.connect(Url("ws://127.0.0.1:8080"));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    client.send(Message("hello world"));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cout << "call disconnect" << std::endl;
+    client.disconnect("bye", CloseStatus::NORMAL);
+    std::cout << "after disconnect" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    else {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        // say hello
-        client.send(WsClient::MessageType::TEXT, "hello", ws_error);
-
-        if (ws_error) {
-            std::cout << "error send message: " << ws_error.message()
-                      << std::endl;
-        }
-
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-    }
     return 0;
-    // did not call disconnect, default status will be sent
 }
