@@ -23,6 +23,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_part.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/mime_parts.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/request/proxy.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/client.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/message.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/ws_client.cc
