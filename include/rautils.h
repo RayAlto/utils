@@ -12,6 +12,5 @@
 #include "rautils/misc/mime_types.h"
 #include "rautils/network/request.h"
 #include "rautils/string/strtool.h"
-#include "rautils/network/ws_client.h"
 
 #endif // RA_UTILS_RA_UTILS_HPP_

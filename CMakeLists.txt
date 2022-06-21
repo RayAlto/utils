@@ -26,8 +26,6 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/client.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/message.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/network/ws_client.cc
-  ${CMAKE_CURRENT_LIST_DIR}/src/network/ws_client/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
 )
 set(RA_UTILS_INCLUDES
@@ -38,7 +36,6 @@ find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 find_package(SQLite3 REQUIRED)
 find_package(Threads REQUIRED)
 find_package(libwebsockets REQUIRED)
-find_package(websocketpp REQUIRED)
 
 add_library(${CMAKE_PROJECT_NAME} STATIC ${RA_UTILS_SRCS})
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 17)
@@ -49,7 +46,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OpenSSL::SSL)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBWEBSOCKETS_LIBRARIES})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${LIBWEBSOCKETS_INCLUDE_DIRS})
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE websocketpp::websocketpp)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SQLite::SQLite3)
 
 if(BUILD_TESTS)
