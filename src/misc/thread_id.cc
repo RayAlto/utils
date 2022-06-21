@@ -18,7 +18,7 @@ unsigned int thread_id() {
     const std::unordered_map<std::thread::id, unsigned int>::const_iterator
         found = thread_id_map.find(thread);
     if (found == thread_id_map.end()) {
-        std::size_t id = thread_id_map.size();
+        std::size_t id = thread_id_map.size() + 1;
         thread_id_map.emplace(thread, id);
         thread_id_map_lock.unlock();
         return id;
