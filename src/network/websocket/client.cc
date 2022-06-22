@@ -1,7 +1,5 @@
 #include "rautils/network/websocket/client.h"
 
-#include <iostream>
-
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -210,12 +208,10 @@ void Client::ClientImpl::connect() {
         if (url_->host() != nullptr) {
             ws_connection_info_.address = url_->host()->c_str();
             ws_connection_info_.host = url_->host()->c_str();
-            std::cout << "connect address/host " << *url_->host() << std::endl;
         }
 
         if (url_->path() != nullptr) {
             ws_connection_info_.path = url_->path()->c_str();
-            std::cout << "connect path " << *url_->path() << std::endl;
         }
 
         if (url_->port() != nullptr) {
@@ -231,8 +227,6 @@ void Client::ClientImpl::connect() {
                 ws_context_info_.options = 0;
                 ws_connection_info_.ssl_connection = 0;
             }
-
-            std::cout << "connect port " << *url_->port() << std::endl;
         }
     }
 
@@ -479,7 +473,6 @@ void Client::ClientImpl::send(Message&& message) {
 
 void Client::ClientImpl::wake_lws_up_() {
     wake_lws_.lock();
-    std::cout << "wake up!" << std::endl;
     lws_callback_on_writable(ws_instance_);
     wake_lws_.unlock();
 }
@@ -628,7 +621,6 @@ int lws_callback(lws* wsi,
     }
 
     case /* 10 */ LWS_CALLBACK_CLIENT_WRITEABLE: {
-        std::cout << "callback client writable" << std::endl;
         if (client_impl.interrupted_) {
             const std::unique_ptr<std::uint16_t>& status =
                 client_impl.local_close_status_;
@@ -706,7 +698,6 @@ int lws_callback(lws* wsi,
     }
 
     case /* 31 */ LWS_CALLBACK_GET_THREAD_ID: {
-        std::cout << "callback on thread id" << std::endl;
         return misc::thread_id();
         break;
     }
