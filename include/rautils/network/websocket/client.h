@@ -49,6 +49,9 @@ public:
     Client& disconnect(const std::string& message,
                     const std::uint16_t& close_status);
 
+    // if connection was established
+    bool connected() const;
+
     // url
     const std::unique_ptr<general::Url>& url();
     Client& url(const general::Url& url);

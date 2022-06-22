@@ -75,6 +75,9 @@ public:
     void disconnect(const std::string& message,
                     const std::uint16_t& close_status);
 
+    // if connection was established
+    bool connected() const;
+
     // url
     const std::unique_ptr<general::Url>& url();
     void url(const general::Url& url);
@@ -310,6 +313,10 @@ void Client::ClientImpl::disconnect(const std::string& message,
     local_close_message_ = std::make_unique<std::string>(message);
     local_close_status_ = std::make_unique<std::uint16_t>(close_status);
     disconnect();
+}
+
+bool Client::ClientImpl::connected() const {
+    return !stopped_;
 }
 
 const std::unique_ptr<general::Url>& Client::ClientImpl::url() {
@@ -785,6 +792,10 @@ Client& Client::disconnect(const std::string& message,
                            const std::uint16_t& close_status) {
     impl_->disconnect(message, close_status);
     return *this;
+}
+
+bool Client::connected() const {
+    return impl_->connected();
 }
 
 const std::unique_ptr<general::Url>& Client::url() {
