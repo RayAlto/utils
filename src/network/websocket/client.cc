@@ -175,6 +175,7 @@ protected:
 
 protected:
     void wake_lws_up_();
+    void reset_config_();
 };
 
 Client::ClientImpl::ClientImpl(Client& client) : client_(client) {
@@ -476,6 +477,17 @@ void Client::ClientImpl::wake_lws_up_() {
     wake_lws_.unlock();
 }
 
+void Client::ClientImpl::reset_config_() {
+    ws_connection_info_.address = nullptr;
+    ws_connection_info_.host = nullptr;
+    ws_connection_info_.path = nullptr;
+    ws_connection_info_.port = 0;
+    ws_context_info_.options = 0;
+    ws_connection_info_.ssl_connection = 0;
+    ws_connection_info_.protocol = nullptr;
+    ws_context_ = nullptr;
+}
+
 int lws_callback(lws* wsi,
                  lws_callback_reasons reason,
                  void* user,
@@ -493,6 +505,7 @@ int lws_callback(lws* wsi,
                               : std::string(reinterpret_cast<char*>(in)));
         }
         client_impl.stopped_ = true;
+        client_impl.reset_config_();
         break;
     }
 
@@ -714,6 +727,7 @@ int lws_callback(lws* wsi,
             }
         }
         client_impl.stopped_ = true;
+        client_impl.reset_config_();
         break;
     }
 
