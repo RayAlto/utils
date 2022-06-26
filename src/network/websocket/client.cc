@@ -485,7 +485,6 @@ void Client::ClientImpl::reset_config_() {
     ws_context_info_.options = 0;
     ws_connection_info_.ssl_connection = 0;
     ws_connection_info_.protocol = nullptr;
-    ws_context_ = nullptr;
 }
 
 int lws_callback(lws* wsi,
