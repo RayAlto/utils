@@ -39,17 +39,13 @@ int main(int argc, char const* argv[]) {
     std::this_thread::sleep_for(std::chrono::seconds(1));
     client.send(Message("hello world"));
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "call disconnect" << std::endl;
     client.disconnect("bye", CloseStatus::NORMAL);
-    std::cout << "after disconnect" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
     client.connect(Url("ws://127.0.0.1:8080"));
     std::this_thread::sleep_for(std::chrono::seconds(1));
     client.send(Message("hello world"));
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "call disconnect" << std::endl;
     client.disconnect("bye", CloseStatus::NORMAL);
-    std::cout << "after disconnect" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     return 0;
