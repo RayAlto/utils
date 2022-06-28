@@ -13,6 +13,7 @@
 #include "rautils/network/general/authentication.h"
 #include "rautils/network/general/cookie.h"
 #include "rautils/network/general/header.h"
+#include "rautils/network/general/url.h"
 #include "rautils/string/strtool.h"
 
 namespace rayalto {
@@ -141,9 +142,9 @@ public:
     IpResolve& ip_resolve();
     Impl& ip_resolve(IpResolve ip_resolve);
 
-    const std::unique_ptr<std::string>& url();
-    Impl& url(const std::string& url);
-    Impl& url(std::string&& url);
+    const std::unique_ptr<general::Url>& url();
+    Impl& url(const general::Url& url);
+    Impl& url(general::Url&& url);
 
     const std::unique_ptr<general::Cookie>& cookie();
     Impl& cookie(const general::Cookie& cookie);
@@ -202,7 +203,7 @@ protected:
 
     Method method_ = Method::DEFAULT;
     IpResolve ip_resolve_ = IpResolve::WHATEVER;
-    std::unique_ptr<std::string> url_ = nullptr;
+    std::unique_ptr<general::Url> url_ = nullptr;
     std::unique_ptr<general::Cookie> cookie_ = nullptr;
     std::unique_ptr<general::Header> header_ = nullptr;
     std::unique_ptr<std::string> useragent_ = nullptr;
@@ -307,17 +308,17 @@ Request::Impl& Request::Impl::ip_resolve(IpResolve ip_resolve) {
     return *this;
 }
 
-const std::unique_ptr<std::string>& Request::Impl::url() {
+const std::unique_ptr<general::Url>& Request::Impl::url() {
     return url_;
 }
 
-Request::Impl& Request::Impl::url(const std::string& url) {
-    url_ = std::make_unique<std::string>(url);
+Request::Impl& Request::Impl::url(const general::Url& url) {
+    url_ = std::make_unique<general::Url>(url);
     return *this;
 }
 
-Request::Impl& Request::Impl::url(std::string&& url) {
-    url_ = std::make_unique<std::string>(std::move(url));
+Request::Impl& Request::Impl::url(general::Url&& url) {
+    url_ = std::make_unique<general::Url>(std::move(url));
     return *this;
 }
 
@@ -753,16 +754,16 @@ Request& Request::ip_resolve(IpResolve ip_resolve) {
     return *this;
 }
 
-const std::unique_ptr<std::string>& Request::url() {
+const std::unique_ptr<general::Url>& Request::url() {
     return impl_->url();
 }
 
-Request& Request::url(const std::string& url) {
+Request& Request::url(const general::Url& url) {
     impl_->url(url);
     return *this;
 }
 
-Request& Request::url(std::string&& url) {
+Request& Request::url(general::Url&& url) {
     impl_->url(std::move(url));
     return *this;
 }

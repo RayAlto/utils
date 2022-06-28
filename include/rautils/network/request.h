@@ -10,6 +10,7 @@
 #include "rautils/network/general/authentication.h"
 #include "rautils/network/general/cookie.h"
 #include "rautils/network/general/header.h"
+#include "rautils/network/general/url.h"
 
 namespace rayalto {
 namespace utils {
@@ -62,10 +63,10 @@ public:
     Request& ip_resolve(IpResolve ip_resolve);
 
     // get current target url
-    const std::unique_ptr<std::string>& url();
+    const std::unique_ptr<general::Url>& url();
     // set target url
-    Request& url(const std::string& url);
-    Request& url(std::string&& url);
+    Request& url(const general::Url& url);
+    Request& url(general::Url&& url);
 
     // get cookie to send for current request
     const std::unique_ptr<general::Cookie>& cookie();
