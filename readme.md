@@ -66,7 +66,7 @@ text/plain
 application/octet-stream
 ```
 
-> You can update the "[database](./src/util/mime_types_data.cc)" by running [this python script](./script/update_mime_types_data.py). The script will download & parse MIME Types from:
+> You can update the "[database](./src/misc/mime_types_data.cc)" by running [this python script](./script/update_mime_types_data.py). The script will download & parse MIME Types from:
 >
 > - [Apache HTTPD](https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types)
 > - [Nginx](https://hg.nginx.org/nginx/raw-file/default/conf/mime.types)
