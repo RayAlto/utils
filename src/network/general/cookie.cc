@@ -28,11 +28,17 @@ Cookie::Cookie(Cookie&& cookie) noexcept :
     misc::DictHandler(std::move(cookie.map_)) {}
 
 Cookie& Cookie::operator=(const Cookie& cookie) {
+    if (this == &cookie) {
+        return *this;
+    }
     this->map_ = cookie.map_;
     return *this;
 }
 
 Cookie& Cookie::operator=(Cookie&& cookie) noexcept {
+    if (this == &cookie) {
+        return *this;
+    }
     this->map_ = std::move(cookie.map_);
     return *this;
 }

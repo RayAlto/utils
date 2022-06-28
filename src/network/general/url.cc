@@ -73,6 +73,9 @@ Url::Url(const Url& url) :
                  : std::make_unique<std::string>(*url.url_str_)) {}
 
 Url& Url::operator=(const Url& url) {
+    if (this == &url) {
+        return *this;
+    }
     scheme_ = url.scheme_ == nullptr
                   ? nullptr
                   : std::make_unique<std::string>(*url.scheme_);

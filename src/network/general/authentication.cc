@@ -21,6 +21,9 @@ Authentication::Authentication(Authentication&& authentication) noexcept :
 
 Authentication& Authentication::operator=(
     const Authentication& authentication) {
+    if (this == &authentication) {
+        return *this;
+    }
     username_ = authentication.username_;
     password_ = authentication.password_;
     return *this;
@@ -28,6 +31,9 @@ Authentication& Authentication::operator=(
 
 Authentication& Authentication::operator=(
     Authentication&& authentication) noexcept {
+    if (this == &authentication) {
+        return *this;
+    }
     username_ = std::move(authentication.username_);
     password_ = std::move(authentication.password_);
     return *this;

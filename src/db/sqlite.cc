@@ -48,9 +48,13 @@ Sqlite::SqliteImpl::SqliteImpl(SqliteImpl&& old) noexcept :
     old.sqlite3_ = nullptr;
 }
 
-Sqlite::SqliteImpl& Sqlite::SqliteImpl::operator=(SqliteImpl&& old) noexcept {
-    sqlite3_ = old.sqlite3_;
-    old.sqlite3_ = nullptr;
+Sqlite::SqliteImpl& Sqlite::SqliteImpl::operator=(
+    SqliteImpl&& sqlite_impl) noexcept {
+    if (this == &sqlite_impl) {
+        return *this;
+    }
+    sqlite3_ = sqlite_impl.sqlite3_;
+    sqlite_impl.sqlite3_ = nullptr;
     return *this;
 }
 
@@ -159,11 +163,14 @@ Sqlite::Cursor::CursorImpl::CursorImpl(CursorImpl&& old) noexcept :
 }
 
 Sqlite::Cursor::CursorImpl& Sqlite::Cursor::CursorImpl::operator=(
-    CursorImpl&& old) noexcept {
-    sqlite3_ = old.sqlite3_;
-    sqlite3_stmt_ = old.sqlite3_stmt_;
-    old.sqlite3_ = nullptr;
-    old.sqlite3_stmt_ = nullptr;
+    CursorImpl&& cursor_impl) noexcept {
+    if (this == &cursor_impl) {
+        return *this;
+    }
+    sqlite3_ = cursor_impl.sqlite3_;
+    sqlite3_stmt_ = cursor_impl.sqlite3_stmt_;
+    cursor_impl.sqlite3_ = nullptr;
+    cursor_impl.sqlite3_stmt_ = nullptr;
     return *this;
 }
 
