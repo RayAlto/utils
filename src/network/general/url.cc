@@ -321,7 +321,7 @@ void Url::from_string_(const std::string& str) {
                 str.substr(host_start_pos, host_end_pos - host_start_pos));
         }
 
-        path_start_pos = host_end_pos + 1;
+        path_start_pos = host_end_pos;
 
         if (str[host_end_pos] == ':') {
             // port subcomponent
