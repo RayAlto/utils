@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
+
 project(
   ra-utils
   VERSION 1.0
   LANGUAGES CXX)
+
 option(BUILD_TESTS "Build tests" ON)
+
 set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/codec.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/diffie_hellman.cc
@@ -27,9 +30,15 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/message.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/system/subprocess.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/system/subprocess/args.cc
 )
+
 set(RA_UTILS_INCLUDES
   ${CMAKE_CURRENT_LIST_DIR}/include/)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBUV REQUIRED libuv)
 
 find_package(CURL REQUIRED COMPONENTS HTTP HTTPS SSL)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
@@ -47,6 +56,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Threads::Threads)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBWEBSOCKETS_LIBRARIES})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${LIBWEBSOCKETS_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SQLite::SQLite3)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBUV_LIBRARIES})
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${LIBUV_INCLUDE_DIRS})
 
 if(BUILD_TESTS)
   add_subdirectory(test)
