@@ -8,6 +8,8 @@ project(
 option(BUILD_TESTS "Build tests" ON)
 
 set(RA_UTILS_SRCS
+  ${CMAKE_CURRENT_LIST_DIR}/src/barcode/qrcode.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/barcode/qrcode/result.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/codec.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/diffie_hellman.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/crypto/encrypt.cc
@@ -45,6 +47,7 @@ find_package(OpenSSL REQUIRED COMPONENTS Crypto SSL)
 find_package(SQLite3 REQUIRED)
 find_package(Threads REQUIRED)
 find_package(libwebsockets REQUIRED)
+find_package(ZXing REQUIRED)
 
 add_library(${CMAKE_PROJECT_NAME} STATIC ${RA_UTILS_SRCS})
 set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 17)
@@ -58,6 +61,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${LIBWEBSOCKETS_INCLUDE
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SQLite::SQLite3)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBUV_LIBRARIES})
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${LIBUV_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ZXing::ZXing)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
