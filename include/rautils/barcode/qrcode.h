@@ -22,7 +22,17 @@ public:
         H /* High, 30% */
     };
     // mask
-    enum class Mask : std::uint8_t { M0, M1, M2, M3, M4, M5, M6, M7, AUTO };
+    enum class Mask : std::uint8_t {
+        M0, /* 000 */
+        M1, /* 001 */
+        M2, /* 010 */
+        M3, /* 011 */
+        M4, /* 100 */
+        M5, /* 101 */
+        M6, /* 110 */
+        M7, /* 111 */
+        AUTO
+    };
 
 public:
     Qrcode() = default;
@@ -33,27 +43,34 @@ public:
 
     virtual ~Qrcode() = default;
 
+    // margin of qr code
     const std::uint8_t& margin() const;
     std::uint8_t& margin();
     Qrcode& margin(const std::uint8_t& margin);
     Qrcode& margin(std::uint8_t&& margin);
 
+    // version of qr code, should be between 1 and 40
     const std::uint8_t& version() const;
     std::uint8_t& version();
     Qrcode& version(const std::uint8_t& version);
     Qrcode& version(std::uint8_t&& version);
 
+    // error correction level
     const EC& error_correction_level() const;
     EC& error_correction_level();
     Qrcode& error_correction_level(const EC& ec);
     Qrcode& error_correction_level(EC&& ec);
 
+    // mask
     const Mask& mask() const;
     Mask& mask();
     Qrcode& mask(const Mask& mask);
     Qrcode& mask(Mask&& mask);
 
+    // encode utf-8 text
     Result encode(const std::string& text);
+
+    // encode binary data
     Result encode(const std::vector<unsigned char>& binary);
 
 protected:
@@ -85,15 +102,21 @@ public:
     Result& reverse_color_in_ostream(bool&& reverse);
     const bool& reverse_color_in_ostream() const;
     bool& reverse_color_in_ostream();
+
     friend std::ostream& operator<<(std::ostream& os, const Result& result);
+
     std::string to_svg(const std::size_t& rect_size = 16) const;
+
     bool get(const std::size_t& x, const std::size_t& y) const;
+
     Result& set(const std::size_t& x,
                 const std::size_t& y,
                 const bool& value = true);
 
     bool empty() const noexcept;
+
     Result& reset() noexcept;
+
     Result& resize(const std::size_t& width, const std::size_t& height);
     Result& resize(std::size_t&& width, std::size_t&& height);
     Result& resize(const std::size_t& width,
@@ -102,7 +125,9 @@ public:
     Result& resize(std::size_t&& width,
                    std::size_t&& height,
                    const bool& value);
+
     Result& flip();
+
     friend bool operator==(const Result& lhs, const Result& rhs);
 
 protected:
