@@ -26,16 +26,25 @@ public:
 
     virtual ~Subprocess() = default;
 
+    // args to spawn subprocess
     const Args& args() const;
     Args& args();
     Subprocess& args(const Args& args);
     Subprocess& args(Args&& args);
 
+    // spawn subprocess and wait until it exits
     Subprocess& run();
 
+    // if the subprocess exited
     const bool& exited() const;
+
+    // subprocess exit status
     const std::int64_t& get_exit_status() const;
+
+    // subprocess stdout
     const std::string& get_stdout() const;
+
+    // subprocess stderr
     const std::string& get_stderr() const;
 
 protected:
@@ -68,6 +77,7 @@ public:
 
     virtual ~Args();
 
+    // to pass to libuv
     char** c_str_array();
 
 public: /* stuff comes from std::vector<std::string> */
