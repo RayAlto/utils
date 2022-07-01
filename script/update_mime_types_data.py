@@ -24,7 +24,7 @@ output_template = '''\
  * update time: ${time} (UTC)
  */
 
-#include "rautils/mime_types.h"
+#include "rautils/misc/mime_types.h"
 
 #include <map>
 #include <string>
