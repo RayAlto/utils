@@ -14,7 +14,7 @@ import requests
 from datetime import datetime
 from os import path
 
-output_file_dir = '../src/util/mime_types_data.cc'
+output_file_dir = '../src/misc/mime_types_data.cc'
 mime_type_dict = {}
 output_template = '''\
 /**
