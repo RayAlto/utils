@@ -487,12 +487,41 @@ int main(int argc, char const *argv[]) {
 
 </details>
 
-### 9. Qrcode
+### 9. Thread id
+
+Get thread id of type uint32 count from 1
+
+<details>
+<summary>Example of 100 threads</summary>
+
+```c++
+#include <chrono>
+#include <cstdio>
+#include <thread>
+
+#include "rautils/misc/thread_id.h"
+
+int main(int argc, char const *argv[]) {
+    for (int i = 0; i < 100; ++i) {
+        std::thread t([&]() -> void {
+            std::printf("%d\n", rayalto::utils::misc::thread_id());
+            std::this_thread::sleep_for(std::chrono::milliseconds(90));
+        });
+        t.detach();
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    return 0;
+}
+```
+
+</details>
+
+### 10. Qrcode
 
 Wrapper for ZXing-cpp
 
 <details>
-<summary></summary>
+<summary>Generate QR code of "hello world!"</summary>
 
 ```c++
 #include <iostream>
