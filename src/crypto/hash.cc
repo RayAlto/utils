@@ -8,10 +8,7 @@
 #include "openssl/evp.h"
 #include "openssl/ossl_typ.h"
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace hash {
+namespace rayalto::utils::crypto::hash {
 
 std::vector<unsigned char> sha256(const std::vector<unsigned char>& message) {
     return sha256(message.data(), message.size());
@@ -75,7 +72,4 @@ std::vector<unsigned char> sha256(const unsigned char* message,
     return result;
 }
 
-} // namespace hash
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::hash

@@ -3,10 +3,7 @@
 
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 class Authentication {
 public:
@@ -17,7 +14,7 @@ public:
     Authentication& operator=(const Authentication& authentication);
     Authentication& operator=(Authentication&& authentication) noexcept;
 
-    virtual ~Authentication();
+    virtual ~Authentication() = default;
 
     void username(const std::string& username);
     void username(std::string&& username);
@@ -39,9 +36,6 @@ protected:
     std::string auth_str_;
 };
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general
 
 #endif // RA_UTILS_RAUTILS_NETWORK_GENERAL_H_

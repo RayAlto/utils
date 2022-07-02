@@ -3,16 +3,10 @@
 
 #include "rautils/misc/map_handler.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 using Header = misc::DictIcHandler;
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general
 
 #endif // RA_UTILS_RAUTILS_NETWORK_GENERAL_H_

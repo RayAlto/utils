@@ -7,17 +7,13 @@
 #include <variant>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 class Message {
 public:
     static const std::size_t MAX_LENGTH;
     enum class Type : std::uint8_t { TEXT, BINARY };
 
-public:
     Message() = default;
     Message(const Message&) = default;
     Message(Message&&) noexcept = default;
@@ -26,33 +22,32 @@ public:
 
     virtual ~Message() = default;
 
-    Message(const std::string& text);
-    Message(std::string&& text);
+    explicit Message(const std::string& text);
+    explicit Message(std::string&& text);
 
-    Message(const std::vector<unsigned char>& binary);
-    Message(std::vector<unsigned char>&& binary);
+    explicit Message(const std::vector<unsigned char>& binary);
+    explicit Message(std::vector<unsigned char>&& binary);
 
-    const Type& type() const;
+    [[nodiscard]] const Type& type() const;
     Type& type();
 
     Message& type(const Type& type);
-    Message& type(Type&& type);
 
-    const std::string& text() const;
+    [[nodiscard]] const std::string& text() const;
     std::string& text();
 
     Message& text(const std::string& text);
     Message& text(std::string&& text);
 
-    const std::vector<unsigned char>& binary() const;
+    [[nodiscard]] const std::vector<unsigned char>& binary() const;
     std::vector<unsigned char>& binary();
 
     Message& binary(const std::vector<unsigned char>& binary);
     Message& binary(std::vector<unsigned char>&& binary);
 
-    bool empty() const;
+    [[nodiscard]] bool empty() const;
 
-    std::size_t length() const;
+    [[nodiscard]] std::size_t length() const;
 
     void reserve(std::size_t new_capacity);
 
@@ -60,12 +55,9 @@ public:
 
 protected:
     std::variant<std::string, std::vector<unsigned char>> data_;
-    Type type_;
+    Type type_ = Type::TEXT;
 };
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket
 
 #endif // RA_UTILS_RAUTILS_NETWORK_WEBSOCKET_MESSAGE_H_

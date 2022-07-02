@@ -12,10 +12,7 @@
 #include "rautils/network/websocket/close_status.h"
 #include "rautils/network/websocket/message.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 class Client {
 public:
@@ -28,7 +25,6 @@ public:
     using CloseCallback =
         std::function<void(Client&, const CloseStatus&, const std::string&)>;
 
-public:
     Client();
     Client(const Client&) = delete;
     Client(Client&&) noexcept;
@@ -45,12 +41,13 @@ public:
     Client& disconnect(const CloseStatus& close_status);
     Client& disconnect(const std::uint16_t& close_status);
     Client& disconnect(const std::string& message,
-                    const CloseStatus& close_status = CloseStatus::NORMAL);
+                       const CloseStatus& close_status =
+                           static_cast<CloseStatus>(CloseStatus::NORMAL));
     Client& disconnect(const std::string& message,
-                    const std::uint16_t& close_status);
+                       const std::uint16_t& close_status);
 
     // if connection was established
-    bool connected() const;
+    [[nodiscard]] bool connected() const;
 
     // url
     const std::unique_ptr<general::Url>& url();
@@ -114,9 +111,6 @@ protected:
     std::unique_ptr<ClientImpl> impl_;
 };
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket
 
 #endif // RA_UTILS_RAUTILS_NETWORK_WEBSOCKET_H_

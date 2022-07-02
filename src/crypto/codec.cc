@@ -6,10 +6,7 @@
 
 #include "openssl/evp.h"
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace codec {
+namespace rayalto::utils::crypto::codec {
 
 std::vector<unsigned char> base64_encode(
     const std::vector<unsigned char>& input_data) {
@@ -41,8 +38,9 @@ std::vector<unsigned char> base64_encode(const unsigned char* input_data) {
 std::vector<unsigned char> base64_encode(const unsigned char* input_data,
                                          const std::size_t& input_length) {
     unsigned char result[((input_length / 3) + 2) * 4];
-    int result_length = EVP_EncodeBlock(result, input_data, input_length);
-    return std::vector<unsigned char>(result, result + result_length);
+    int result_length =
+        EVP_EncodeBlock(result, input_data, static_cast<int>(input_length));
+    return {result, result + result_length};
 }
 
 std::vector<unsigned char> base64_decode(
@@ -75,7 +73,8 @@ std::vector<unsigned char> base64_decode(const unsigned char* input_data) {
 std::vector<unsigned char> base64_decode(const unsigned char* input_data,
                                          const std::size_t& input_length) {
     unsigned char result[((input_length / 4) + 1) * 3];
-    int result_length = EVP_DecodeBlock(result, input_data, input_length);
+    int result_length =
+        EVP_DecodeBlock(result, input_data, static_cast<int>(input_length));
     if (result_length == -1) {
         // failed to decode
         return std::vector<unsigned char> {};
@@ -87,10 +86,7 @@ std::vector<unsigned char> base64_decode(const unsigned char* input_data,
     else if (input_length > 2 && input_data[input_length - 1] == '=') {
         result_length -= 1;
     }
-    return std::vector<unsigned char>(result, result + result_length);
+    return {result, result + result_length};
 }
 
-} // namespace codec
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::codec

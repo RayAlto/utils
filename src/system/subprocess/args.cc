@@ -6,9 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace system {
+namespace rayalto::utils::system {
 
 bool operator==(const Subprocess::Args& lhs, const Subprocess::Args& rhs) {
     return lhs.args_ == rhs.args_;
@@ -118,7 +116,7 @@ std::size_t Subprocess::Args::max_size() const noexcept {
     return args_.max_size();
 }
 
-void Subprocess::Args::reserve(const std::size_t new_cap) {
+void Subprocess::Args::reserve(const std::size_t& new_cap) {
     return args_.reserve(new_cap);
 }
 
@@ -235,6 +233,4 @@ char** Subprocess::Args::c_str_array() {
     return data_;
 }
 
-} // namespace system
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::system

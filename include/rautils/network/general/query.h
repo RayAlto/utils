@@ -3,16 +3,10 @@
 
 #include "rautils/misc/map_handler.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 using Query = misc::DictHandler;
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general
 
 #endif // RA_UTILS_RAUTILS_NETWORK_GENERAL_QUERY_H_

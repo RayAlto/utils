@@ -3,10 +3,7 @@
 #include <string>
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 Authentication::Authentication(const std::string& username,
                                const std::string& password) :
@@ -38,8 +35,6 @@ Authentication& Authentication::operator=(
     password_ = std::move(authentication.password_);
     return *this;
 }
-
-Authentication::~Authentication() {}
 
 void Authentication::username(const std::string& username) {
     username_ = username;
@@ -86,7 +81,4 @@ const char* Authentication::c_str() {
     return auth_str_.c_str();
 }
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general

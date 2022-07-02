@@ -3,20 +3,12 @@
 #include <cstdint>
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 CloseStatus::CloseStatus(const Code& code) :
     value_(static_cast<std::uint16_t>(code)) {}
 
-CloseStatus::CloseStatus(Code&& code) :
-    value_(static_cast<std::uint16_t>(std::move(code))) {}
-
 CloseStatus::CloseStatus(const std::uint16_t& value) : value_(value) {}
-
-CloseStatus::CloseStatus(std::uint16_t&& value) : value_(std::move(value)) {}
 
 const std::uint16_t& CloseStatus::value() const {
     return value_;
@@ -53,7 +45,4 @@ bool operator!=(const CloseStatus& lv, const CloseStatus& rv) {
     return !operator==(lv, rv);
 }
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket

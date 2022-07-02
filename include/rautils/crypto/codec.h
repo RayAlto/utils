@@ -4,10 +4,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace codec {
+namespace rayalto::utils::crypto::codec {
 
 // base64 encode
 std::vector<unsigned char> base64_encode(
@@ -35,9 +32,6 @@ std::vector<unsigned char> base64_decode(const unsigned char* input_data);
 std::vector<unsigned char> base64_decode(const unsigned char* input_data,
                                          const std::size_t& input_length);
 
-} // namespace codec
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::codec
 
 #endif // RA_UTILS_CRYPTO_CODEC_H_

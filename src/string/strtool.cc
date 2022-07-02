@@ -14,9 +14,7 @@
 #include <utility>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace string {
+namespace rayalto::utils::string {
 
 unsigned char hex2bin(const char& c) {
     if (c >= '0' && c <= '9') {
@@ -39,7 +37,7 @@ std::string lstrip(std::string& str) {
     str.erase(
         str.begin(),
         std::find_if(str.begin(), str.end(), [](unsigned char ch) -> bool {
-            return !std::isspace(ch);
+            return std::isspace(ch) == 0;
         }));
     return str;
 }
@@ -50,7 +48,7 @@ std::string lstrip(const std::string& str) {
         result.begin(),
         std::find_if(
             result.begin(), result.end(), [](unsigned char ch) -> bool {
-                return !std::isspace(ch);
+                return std::isspace(ch) == 0;
             }));
     return result;
 }
@@ -60,11 +58,12 @@ std::string rstrip(std::string&& str) {
 }
 
 std::string rstrip(std::string& str) {
-    str.erase(std::find_if(str.rbegin(),
-                           str.rend(),
-                           [](unsigned char ch) { return !std::isspace(ch); })
-                  .base(),
-              str.end());
+    str.erase(
+        std::find_if(str.rbegin(),
+                     str.rend(),
+                     [](unsigned char ch) { return std::isspace(ch) == 0; })
+            .base(),
+        str.end());
     return str;
 }
 
@@ -73,7 +72,7 @@ std::string rstrip(const std::string& str) {
     result.erase(
         std::find_if(result.rbegin(),
                      result.rend(),
-                     [](unsigned char ch) { return !std::isspace(ch); })
+                     [](unsigned char ch) { return std::isspace(ch) == 0; })
             .base(),
         result.end());
     return result;
@@ -106,7 +105,7 @@ std::string lstrip(std::string& str, const std::unordered_set<char>& chars) {
     str.erase(str.begin(),
               std::find_if(
                   str.begin(), str.end(), [&chars](unsigned char ch) -> bool {
-                      return (chars.count(ch) == 0);
+                      return (chars.count(static_cast<char>(ch)) == 0);
                   }));
     return str;
 }
@@ -121,7 +120,7 @@ std::string lstrip(const std::string& str,
         result.begin(),
         std::find_if(
             result.begin(), result.end(), [&chars](unsigned char ch) -> bool {
-                return (chars.count(ch) == 0);
+                return (chars.count(static_cast<char>(ch)) == 0);
             }));
     return result;
 }
@@ -134,10 +133,11 @@ std::string rstrip(std::string& str, const std::unordered_set<char>& chars) {
     if (chars.empty()) {
         return rstrip(str);
     }
-    str.erase(std::find_if(
-                  str.rbegin(),
-                  str.rend(),
-                  [&chars](unsigned char ch) { return (chars.count(ch) == 0); })
+    str.erase(std::find_if(str.rbegin(),
+                           str.rend(),
+                           [&chars](unsigned char ch) {
+                               return (chars.count(static_cast<char>(ch)) == 0);
+                           })
                   .base(),
               str.end());
     return str;
@@ -149,13 +149,14 @@ std::string rstrip(const std::string& str,
     if (chars.empty()) {
         return rstrip(result);
     }
-    result.erase(std::find_if(result.rbegin(),
-                              result.rend(),
-                              [&chars](unsigned char ch) {
-                                  return (chars.count(ch) == 0);
-                              })
-                     .base(),
-                 result.end());
+    result.erase(
+        std::find_if(result.rbegin(),
+                     result.rend(),
+                     [&chars](unsigned char ch) {
+                         return (chars.count(static_cast<char>(ch)) == 0);
+                     })
+            .base(),
+        result.end());
     return result;
 }
 
@@ -325,24 +326,12 @@ bool compare_ic(const std::string& lv, const std::string& rv) {
 }
 
 std::string join(const std::string& str,
-                 const std::initializer_list<std::string>& between) {
+                 std::initializer_list<std::string> between) {
     return std::accumulate(std::next(between.begin()),
                            between.end(),
                            *between.begin(),
                            [&str](std::string l, std::string r) -> std::string {
-                               return std::move(l) + std::move(str)
-                                      + std::move(r);
-                           });
-}
-
-std::string join(std::string&& str,
-                 std::initializer_list<std::string>&& between) {
-    return std::accumulate(std::next(between.begin()),
-                           between.end(),
-                           *between.begin(),
-                           [&str](std::string l, std::string r) -> std::string {
-                               return std::move(l) + std::move(str)
-                                      + std::move(r);
+                               return std::move(l) + str + std::move(r);
                            });
 }
 
@@ -434,16 +423,16 @@ std::string hex_string(const unsigned char* data,
                        const bool& upper_case) {
     char result[data_length * 2 + 1];
     result[data_length * 2] = '\0';
-    unsigned char hex_map_lower[] {"0123456789abcdef"};
-    unsigned char hex_map_upper[] {"0123456789ABCDEF"};
-    unsigned char* hex_str = upper_case ? hex_map_upper : hex_map_lower;
-    for (int i = 0; i < data_length; ++i) {
+    char hex_map_lower[] {"0123456789abcdef"};
+    char hex_map_upper[] {"0123456789ABCDEF"};
+    char* hex_str = upper_case ? hex_map_upper : hex_map_lower;
+    for (std::size_t i = 0; i < data_length; ++i) {
         // clang-format off
         result[2 * i    ] = hex_str[(data[i] >> 4) & 0x0f];
         result[2 * i + 1] = hex_str[ data[i]       & 0x0f];
         // clang-format on
     }
-    return std::string(result);
+    return {result};
 }
 
 std::string data_string(const std::vector<unsigned char>& data) {
@@ -470,7 +459,7 @@ std::string data_string(const char* data) {
 }
 
 std::string data_string(const char* data, const std::size_t& data_length) {
-    return std::string(data, data_length);
+    return {data, data_length};
 }
 
 std::vector<unsigned char> to_data(const std::string& source) {
@@ -501,7 +490,7 @@ std::vector<unsigned char> to_data(const unsigned char* source) {
 
 std::vector<unsigned char> to_data(const unsigned char* source,
                                    const std::size_t& source_length) {
-    return std::vector<unsigned char>(source, source + source_length);
+    return {source, source + source_length};
 }
 
 std::vector<unsigned char> parse_hex(const std::string& hex) {
@@ -520,8 +509,8 @@ std::vector<unsigned char> parse_hex(const char* hex) {
 std::vector<unsigned char> parse_hex(const char* hex,
                                      const std::size_t& hex_length) {
     std::vector<unsigned char> result;
-    unsigned char b;
-    std::size_t i;
+    unsigned char b = 0;
+    std::size_t i = 0;
     for (i = 0; i < hex_length - 1; i += 2) {
         b = 0;
         b |= ((hex2bin(hex[i]) << 4) & 0xf0);
@@ -536,6 +525,4 @@ std::vector<unsigned char> parse_hex(const char* hex,
     return result;
 }
 
-} // namespace string
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::string

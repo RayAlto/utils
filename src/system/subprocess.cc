@@ -8,13 +8,11 @@
 
 #include "uv.h"
 
-namespace rayalto {
-namespace utils {
-namespace system {
+namespace rayalto::utils::system {
 
 namespace {
 
-static uv_alloc_cb uv_alloc =
+const uv_alloc_cb uv_alloc =
     [](uv_handle_t*, std::size_t suggested_size, uv_buf_t* uv_buf) -> void {
     uv_buf->base = new char[suggested_size] {};
     uv_buf->len = suggested_size;
@@ -113,7 +111,7 @@ Subprocess& Subprocess::run() {
     uv_process_options.stdio = uv_process_stdio;
 
     int uv_return_code = uv_spawn(&uv_loop, &uv_process, &uv_process_options);
-    if (uv_return_code) {
+    if (uv_return_code != 0) {
         exited_ = true;
         exit_status_ = -1;
         stderr_ = uv_err_name(uv_return_code);
@@ -132,9 +130,7 @@ Subprocess& Subprocess::run() {
                 Result& result = *reinterpret_cast<Result*>(uv_stream->data);
                 result.stdout_.append(uv_buf->base, uv_buf->len);
             }
-            if (uv_buf->base != nullptr) {
-                delete[] uv_buf->base;
-            }
+            delete[] uv_buf->base;
             if (nread == UV_EOF) {
                 uv_close(reinterpret_cast<uv_handle_t*>(uv_stream), nullptr);
             }
@@ -149,9 +145,7 @@ Subprocess& Subprocess::run() {
                 Result& result = *reinterpret_cast<Result*>(uv_stream->data);
                 result.stderr_.append(uv_buf->base, uv_buf->len);
             }
-            if (uv_buf->base != nullptr) {
-                delete[] uv_buf->base;
-            }
+            delete[] uv_buf->base;
             if (nread == UV_EOF) {
                 uv_close(reinterpret_cast<uv_handle_t*>(uv_stream), nullptr);
             }
@@ -178,6 +172,4 @@ const std::string& Subprocess::get_stderr() const {
     return stderr_;
 }
 
-} // namespace system
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::system

@@ -3,9 +3,7 @@
 #include <cstddef>
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 namespace {
 
@@ -33,6 +31,4 @@ std::string MimeTypes::get(const std::string& filename,
 const std::string MimeTypes::default_text {"text/plain"};
 const std::string MimeTypes::default_binary {"application/octet-stream"};
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc

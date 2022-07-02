@@ -4,21 +4,17 @@
 #include <memory>
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 struct Status {
     bool error = false;
     std::unique_ptr<std::string> message = nullptr;
 
-    operator bool() const noexcept {
+    explicit operator bool() const noexcept {
         return error;
     }
 };
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc
 
 #endif // RA_UTILS_RAUTILS_MISC_STATUS_H_

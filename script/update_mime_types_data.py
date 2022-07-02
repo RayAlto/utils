@@ -29,9 +29,7 @@ output_template = '''\
 #include <map>
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 // clang-format off
 const std::map<std::string, std::string> MimeTypes::ext2mime_ {
@@ -39,9 +37,7 @@ ${data}
 };
 // clang-format on
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto'''
+} // namespace rayalto::utils::misc'''
 
 
 def load_nginx_mime_type() -> None:

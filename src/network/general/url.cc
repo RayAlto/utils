@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -11,10 +12,7 @@
 #include "rautils/network/general/query.h"
 #include "rautils/string/strtool.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 Url::Url(const std::string& url) {
     from_string_(url);
@@ -38,14 +36,14 @@ Url::Url(const std::string& scheme,
 Url::Url(std::string&& scheme,
          Authentication&& userinfo,
          std::string&& host,
-         std::uint16_t&& port,
+         const std::uint16_t& port,
          std::string&& path,
          Query&& query,
          std::string&& fragment) :
     scheme_(std::make_unique<std::string>(std::move(scheme))),
     userinfo_(std::make_unique<Authentication>(std::move(userinfo))),
     host_(std::make_unique<std::string>(std::move(host))),
-    port_(std::make_unique<std::uint16_t>(std::move(port))),
+    port_(std::make_unique<std::uint16_t>(port)),
     path_(std::make_unique<std::string>(std::move(path))),
     query_(std::make_unique<Query>(std::move(query))),
     fragment_(std::make_unique<std::string>(std::move(fragment))) {}
@@ -165,11 +163,6 @@ Url& Url::port(const std::uint16_t& port) {
     return *this;
 }
 
-Url& Url::port(std::uint16_t&& port) {
-    port_ = std::make_unique<std::uint16_t>(std::move(port));
-    return *this;
-}
-
 Url& Url::port(std::nullptr_t) {
     port_ = nullptr;
     return *this;
@@ -242,6 +235,7 @@ const char* Url::c_str() const {
     return url_str_->c_str();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void Url::from_string_(const std::string& str) {
     std::string::const_iterator str_begin_iter = str.begin();
 
@@ -272,9 +266,9 @@ void Url::from_string_(const std::string& str) {
             // has userinfo subcomponent
             host_start_pos = userinfo_end_pos + 1;
             std::string::const_iterator userinfo_start_iter =
-                str_begin_iter + scheme_end_pos + 3;
+                str_begin_iter + static_cast<std::int64_t>(scheme_end_pos) + 3;
             std::string::const_iterator userinfo_end_iter =
-                str_begin_iter + userinfo_end_pos;
+                str_begin_iter + static_cast<std::int64_t>(userinfo_end_pos);
             std::string::const_iterator username_end_iter =
                 std::find(userinfo_start_iter, userinfo_end_iter, ':');
             if (username_end_iter == userinfo_end_iter) {
@@ -329,7 +323,7 @@ void Url::from_string_(const std::string& str) {
         if (str[host_end_pos] == ':') {
             // port subcomponent
             std::string::const_iterator port_start_iter =
-                str_begin_iter + host_end_pos + 1;
+                str_begin_iter + static_cast<std::int64_t>(host_end_pos) + 1;
             std::string::const_iterator port_end_iter =
                 std::find_if_not(port_start_iter,
                                  str.end(),
@@ -368,13 +362,10 @@ void Url::from_string_(const std::string& str) {
             }
             return;
         }
-        else {
-            for (const std::string& pair_str :
-                 string::split(str.substr(query_start_pos,
-                                          query_end_pos - query_start_pos),
-                               '&')) {
-                query_->update(string::split_once(pair_str, '='));
-            }
+        for (const std::string& pair_str : string::split(
+                 str.substr(query_start_pos, query_end_pos - query_start_pos),
+                 '&')) {
+            query_->update(string::split_once(pair_str, '='));
         }
     }
 
@@ -387,8 +378,6 @@ void Url::from_string_(const std::string& str) {
             std::make_unique<std::string>(str.substr(fragment_start_pos));
         return;
     }
-
-    return;
 }
 
 void Url::form_string_() const {
@@ -430,7 +419,4 @@ void Url::form_string_() const {
     }
 }
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general

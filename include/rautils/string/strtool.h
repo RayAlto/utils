@@ -9,9 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace string {
+namespace rayalto::utils::string {
 
 // trim out space characters from string (from start)
 std::string lstrip(std::string&& str);
@@ -99,9 +97,8 @@ bool compare_ic(const std::string& lv, const std::string& rv);
 
 // string join
 std::string join(const std::string& str,
-                 const std::initializer_list<std::string>& between);
-std::string join(std::string&& str,
-                 std::initializer_list<std::string>&& between);
+                 std::initializer_list<std::string> between);
+
 template <typename Iter>
 std::string join(std::string&& str, Iter begin, Iter end) {
     return std::accumulate(std::next(begin),
@@ -172,8 +169,6 @@ std::vector<unsigned char> parse_hex(const char* hex);
 std::vector<unsigned char> parse_hex(const char* hex,
                                      const std::size_t& hex_length);
 
-} // namespace string
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::string
 
 #endif // RA_UTILS_STRING_STRTOOL_HPP_

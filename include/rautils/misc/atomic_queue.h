@@ -6,9 +6,7 @@
 #include <queue>
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 template <typename T>
 class AtomicQueue {
@@ -18,8 +16,8 @@ public:
     AtomicQueue(AtomicQueue&&) noexcept = default;
     AtomicQueue& operator=(const AtomicQueue&) = default;
     AtomicQueue& operator=(AtomicQueue&&) noexcept = default;
-    AtomicQueue(const std::queue<T>& queue) : queue_(queue) {}
-    AtomicQueue(std::queue<T>&& queue) : queue_(std::move(queue)) {}
+    explicit AtomicQueue(const std::queue<T>& queue) : queue_(queue) {}
+    explicit AtomicQueue(std::queue<T>&& queue) : queue_(std::move(queue)) {}
 
     virtual ~AtomicQueue() = default;
 
@@ -74,8 +72,6 @@ protected:
     std::mutex mutex_;
 };
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc
 
 #endif // RA_UTILS_RAUTILS_MISC_ATOMIC_QUEUE_H_

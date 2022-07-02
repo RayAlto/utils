@@ -2,9 +2,7 @@
 
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace network {
+namespace rayalto::utils::network {
 
 bool& Request::MimePart::is_file() {
     return is_file_;
@@ -16,11 +14,6 @@ const bool& Request::MimePart::is_file() const {
 
 Request::MimePart& Request::MimePart::is_file(const bool& file) {
     is_file_ = file;
-    return *this;
-}
-
-Request::MimePart& Request::MimePart::is_file(bool&& file) {
-    is_file_ = std::move(file);
     return *this;
 }
 
@@ -83,6 +76,4 @@ Request::MimePart& Request::MimePart::file_name(std::string&& file_name) {
     return *this;
 }
 
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network

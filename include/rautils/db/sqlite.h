@@ -10,16 +10,13 @@
 
 #include "rautils/misc/status.h"
 
-namespace rayalto {
-namespace utils {
-namespace db {
+namespace rayalto::utils::db {
 
 class Sqlite {
 public:
     class Cursor;
     class Column;
 
-public:
     Sqlite();
     Sqlite(const Sqlite&) = delete;
     Sqlite(Sqlite&&) noexcept = default;
@@ -31,7 +28,7 @@ public:
     Sqlite& connect(const std::string& uri, misc::Status& status);
     Sqlite& connect(std::string&& uri, misc::Status& status);
 
-    const std::string& uri() const;
+    [[nodiscard]] const std::string& uri() const;
 
     Cursor cursor();
 
@@ -44,7 +41,6 @@ class Sqlite::Cursor {
 public:
     friend class Sqlite;
 
-public:
     Cursor(const Cursor&) = delete;
     Cursor(Cursor&&) noexcept = default;
     Cursor& operator=(const Cursor&) = delete;
@@ -59,7 +55,7 @@ public:
     Cursor& prepare(const std::string& statement, misc::Status& status);
     Cursor& prepare(std::string&& statement, misc::Status& status);
 
-    const std::string& statement() const;
+    [[nodiscard]] const std::string& statement() const;
 
     // bind blob
     Cursor& bind(const int& index,
@@ -88,15 +84,13 @@ protected:
     class CursorImpl;
     std::unique_ptr<CursorImpl> impl_;
 
-protected:
-    Cursor(CursorImpl&& impl);
+    explicit Cursor(CursorImpl&& impl);
 };
 
 class Sqlite::Column {
 public:
     friend class Sqlite::Cursor::CursorImpl;
 
-public:
     enum class Type : std::uint8_t {
         NULLTYPE,
         INTEGER,
@@ -106,7 +100,7 @@ public:
         BLOB
     };
 
-    constexpr const char* type_str() const {
+    [[nodiscard]] constexpr const char* type_str() const {
         return type_ == Type::NULLTYPE    ? "NULL"
                : type_ == Type::INTEGER   ? "INTEGER"
                : type_ == Type::INTEGER64 ? "INTEGER"
@@ -116,14 +110,15 @@ public:
                                           : "?";
     }
 
-public:
     Column() = delete;
     Column(const Column&) = delete;
     Column(Column&&) = default;
     Column& operator=(const Column&) = delete;
     Column& operator=(Column&&) = default;
 
-    const Type& type() const;
+    virtual ~Column() = default;
+
+    [[nodiscard]] const Type& type() const;
 
     const std::unique_ptr<int>& integer();
     const std::unique_ptr<std::int64_t>& integer64();
@@ -131,27 +126,22 @@ public:
     const std::unique_ptr<std::string>& text();
     const std::unique_ptr<std::vector<unsigned char>>& blob();
 
-    operator int();
-    operator std::int64_t();
-    operator double();
-    operator std::string();
-    operator std::vector<unsigned char>();
+    explicit operator int();
+    explicit operator std::int64_t();
+    explicit operator double();
+    explicit operator std::string();
+    explicit operator std::vector<unsigned char>();
 
 protected:
-    Column(const int& data);
-    Column(int&& data);
-    Column(const std::int64_t& data);
-    Column(std::int64_t&& data);
-    Column(const double& data);
-    Column(double&& data);
-    Column(const std::string& data);
-    Column(std::string&& data);
-    Column(const std::vector<unsigned char>& data);
-    Column(std::vector<unsigned char>&& data);
-    Column(const std::nullptr_t&);
-    Column(std::nullptr_t&&);
+    explicit Column(const int& data);
+    explicit Column(const std::int64_t& data);
+    explicit Column(const double& data);
+    explicit Column(const std::string& data);
+    explicit Column(std::string&& data);
+    explicit Column(const std::vector<unsigned char>& data);
+    explicit Column(std::vector<unsigned char>&& data);
+    explicit Column(const std::nullptr_t&);
 
-protected:
     Type type_;
     std::variant<std::unique_ptr<int>,
                  std::unique_ptr<std::int64_t>,
@@ -161,8 +151,6 @@ protected:
         data_;
 };
 
-} // namespace db
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::db
 
 #endif // RA_UTILS_RAUTILS_DB_SQLITE_H_

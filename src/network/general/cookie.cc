@@ -6,13 +6,10 @@
 
 #include "curl/curl.h"
 
-#include "rautils/string/strtool.h"
 #include "rautils/misc/map_handler.h"
+#include "rautils/string/strtool.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 Cookie::Cookie(
     std::initializer_list<std::pair<const std::string, std::string>> pairs) :
@@ -48,7 +45,4 @@ const char* Cookie::c_str() {
     return str_.c_str();
 }
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general

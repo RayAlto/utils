@@ -9,9 +9,7 @@
 #include <string>
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 /**
  * Ignore case version of std::less
@@ -46,8 +44,8 @@ class MapIc {
     using const_iterator = typename MapType::const_iterator;
 
 public:
-    MapIc(const MapType& map) : map_(map) {}
-    MapIc(MapType&& map) : map_(std::move(map)) {}
+    explicit MapIc(const MapType& map) : map_(map) {}
+    explicit MapIc(MapType&& map) : map_(std::move(map)) {}
     MapIc(
         std::initializer_list<std::pair<const std::string, ValueType>> pairs) :
         map_(pairs) {}
@@ -93,11 +91,11 @@ public:
         return map_.clear();
     }
 
-    bool empty() const noexcept {
+    [[nodiscard]] bool empty() const noexcept {
         return map_.empty();
     }
 
-    std::size_t size() const noexcept {
+    [[nodiscard]] std::size_t size() const noexcept {
         return map_.size();
     }
 
@@ -151,7 +149,7 @@ public:
     }
 
     // test whether a key exists
-    bool exists(const std::string& key) const {
+    [[nodiscard]] bool exists(const std::string& key) const {
         return (map_.find(key) == map_.end());
     }
 
@@ -168,7 +166,7 @@ public:
     // try to remove items by key, return the amount of items actually removed
     std::size_t remove(std::initializer_list<std::string> keys) {
         std::size_t count = 0;
-        for (const std::string key : keys) {
+        for (const std::string& key : keys) {
             if (remove(key)) {
                 count += 1;
             }
@@ -253,8 +251,8 @@ class Map {
     using const_iterator = typename MapType::const_iterator;
 
 public:
-    Map(const MapType& map) : map_(map) {}
-    Map(MapType&& map) : map_(std::move(map)) {}
+    explicit Map(const MapType& map) : map_(map) {}
+    explicit Map(MapType&& map) : map_(std::move(map)) {}
     Map(std::initializer_list<std::pair<const std::string, ValueType>> pairs) :
         map_(pairs) {}
 
@@ -299,11 +297,11 @@ public:
         return map_.clear();
     }
 
-    bool empty() const noexcept {
+    [[nodiscard]] bool empty() const noexcept {
         return map_.empty();
     }
 
-    std::size_t size() const noexcept {
+    [[nodiscard]] std::size_t size() const noexcept {
         return map_.size();
     }
 
@@ -357,7 +355,7 @@ public:
     }
 
     // test whether a key exists
-    bool exists(const std::string& key) const {
+    [[nodiscard]] bool exists(const std::string& key) const {
         return (map_.find(key) == map_.end());
     }
 
@@ -374,7 +372,7 @@ public:
     // try to remove items by key, return the amount of items actually removed
     std::size_t remove(std::initializer_list<std::string> keys) {
         std::size_t count = 0;
-        for (const std::string key : keys) {
+        for (const std::string& key : keys) {
             if (remove(key)) {
                 count += 1;
             }
@@ -451,8 +449,6 @@ protected:
 using DictHandler = Map<std::string>;
 using DictIcHandler = MapIc<std::string>;
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc
 
 #endif // RA_UTILS_UTIL_MAP_HANDLER_H_

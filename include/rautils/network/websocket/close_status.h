@@ -3,10 +3,7 @@
 
 #include <cstdint>
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 class CloseStatus {
 public:
@@ -26,23 +23,20 @@ public:
         /* 1015 */ TLS_FAILURE = 1015
     };
 
-public:
     CloseStatus() = default;
     CloseStatus(const CloseStatus&) = default;
     CloseStatus(CloseStatus&&) noexcept = default;
     CloseStatus& operator=(const CloseStatus&) = default;
     CloseStatus& operator=(CloseStatus&&) noexcept = default;
 
-    CloseStatus(const Code& code);
-    CloseStatus(Code&& code);
+    explicit CloseStatus(const Code& code);
 
-    CloseStatus(const std::uint16_t& value);
-    CloseStatus(std::uint16_t&& value);
+    explicit CloseStatus(const std::uint16_t& value);
 
-    const std::uint16_t& value() const;
+    [[nodiscard]] const std::uint16_t& value() const;
     std::uint16_t& value();
 
-    bool is_unknown() const;
+    [[nodiscard]] bool is_unknown() const;
 
     friend bool operator==(const CloseStatus& lv, const CloseStatus& rv);
     friend bool operator!=(const CloseStatus& lv, const CloseStatus& rv);
@@ -53,9 +47,6 @@ protected:
     std::uint16_t value_ = 0xffff;
 };
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket
 
 #endif // RA_UTILS_RAUTILS_NETWORK_WEBSOCKET_CLOSE_STATUS_H_

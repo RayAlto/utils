@@ -4,9 +4,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
+namespace rayalto::utils::crypto {
 
 namespace encrypt {
 
@@ -70,8 +68,6 @@ std::vector<unsigned char> aes256cbc(const unsigned char* ciphertext,
 
 } // namespace decrypt
 
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto
 
 #endif // RA_UTILS_CRYPTO_ENCRYPT_H_

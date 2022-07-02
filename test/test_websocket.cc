@@ -13,12 +13,13 @@ using rayalto::utils::network::websocket::Message;
 using rayalto::utils::network::general::Url;
 using rayalto::utils::network::websocket::CloseStatus;
 
-int main(int argc, char const* argv[]) {
+int main(int /* argc */, char const* /* argv */[]) {
     Client client;
-    client.on_error([&](Client& client, const std::string& message) -> void {
-        std::cerr << "Error: " << message << std::endl;
-    });
-    client.on_close([&](Client& client,
+    client.on_error(
+        [&](Client& /* client */, const std::string& message) -> void {
+            std::cerr << "Error: " << message << std::endl;
+        });
+    client.on_close([&](Client& /* client */,
                         const CloseStatus& close_status,
                         const std::string& message) -> void {
         std::cout << "Closed(" << close_status.value() << "): " << message

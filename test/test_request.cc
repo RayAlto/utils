@@ -1,15 +1,15 @@
 #include <iostream>
 #include <string>
 
+#include "rautils/misc/mime_types.h"
 #include "rautils/network/general/url.h"
 #include "rautils/network/request.h"
-#include "rautils/misc/mime_types.h"
 
 using rayalto::utils::misc::MimeTypes;
 using rayalto::utils::network::Request;
 using rayalto::utils::network::general::Url;
 
-int main(int argc, char const* argv[]) {
+int main(int /* argc */, char const* /* argv */[]) {
     Request request;
     // clang-format off
     request.url(Url("https://httpbin.org/anything"))

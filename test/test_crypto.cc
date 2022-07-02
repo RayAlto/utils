@@ -2,17 +2,18 @@
 
 #include "rautils/crypto/codec.h"
 #include "rautils/crypto/diffie_hellman.h"
+#include "rautils/crypto/encrypt.h"
 #include "rautils/crypto/hash.h"
 #include "rautils/crypto/random.h"
-#include "rautils/crypto/encrypt.h"
 #include "rautils/string/strtool.h"
 
+// NOLINTNEXTLINE(google-build-using-namespace)
 using namespace rayalto::utils::crypto;
 using rayalto::utils::string::hex_string;
 using rayalto::utils::string::data_string;
 using rayalto::utils::string::to_data;
 
-int main(int argc, char const *argv[]) {
+int main(int /* argc */, char const * /* argv */[]) {
     // echo '灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n' | openssl dgst -sha256
     std::cout << hex_string(
         hash::sha256("灌注永雏塔菲喵，灌注永雏塔菲谢谢喵！\n"))

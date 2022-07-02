@@ -9,10 +9,7 @@
 #include "rautils/network/general/authentication.h"
 #include "rautils/network/general/query.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace general {
+namespace rayalto::utils::network::general {
 
 /**
  * A simple lazy url parser which is so lazy to do much validation
@@ -20,7 +17,7 @@ namespace general {
  */
 class Url {
 public:
-    Url(const std::string& url);
+    explicit Url(const std::string& url);
     Url(const std::string& scheme,
         const Authentication& userinfo,
         const std::string& host,
@@ -31,7 +28,7 @@ public:
     Url(std::string&& scheme,
         Authentication&& userinfo,
         std::string&& host,
-        std::uint16_t&& port,
+        const std::uint16_t& port,
         std::string&& path,
         Query&& query,
         std::string&& fragment);
@@ -60,7 +57,6 @@ public:
 
     const std::unique_ptr<std::uint16_t>& port();
     Url& port(const std::uint16_t& port);
-    Url& port(std::uint16_t&& port);
     Url& port(std::nullptr_t);
 
     const std::unique_ptr<std::string>& path();
@@ -91,14 +87,10 @@ protected:
     std::unique_ptr<std::string> fragment_ = nullptr;
     mutable std::unique_ptr<std::string> url_str_ = nullptr;
 
-protected:
     void from_string_(const std::string& str);
     void form_string_() const;
 };
 
-} // namespace general
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::general
 
 #endif // RA_UTILS_RAUTILS_NETWORK_GENERAL_URL_H_

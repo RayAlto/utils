@@ -11,11 +11,12 @@ void shit_happens(const Status& status) {
         if (status.message != nullptr) {
             std::cout << *status.message << std::endl;
         }
+        // NOLINTNEXTLINE(concurrency-mt-unsafe)
         std::exit(1);
     }
 }
 
-int main(int argc, char const* argv[]) {
+int main(int /* argc */, char const* /* argv */[]) {
     Sqlite database;
     Status status;
     database.connect("./test/test.db", status);

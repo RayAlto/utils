@@ -6,13 +6,11 @@
 
 #include "ZXing/BitMatrix.h"
 #include "ZXing/CharacterSet.h"
+#include "ZXing/TextUtfEncoding.h"
 #include "ZXing/qrcode/QRErrorCorrectionLevel.h"
 #include "ZXing/qrcode/QRWriter.h"
-#include "ZXing/TextUtfEncoding.h"
 
-namespace rayalto {
-namespace utils {
-namespace barcode {
+namespace rayalto::utils::barcode {
 
 namespace {
 
@@ -37,12 +35,12 @@ void prepare_zxing_qr_writer(ZXing::QRCode::Writer& writer,
 }
 
 Qrcode::Result convert_to_qrcode_result(const ZXing::BitMatrix& qr_matrix) {
-    const std::size_t result_width = qr_matrix.width();
-    const std::size_t result_height = qr_matrix.height();
+    const int result_width = qr_matrix.width();
+    const int result_height = qr_matrix.height();
 
     Qrcode::Result result(result_width, result_height);
-    for (std::size_t y = 0; y < result_height; ++y) {
-        for (std::size_t x = 0; x < result_width; ++x) {
+    for (int y = 0; y < result_height; ++y) {
+        for (int x = 0; x < result_width; ++x) {
             if (qr_matrix.get(x, y)) {
                 result.set(x, y);
             }
@@ -67,11 +65,6 @@ Qrcode& Qrcode::margin(const std::uint8_t& margin) {
     return *this;
 }
 
-Qrcode& Qrcode::margin(std::uint8_t&& margin) {
-    margin_ = std::move(margin);
-    return *this;
-}
-
 const std::uint8_t& Qrcode::version() const {
     return version_;
 }
@@ -82,11 +75,6 @@ std::uint8_t& Qrcode::version() {
 
 Qrcode& Qrcode::version(const std::uint8_t& version) {
     version_ = version;
-    return *this;
-}
-
-Qrcode& Qrcode::version(std::uint8_t&& version) {
-    version_ = std::move(version);
     return *this;
 }
 
@@ -103,11 +91,6 @@ Qrcode& Qrcode::error_correction_level(const EC& ec) {
     return *this;
 }
 
-Qrcode& Qrcode::error_correction_level(EC&& ec) {
-    ec_ = std::move(ec);
-    return *this;
-}
-
 const Qrcode::Mask& Qrcode::mask() const {
     return mask_;
 }
@@ -118,11 +101,6 @@ Qrcode::Mask& Qrcode::mask() {
 
 Qrcode& Qrcode::mask(const Qrcode::Mask& mask) {
     mask_ = mask;
-    return *this;
-}
-
-Qrcode& Qrcode::mask(Qrcode::Mask&& mask) {
-    mask_ = std::move(mask);
     return *this;
 }
 
@@ -144,6 +122,4 @@ Qrcode::Result Qrcode::encode(const std::vector<unsigned char>& binary) {
     return convert_to_qrcode_result(qr_matrix);
 }
 
-} // namespace barcode
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::barcode

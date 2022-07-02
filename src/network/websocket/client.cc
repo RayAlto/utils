@@ -21,10 +21,7 @@
 #include "rautils/network/websocket/close_status.h"
 #include "rautils/network/websocket/message.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 constexpr const char* LWS_LOCAL_PROTOCOL_NAME = "ra-utils-websocket-client";
 
@@ -49,8 +46,7 @@ public:
                             void* in,
                             std::size_t len);
 
-public:
-    ClientImpl(Client& client);
+    explicit ClientImpl(Client& client);
     ClientImpl() = delete;
 
     // Impl does not need these
@@ -69,12 +65,13 @@ public:
     void disconnect(const CloseStatus& close_status);
     void disconnect(const std::uint16_t& close_status);
     void disconnect(const std::string& message,
-                    const CloseStatus& close_status = CloseStatus::NORMAL);
+                    const CloseStatus& close_status =
+                        static_cast<CloseStatus>(CloseStatus::NORMAL));
     void disconnect(const std::string& message,
                     const std::uint16_t& close_status);
 
     // if connection was established
-    bool connected() const;
+    [[nodiscard]] bool connected() const;
 
     // url
     const std::unique_ptr<general::Url>& url();
@@ -138,11 +135,11 @@ protected:
     /* libwebsockets stuff */
     lws* ws_instance_ = nullptr;
     lws_context* ws_context_ = nullptr;
-    lws_context_creation_info ws_context_info_ {0};
+    lws_context_creation_info ws_context_info_ {};
     lws_protocols ws_protocols_[2] {
         {LWS_LOCAL_PROTOCOL_NAME, lws_callback, 0, 0, 0, nullptr, 0},
         LWS_PROTOCOL_LIST_TERM};
-    lws_client_connect_info ws_connection_info_ {0};
+    lws_client_connect_info ws_connection_info_ {};
 
     /* core */
     std::mutex wake_lws_;
@@ -174,7 +171,6 @@ protected:
     std::unique_ptr<std::uint16_t> close_status_ = nullptr;
     std::unique_ptr<std::string> close_message = nullptr;
 
-protected:
     void wake_lws_up_();
     void reset_config_();
 };
@@ -244,7 +240,7 @@ void Client::ClientImpl::connect() {
 
     ws_connection_info_.context = ws_context_;
 
-    if (!lws_client_connect_via_info(&ws_connection_info_)) {
+    if (lws_client_connect_via_info(&ws_connection_info_) == nullptr) {
         if (on_error_ != nullptr) {
             (*on_error_)(client_, "libwebsockets: Failed to connect");
         }
@@ -487,9 +483,10 @@ void Client::ClientImpl::reset_config_() {
     ws_connection_info_.protocol = nullptr;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 int lws_callback(lws* wsi,
                  lws_callback_reasons reason,
-                 void* user,
+                 void* /* user */,
                  void* in,
                  std::size_t len) {
     Client::ClientImpl& client_impl = *reinterpret_cast<Client::ClientImpl*>(
@@ -528,8 +525,10 @@ int lws_callback(lws* wsi,
                     buf.reserve(result_len + 4);
                 }
                 // real length of header value copied to buffer
-                result_len =
-                    lws_hdr_copy(wsi, buf.data(), buf.capacity(), lws_index);
+                result_len = lws_hdr_copy(wsi,
+                                          buf.data(),
+                                          static_cast<int>(buf.capacity()),
+                                          lws_index);
                 client_impl.server_header_->add(
                     {reinterpret_cast<const char*>(
                          lws_token_to_string(lws_index)),
@@ -546,7 +545,7 @@ int lws_callback(lws* wsi,
                 custom_header_ctx.result_len = lws_hdr_custom_copy(
                     custom_header_ctx.client_impl.ws_instance_,
                     custom_header_ctx.buf.data(),
-                    custom_header_ctx.buf.capacity(),
+                    static_cast<int>(custom_header_ctx.buf.capacity()),
                     name,
                     name_len);
                 custom_header_ctx.client_impl.server_header_->add(
@@ -566,8 +565,8 @@ int lws_callback(lws* wsi,
     }
 
     case /*  8 */ LWS_CALLBACK_CLIENT_RECEIVE: {
-        if (lws_is_first_fragment(wsi)) {
-            if (lws_frame_is_binary(wsi)) {
+        if (lws_is_first_fragment(wsi) != 0) {
+            if (lws_frame_is_binary(wsi) != 0) {
                 unsigned char* binary_message =
                     reinterpret_cast<unsigned char*>(in);
                 client_impl.receive_message_ =
@@ -578,7 +577,7 @@ int lws_callback(lws* wsi,
                 client_impl.receive_message_ = std::make_unique<Message>(
                     std::string(reinterpret_cast<char*>(in), len));
             }
-            if (lws_is_final_fragment(wsi)) {
+            if (lws_is_final_fragment(wsi) != 0) {
                 if (client_impl.on_receive_ != nullptr) {
                     (*client_impl.on_receive_)(client_impl.client_,
                                                *client_impl.receive_message_);
@@ -590,32 +589,30 @@ int lws_callback(lws* wsi,
             }
             break;
         }
-        else {
-            switch (client_impl.receive_message_->type()) {
-            case Message::Type::BINARY: {
-                unsigned char* binary_message =
-                    reinterpret_cast<unsigned char*>(in);
-                std::vector<unsigned char>& binary =
-                    client_impl.receive_message_->binary();
-                binary.insert(
-                    binary.end(), binary_message, binary_message + len);
-                break;
-            }
-            case Message::Type::TEXT: {
-                client_impl.receive_message_->text().append(
-                    reinterpret_cast<char*>(in), len);
-                break;
-            }
-            default: break;
-            }
-            if (lws_is_final_fragment(wsi)) {
-                if (client_impl.on_receive_ != nullptr) {
-                    (*client_impl.on_receive_)(client_impl.client_,
-                                               *client_impl.receive_message_);
-                }
-            }
+        switch (client_impl.receive_message_->type()) {
+        case Message::Type::BINARY: {
+            unsigned char* binary_message =
+                reinterpret_cast<unsigned char*>(in);
+            std::vector<unsigned char>& binary =
+                client_impl.receive_message_->binary();
+            binary.insert(binary.end(), binary_message, binary_message + len);
             break;
         }
+        case Message::Type::TEXT: {
+            client_impl.receive_message_->text().append(
+                reinterpret_cast<char*>(in), len);
+            break;
+        }
+        default: break;
+        }
+        if (lws_is_final_fragment(wsi) != 0) {
+            if (client_impl.on_receive_ != nullptr) {
+                (*client_impl.on_receive_)(client_impl.client_,
+                                           *client_impl.receive_message_);
+            }
+        }
+        break;
+
         break;
     }
 
@@ -675,7 +672,7 @@ int lws_callback(lws* wsi,
         }
         unsigned char** p = reinterpret_cast<unsigned char**>(in);
         unsigned char* end = (*p) + len;
-        for (const std::pair<std::string, std::string>& header :
+        for (const std::pair<const std::string, std::string>& header :
              *client_impl.header_) {
             const std::size_t name_length = header.first.length();
             char name[name_length + 2];
@@ -687,9 +684,10 @@ int lws_callback(lws* wsi,
                     reinterpret_cast<const unsigned char*>(name),
                     reinterpret_cast<const unsigned char*>(
                         header.second.c_str()),
-                    header.second.length(),
+                    static_cast<int>(header.second.length()),
                     p,
-                    end)) {
+                    end)
+                != 0) {
                 // what should I do
             }
         }
@@ -697,7 +695,7 @@ int lws_callback(lws* wsi,
     }
 
     case /* 31 */ LWS_CALLBACK_GET_THREAD_ID: {
-        return misc::thread_id();
+        return static_cast<int>(misc::thread_id());
         break;
     }
 
@@ -715,12 +713,15 @@ int lws_callback(lws* wsi,
         if (client_impl.on_close_ != nullptr) {
             if (client_impl.close_status_ == nullptr) {
                 (*client_impl.on_close_)(
-                    client_impl.client_, CloseStatus::ABNORMAL, std::string {});
+                    client_impl.client_,
+                    static_cast<CloseStatus>(CloseStatus::ABNORMAL),
+                    std::string {});
             }
             else {
-                (*client_impl.on_close_)(client_impl.client_,
-                                         *client_impl.close_status_,
-                                         *client_impl.close_message);
+                (*client_impl.on_close_)(
+                    client_impl.client_,
+                    static_cast<CloseStatus>(*client_impl.close_status_),
+                    *client_impl.close_message);
             }
         }
         client_impl.stopped_ = true;
@@ -969,7 +970,4 @@ Client& Client::send(Message&& message) {
     return *this;
 }
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket

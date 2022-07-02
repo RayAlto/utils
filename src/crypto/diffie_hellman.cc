@@ -1,6 +1,7 @@
 #include "rautils/crypto/diffie_hellman.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <utility>
@@ -14,9 +15,7 @@
 
 #include "rautils/exceptions/exceptions.h"
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
+namespace rayalto::utils::crypto {
 
 class DiffieHellman::Impl {
 public:
@@ -41,7 +40,7 @@ public:
     void peer_public_key(const unsigned char* peer_public_key,
                          const std::size_t& peer_public_key_length);
     std::vector<unsigned char>& peer_public_key();
-    const std::vector<unsigned char>& peer_public_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& peer_public_key() const;
 
     void param_p(const std::vector<unsigned char>& param_p);
     void param_p(const std::vector<unsigned char>& param_p,
@@ -55,7 +54,7 @@ public:
     void param_p(const unsigned char* param_p,
                  const std::size_t& param_p_length);
     std::vector<unsigned char>& param_p();
-    const std::vector<unsigned char>& param_p() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_p() const;
 
     void param_q(const std::vector<unsigned char>& param_q);
     void param_q(const std::vector<unsigned char>& param_q,
@@ -69,7 +68,7 @@ public:
     void param_q(const unsigned char* param_q,
                  const std::size_t& param_q_length);
     std::vector<unsigned char>& param_q();
-    const std::vector<unsigned char>& param_q() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_q() const;
 
     void param_g(const std::vector<unsigned char>& param_g);
     void param_g(const std::vector<unsigned char>& param_g,
@@ -83,16 +82,15 @@ public:
     void param_g(const unsigned char* param_g,
                  const std::size_t& param_g_length);
     std::vector<unsigned char>& param_g();
-    const std::vector<unsigned char>& param_g() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_g() const;
 
-    const std::vector<unsigned char>& public_key() const;
-    const std::vector<unsigned char>& private_key() const;
-    const std::vector<unsigned char>& shared_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& public_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& private_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& shared_key() const;
 
     void use_built_in_params(const bool& built_in);
-    void use_built_in_params(bool&& built_in);
 
-    const bool& use_built_in_params() const;
+    [[nodiscard]] const bool& use_built_in_params() const;
     bool& use_built_in_params();
 
     void generate_key_pair();
@@ -156,7 +154,8 @@ void DiffieHellman::Impl::peer_public_key(
     const std::size_t& peer_public_key_length) {
     peer_public_key_ = std::vector<unsigned char>(
         peer_public_key.begin(),
-        peer_public_key.begin() + peer_public_key_length);
+        peer_public_key.begin()
+            + static_cast<std::int64_t>(peer_public_key_length));
 }
 
 void DiffieHellman::Impl::peer_public_key(
@@ -167,8 +166,10 @@ void DiffieHellman::Impl::peer_public_key(
 void DiffieHellman::Impl::peer_public_key(
     std::vector<unsigned char>&& peer_public_key,
     const std::size_t& peer_public_key_length) {
-    peer_public_key.erase(peer_public_key.begin() + peer_public_key_length,
-                          peer_public_key.end());
+    peer_public_key.erase(
+        peer_public_key.begin()
+            + static_cast<std::int64_t>(peer_public_key_length),
+        peer_public_key.end());
     peer_public_key_ = std::move(peer_public_key);
 }
 
@@ -217,8 +218,9 @@ void DiffieHellman::Impl::param_p(const std::vector<unsigned char>& param_p) {
 
 void DiffieHellman::Impl::param_p(const std::vector<unsigned char>& param_p,
                                   const std::size_t& param_p_length) {
-    param_p_ = std::vector<unsigned char>(param_p.begin(),
-                                          param_p.begin() + param_p_length);
+    param_p_ = std::vector<unsigned char>(
+        param_p.begin(),
+        param_p.begin() + static_cast<std::int64_t>(param_p_length));
 }
 
 void DiffieHellman::Impl::param_p(std::vector<unsigned char>&& param_p) {
@@ -227,7 +229,8 @@ void DiffieHellman::Impl::param_p(std::vector<unsigned char>&& param_p) {
 
 void DiffieHellman::Impl::param_p(std::vector<unsigned char>&& param_p,
                                   const std::size_t& param_p_length) {
-    param_p.erase(param_p.begin() + param_p_length, param_p.end());
+    param_p.erase(param_p.begin() + static_cast<std::int64_t>(param_p_length),
+                  param_p.end());
     param_p_ = std::move(param_p);
 }
 
@@ -270,8 +273,9 @@ void DiffieHellman::Impl::param_q(const std::vector<unsigned char>& param_q) {
 
 void DiffieHellman::Impl::param_q(const std::vector<unsigned char>& param_q,
                                   const std::size_t& param_q_length) {
-    param_q_ = std::vector<unsigned char>(param_q.begin(),
-                                          param_q.begin() + param_q_length);
+    param_q_ = std::vector<unsigned char>(
+        param_q.begin(),
+        param_q.begin() + static_cast<std::int64_t>(param_q_length));
 }
 
 void DiffieHellman::Impl::param_q(std::vector<unsigned char>&& param_q) {
@@ -280,7 +284,8 @@ void DiffieHellman::Impl::param_q(std::vector<unsigned char>&& param_q) {
 
 void DiffieHellman::Impl::param_q(std::vector<unsigned char>&& param_q,
                                   const std::size_t& param_q_length) {
-    param_q.erase(param_q.begin() + param_q_length, param_q.end());
+    param_q.erase(param_q.begin() + static_cast<std::int64_t>(param_q_length),
+                  param_q.end());
     param_q_ = std::move(param_q);
 }
 
@@ -323,8 +328,9 @@ void DiffieHellman::Impl::param_g(const std::vector<unsigned char>& param_g) {
 
 void DiffieHellman::Impl::param_g(const std::vector<unsigned char>& param_g,
                                   const std::size_t& param_g_length) {
-    param_g_ = std::vector<unsigned char>(param_g.begin(),
-                                          param_g.begin() + param_g_length);
+    param_g_ = std::vector<unsigned char>(
+        param_g.begin(),
+        param_g.begin() + static_cast<std::int64_t>(param_g_length));
 }
 
 void DiffieHellman::Impl::param_g(std::vector<unsigned char>&& param_g) {
@@ -333,7 +339,8 @@ void DiffieHellman::Impl::param_g(std::vector<unsigned char>&& param_g) {
 
 void DiffieHellman::Impl::param_g(std::vector<unsigned char>&& param_g,
                                   const std::size_t& param_g_length) {
-    param_g.erase(param_g.begin() + param_g_length, param_g.end());
+    param_g.erase(param_g.begin() + static_cast<std::int64_t>(param_g_length),
+                  param_g.end());
     param_g_ = std::move(param_g);
 }
 
@@ -384,10 +391,6 @@ const std::vector<unsigned char>& DiffieHellman::Impl::shared_key() const {
 
 void DiffieHellman::Impl::use_built_in_params(const bool& built_in) {
     use_built_in_params_ = built_in;
-}
-
-void DiffieHellman::Impl::use_built_in_params(bool&& built_in) {
-    use_built_in_params_ = std::move(built_in);
 }
 
 const bool& DiffieHellman::Impl::use_built_in_params() const {
@@ -493,15 +496,18 @@ void DiffieHellman::Impl::init_custom_params_() {
     if (param_dh == nullptr) {
         throw exceptions::OpensslError("DH_new()");
     }
-    BIGNUM* param_p_bn = BN_mpi2bn(param_p_.data(), param_p_.size(), nullptr);
+    BIGNUM* param_p_bn =
+        BN_mpi2bn(param_p_.data(), static_cast<int>(param_p_.size()), nullptr);
     if (param_p_bn == nullptr) {
         throw exceptions::OpensslError("BN_mpi2bn()");
     }
-    BIGNUM* param_q_bn = BN_mpi2bn(param_q_.data(), param_q_.size(), nullptr);
+    BIGNUM* param_q_bn =
+        BN_mpi2bn(param_q_.data(), static_cast<int>(param_q_.size()), nullptr);
     if (param_q_bn == nullptr) {
         throw exceptions::OpensslError("BN_mpi2bn()");
     }
-    BIGNUM* param_g_bn = BN_mpi2bn(param_g_.data(), param_g_.size(), nullptr);
+    BIGNUM* param_g_bn =
+        BN_mpi2bn(param_g_.data(), static_cast<int>(param_g_.size()), nullptr);
     if (param_g_bn == nullptr) {
         throw exceptions::OpensslError("BN_mpi2bn()");
     }
@@ -583,7 +589,9 @@ void DiffieHellman::Impl::init_peer_key_() {
 
     // set peer public key
     BIGNUM* peer_public_key_bn =
-        BN_mpi2bn(peer_public_key_.data(), peer_public_key_.size(), nullptr);
+        BN_mpi2bn(peer_public_key_.data(),
+                  static_cast<int>(peer_public_key_.size()),
+                  nullptr);
     if (peer_public_key_bn == nullptr) {
         throw exceptions::OpensslError("BN_mpi2bn()");
     }
@@ -656,7 +664,7 @@ void DiffieHellman::Impl::clear_derivation_context_() {
 
 void DiffieHellman::Impl::derive_shared_key_() {
     // calculate length of shared key
-    std::size_t shared_key_length;
+    std::size_t shared_key_length = 0;
     if (EVP_PKEY_derive(key_derivation_context_, nullptr, &shared_key_length)
         != 1) {
         throw exceptions::OpensslError("EVP_PKEY_derive()");
@@ -946,10 +954,6 @@ void DiffieHellman::use_built_in_params(const bool& built_in) {
     impl_->use_built_in_params(built_in);
 }
 
-void DiffieHellman::use_built_in_params(bool&& built_in) {
-    impl_->use_built_in_params(std::move(built_in));
-}
-
 const bool& DiffieHellman::use_built_in_params() const {
     return impl_->use_built_in_params();
 }
@@ -966,6 +970,4 @@ void DiffieHellman::derive_shared_key() {
     impl_->derive_shared_key();
 }
 
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto

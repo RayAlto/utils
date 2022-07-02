@@ -1,11 +1,10 @@
 #include "rautils/network/request.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace network {
+namespace rayalto::utils::network {
 
 constexpr const char* Request::Proxy::type_c_str(const Type& type) {
     return type == Type::HTTP      ? "http://"
@@ -23,7 +22,7 @@ Request::Proxy::Proxy(std::string&& proxy) : proxy_(std::move(proxy)) {}
 
 Request::Proxy::Proxy(const Proxy::Type& type,
                       const std::string& ip,
-                      const long& port) :
+                      const std::int64_t& port) :
     proxy_(type_c_str(type) + ip + ':' + std::to_string(port)) {}
 
 std::string& Request::Proxy::str() {
@@ -54,10 +53,6 @@ void Request::Proxy::http_proxy_tunnel(const bool& http_proxy_tunnel) {
     http_proxy_tunnel_ = http_proxy_tunnel;
 }
 
-void Request::Proxy::http_proxy_tunnel(bool&& http_proxy_tunnel) {
-    http_proxy_tunnel_ = std::move(http_proxy_tunnel);
-}
-
 void Request::Proxy::clear() noexcept {
     proxy_.clear();
     http_proxy_tunnel_ = false;
@@ -71,6 +66,4 @@ bool Request::Proxy::empty() const noexcept {
     return proxy_.empty();
 }
 
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network

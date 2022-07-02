@@ -1,13 +1,13 @@
 #include "rautils/exceptions/exceptions.h"
-#include <openssl/err.h>
 
 #include <cerrno> // errno(marco)
+#include <cstdint>
 #include <cstring> // std::strerror
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace exceptions {
+#include <openssl/err.h>
+
+namespace rayalto::utils::exceptions {
 
 Exception::Exception(const std::string& type,
                      const std::string& where,
@@ -15,7 +15,6 @@ Exception::Exception(const std::string& type,
     set_message(type, where, message);
 }
 
-Exception::~Exception() noexcept {}
 const char* Exception::what() const noexcept {
     return message_.c_str();
 }
@@ -40,11 +39,12 @@ void Exception::set_message(const std::string& type,
 SyscallError::SyscallError(const std::string& where) {
     set_message("SyscallError(error " + std::to_string(errno) + ")",
                 where,
+                // NOLINTNEXTLINE(concurrency-mt-unsafe)
                 std::strerror(errno));
 }
 
 OpensslError::OpensslError(const std::string& where) {
-    unsigned long error_code = ERR_get_error();
+    std::uint64_t error_code = ERR_get_error();
     char error_buffer[256];
     ERR_error_string(error_code, error_buffer);
     set_message("OpenSSL(" + std::to_string(error_code) + ")",
@@ -52,6 +52,4 @@ OpensslError::OpensslError(const std::string& where) {
                 std::string(error_buffer));
 }
 
-} // namespace exceptions
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::exceptions

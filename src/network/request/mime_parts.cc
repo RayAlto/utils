@@ -2,9 +2,7 @@
 
 #include <utility>
 
-namespace rayalto {
-namespace utils {
-namespace network {
+namespace rayalto::utils::network {
 
 Request::MimeParts::MimeParts(
     std::initializer_list<std::pair<const std::string, MimePart>> pairs) :
@@ -16,6 +14,4 @@ Request::MimeParts::MimeParts(const misc::Map<MimePart>& map) :
 Request::MimeParts::MimeParts(misc::Map<MimePart>&& map) :
     misc::Map<MimePart>(map) {}
 
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network

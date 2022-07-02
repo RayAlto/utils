@@ -4,9 +4,7 @@
 #include <exception>
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace exceptions {
+namespace rayalto::utils::exceptions {
 
 /**
  * Base class for exceptions
@@ -25,9 +23,13 @@ public:
               const std::string& where,
               const std::string& message);
     Exception() = default;
+    Exception(const Exception&) = delete;
+    Exception(Exception&&) noexcept = default;
+    Exception& operator=(const Exception&) = delete;
+    Exception& operator=(Exception&&) noexcept = default;
 
-    virtual ~Exception() noexcept;
-    virtual const char* what() const noexcept;
+    ~Exception() noexcept override = default;
+    [[nodiscard]] const char* what() const noexcept override;
 
 protected:
     void set_message(const std::string& type,
@@ -61,8 +63,6 @@ public:
     explicit OpensslError(const std::string& where);
 };
 
-} // namespace exceptions
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::exceptions
 
 #endif // RA_UTILS_EXCEPTIONS_EXCEPTIONS_HPP_

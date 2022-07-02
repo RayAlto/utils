@@ -6,37 +6,23 @@
 #include <utility>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace barcode {
+namespace rayalto::utils::barcode {
 
 Qrcode::Result::Result(const std::size_t& width, const std::size_t& height) :
     data_(width * height, false), width_(width), height_(height) {}
-
-Qrcode::Result::Result(std::size_t&& width, std::size_t&& height) :
-    data_(width * height, false),
-    width_(std::move(width)),
-    height_(std::move(height)) {}
 
 Qrcode::Result::Result(const std::size_t& width,
                        const std::size_t& height,
                        const std::vector<bool>& data) :
     data_(data), width_(width), height_(height) {}
 
-Qrcode::Result::Result(std::size_t&& width,
-                       std::size_t&& height,
+Qrcode::Result::Result(const std::size_t& width,
+                       const std::size_t& height,
                        std::vector<bool>&& data) :
-    data_(std::move(data)),
-    width_(std::move(width)),
-    height_(std::move(height)) {}
+    data_(std::move(data)), width_(width), height_(height) {}
 
 Qrcode::Result& Qrcode::Result::reverse_color_in_ostream(const bool& reverse) {
     reverse_in_ostream_ = reverse;
-    return *this;
-}
-
-Qrcode::Result& Qrcode::Result::reverse_color_in_ostream(bool&& reverse) {
-    reverse_in_ostream_ = std::move(reverse);
     return *this;
 }
 
@@ -79,8 +65,8 @@ std::ostream& operator<<(std::ostream& os, const Qrcode::Result& result) {
 }
 
 std::string Qrcode::Result::to_svg(const std::size_t& rect_size) const {
-    int real_width = width_ * rect_size;
-    int real_height = height_ * rect_size;
+    std::size_t real_width = width_ * rect_size;
+    std::size_t real_height = height_ * rect_size;
 
     const std::string rect_size_str = std::to_string(rect_size);
     const std::string real_width_str = std::to_string(real_width);
@@ -153,29 +139,12 @@ Qrcode::Result& Qrcode::Result::resize(const std::size_t& width,
     return *this;
 }
 
-Qrcode::Result& Qrcode::Result::resize(std::size_t&& width,
-                                       std::size_t&& height) {
-    data_ = std::vector<bool>(width * height, false);
-    width_ = std::move(width);
-    height_ = std::move(height);
-    return *this;
-}
-
 Qrcode::Result& Qrcode::Result::resize(const std::size_t& width,
                                        const std::size_t& height,
                                        const bool& value) {
     data_ = std::vector<bool>(width * height, value);
     width_ = width;
     height_ = height;
-    return *this;
-}
-
-Qrcode::Result& Qrcode::Result::resize(std::size_t&& width,
-                                       std::size_t&& height,
-                                       const bool& value) {
-    data_ = std::vector<bool>(width * height, value);
-    width_ = std::move(width);
-    height_ = std::move(height);
     return *this;
 }
 
@@ -188,6 +157,4 @@ bool operator==(const Qrcode::Result& lhs, const Qrcode::Result& rhs) {
     return lhs.data_ == rhs.data_;
 }
 
-} // namespace barcode
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::barcode

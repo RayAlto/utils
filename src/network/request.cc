@@ -16,9 +16,7 @@
 #include "rautils/network/general/url.h"
 #include "rautils/string/strtool.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
+namespace rayalto::utils::network {
 
 namespace {
 
@@ -54,17 +52,17 @@ void init_curl_header(const std::unique_ptr<general::Header>& headers,
         return;
     }
     std::string header_line;
-    for (const std::pair<std::string, std::string>& header : *headers) {
+    for (const std::pair<const std::string, std::string>& header : *headers) {
         header_line = header.first + ": " + header.second;
         *curl_header = curl_slist_append(*curl_header, header_line.c_str());
     }
 }
 
 void parse_cookie_slist(curl_slist* curl_cookies, general::Cookie& cookie) {
-    if (!curl_cookies) {
+    if (curl_cookies == nullptr) {
         return;
     }
-    for (curl_slist* curl_cookie = curl_cookies; curl_cookie;
+    for (curl_slist* curl_cookie = curl_cookies; curl_cookie != nullptr;
          curl_cookie = curl_cookie->next) {
         std::vector<std::string> parts = string::split(curl_cookie->data, '\t');
         cookie[parts[5]] = parts[6];
@@ -134,11 +132,11 @@ public:
 
     void reset();
 
-    const Method& method() const;
+    [[nodiscard]] const Method& method() const;
     Method& method();
     Impl& method(Method method);
 
-    const IpResolve& ip_resolve() const;
+    [[nodiscard]] const IpResolve& ip_resolve() const;
     IpResolve& ip_resolve();
     Impl& ip_resolve(IpResolve ip_resolve);
 
@@ -179,7 +177,6 @@ public:
 
     const std::unique_ptr<TimeoutSetting>& timeout_setting();
     Impl& timeout_setting(const TimeoutSetting& timeout);
-    Impl& timeout_setting(TimeoutSetting&& timeout);
 
     const std::unique_ptr<LocalSetting>& local_setting();
     Impl& local_setting(const LocalSetting& local);
@@ -198,7 +195,7 @@ public:
 protected:
     CURL* handle_;
 
-    char error_info_buffer_[CURL_ERROR_SIZE];
+    char error_info_buffer_[CURL_ERROR_SIZE] {};
     std::FILE* temp_stderr_ = nullptr;
 
     Method method_ = Method::DEFAULT;
@@ -229,9 +226,8 @@ protected:
 const std::string Request::Impl::curl_version_ =
     curl_version_info(CURLVERSION_NOW)->version;
 
-Request::Impl::Impl() {
+Request::Impl::Impl() : handle_(curl_easy_init()) {
     curl_global_init(CURL_GLOBAL_ALL);
-    handle_ = curl_easy_init();
     useragent_ = std::make_unique<std::string>("curl/" + curl_version_);
 }
 
@@ -273,7 +269,7 @@ void Request::Impl::reset() {
     local_setting_.reset();
     timeout_setting_.reset();
     response_.reset();
-    if (curl_mime_) {
+    if (curl_mime_ != nullptr) {
         curl_mime_free(curl_mime_);
         curl_mime_ = nullptr;
     }
@@ -444,11 +440,6 @@ Request::Impl& Request::Impl::timeout_setting(const TimeoutSetting& timeout) {
     return *this;
 }
 
-Request::Impl& Request::Impl::timeout_setting(TimeoutSetting&& timeout) {
-    timeout_setting_ = std::make_unique<TimeoutSetting>(std::move(timeout));
-    return *this;
-}
-
 const std::unique_ptr<Request::LocalSetting>& Request::Impl::local_setting() {
     return local_setting_;
 }
@@ -474,31 +465,33 @@ const std::unique_ptr<Request::Response>& Request::Impl::response() {
 }
 
 std::string Request::Impl::url_encode(const std::string& url) {
-    char* result_c_str = curl_easy_escape(handle_, url.c_str(), url.length());
+    char* result_c_str =
+        curl_easy_escape(handle_, url.c_str(), static_cast<int>(url.length()));
     std::string result = result_c_str;
     curl_free(result_c_str);
     return result;
 }
 
 std::string Request::Impl::url_encode(const char* url, std::size_t len) {
-    char* result_c_str = curl_easy_escape(handle_, url, len);
+    char* result_c_str = curl_easy_escape(handle_, url, static_cast<int>(len));
     std::string result = result_c_str;
     curl_free(result_c_str);
     return result;
 }
 
 std::string Request::Impl::url_decode(const std::string& url) {
-    int result_length;
-    char* result_c_str =
-        curl_easy_unescape(handle_, url.c_str(), url.length(), &result_length);
+    int result_length = 0;
+    char* result_c_str = curl_easy_unescape(
+        handle_, url.c_str(), static_cast<int>(url.length()), &result_length);
     std::string result(result_c_str, result_length);
     curl_free(result_c_str);
     return result;
 }
 
 std::string Request::Impl::url_decode(const char* url, std::size_t len) {
-    int result_length;
-    char* result_c_str = curl_easy_unescape(handle_, url, len, &result_length);
+    int result_length = 0;
+    char* result_c_str =
+        curl_easy_unescape(handle_, url, static_cast<int>(len), &result_length);
     std::string result(result_c_str, result_length);
     curl_free(result_c_str);
     return result;
@@ -506,15 +499,15 @@ std::string Request::Impl::url_decode(const char* url, std::size_t len) {
 
 void Request::Impl::init_curl_handle_() {
     // useful for multithreading??
-    curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1l);
+    curl_easy_setopt(handle_, CURLOPT_NOSIGNAL, 1L);
     // enable TCP keep-alive
-    curl_easy_setopt(handle_, CURLOPT_TCP_KEEPALIVE, 1l);
+    curl_easy_setopt(handle_, CURLOPT_TCP_KEEPALIVE, 1L);
     // get verbose message
-    curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1l);
+    curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1L);
     // receive cookie
     curl_easy_setopt(handle_, CURLOPT_COOKIEFILE, "");
     // receive cert info
-    curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1l);
+    curl_easy_setopt(handle_, CURLOPT_CERTINFO, 1L);
     // receive error
     error_info_buffer_[0] = 0;
     curl_easy_setopt(handle_, CURLOPT_ERRORBUFFER, error_info_buffer_);
@@ -539,6 +532,7 @@ void Request::Impl::init_curl_handle_() {
     init_curl_header(header_, &curl_header_);
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void Request::Impl::set_options_() {
     // [option] method
     curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, method_c_str(method_));
@@ -577,14 +571,15 @@ void Request::Impl::set_options_() {
     // [option] multi part
     if (mime_parts_ != nullptr) {
         // clean previous curl_mime
-        if (curl_mime_) {
+        if (curl_mime_ != nullptr) {
             curl_mime_free(curl_mime_);
             curl_mime_ = nullptr;
         }
         // init fresh curl_mime
         curl_mime_ = curl_mime_init(handle_);
         // add parts
-        for (const std::pair<std::string, MimePart>& mime_part : *mime_parts_) {
+        for (const std::pair<const std::string, MimePart>& mime_part :
+             *mime_parts_) {
             curl_add_mime_part(curl_mime_, mime_part.first, mime_part.second);
         }
         curl_easy_setopt(handle_, CURLOPT_MIMEPOST, curl_mime_);
@@ -594,19 +589,19 @@ void Request::Impl::set_options_() {
         curl_easy_setopt(handle_, CURLOPT_PROXY, proxy_->c_str());
         // [option] http proxy tunnel
         if (proxy_->http_proxy_tunnel()) {
-            curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1l);
+            curl_easy_setopt(handle_, CURLOPT_HTTPPROXYTUNNEL, 1L);
         }
     }
     if (timeout_setting_ != nullptr) {
         // [option] timeout
-        if (timeout_setting_->timeout != 0l) {
+        if (timeout_setting_->timeout != 0L) {
             curl_easy_setopt(
                 handle_,
                 CURLOPT_TIMEOUT_MS,
                 static_cast<curl_off_t>(timeout_setting_->timeout));
         }
         // [option] connect timeout
-        if (timeout_setting_->connect_timeout != 300000l) {
+        if (timeout_setting_->connect_timeout != 300000L) {
             curl_easy_setopt(
                 handle_,
                 CURLOPT_CONNECTTIMEOUT_MS,
@@ -694,7 +689,7 @@ bool Request::Impl::perform_request_() {
         handle_, CURLINFO_SPEED_UPLOAD_T, &response_->speed.upload);
     curl_easy_getinfo(
         handle_, CURLINFO_SPEED_DOWNLOAD_T, &response_->speed.download);
-    char* local_ip;
+    char* local_ip = nullptr;
     curl_easy_getinfo(handle_, CURLINFO_LOCAL_IP, &local_ip);
     response_->local_info.ip = local_ip;
     curl_easy_getinfo(
@@ -876,11 +871,6 @@ Request& Request::timeout_setting(const TimeoutSetting& timeout_setting) {
     return *this;
 }
 
-Request& Request::timeout_setting(TimeoutSetting&& timeout_setting) {
-    impl_->timeout_setting(std::move(timeout_setting));
-    return *this;
-}
-
 const std::unique_ptr<Request::LocalSetting>& Request::local_setting() {
     return impl_->local_setting();
 }
@@ -907,6 +897,4 @@ std::time_t Request::parse_time_str(const char* time_str) {
     return curl_getdate(time_str, nullptr);
 }
 
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network

@@ -6,9 +6,7 @@
 #include <ostream>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace barcode {
+namespace rayalto::utils::barcode {
 
 class Qrcode {
 public:
@@ -34,7 +32,6 @@ public:
         AUTO
     };
 
-public:
     Qrcode() = default;
     Qrcode(const Qrcode&) = default;
     Qrcode(Qrcode&&) noexcept = default;
@@ -44,28 +41,24 @@ public:
     virtual ~Qrcode() = default;
 
     // margin of qr code
-    const std::uint8_t& margin() const;
+    [[nodiscard]] const std::uint8_t& margin() const;
     std::uint8_t& margin();
     Qrcode& margin(const std::uint8_t& margin);
-    Qrcode& margin(std::uint8_t&& margin);
 
     // version of qr code, should be between 1 and 40
-    const std::uint8_t& version() const;
+    [[nodiscard]] const std::uint8_t& version() const;
     std::uint8_t& version();
     Qrcode& version(const std::uint8_t& version);
-    Qrcode& version(std::uint8_t&& version);
 
     // error correction level
-    const EC& error_correction_level() const;
+    [[nodiscard]] const EC& error_correction_level() const;
     EC& error_correction_level();
     Qrcode& error_correction_level(const EC& ec);
-    Qrcode& error_correction_level(EC&& ec);
 
     // mask
-    const Mask& mask() const;
+    [[nodiscard]] const Mask& mask() const;
     Mask& mask();
     Qrcode& mask(const Mask& mask);
-    Qrcode& mask(Mask&& mask);
 
     // encode utf-8 text
     Result encode(const std::string& text);
@@ -91,39 +84,35 @@ public:
     virtual ~Result() = default;
 
     Result(const std::size_t& width, const std::size_t& height);
-    Result(std::size_t&& width, std::size_t&& height);
 
     Result(const std::size_t& width,
            const std::size_t& height,
            const std::vector<bool>& data);
-    Result(std::size_t&& width, std::size_t&& height, std::vector<bool>&& data);
+    Result(const std::size_t& width,
+           const std::size_t& height,
+           std::vector<bool>&& data);
 
     Result& reverse_color_in_ostream(const bool& reverse);
-    Result& reverse_color_in_ostream(bool&& reverse);
-    const bool& reverse_color_in_ostream() const;
+    [[nodiscard]] const bool& reverse_color_in_ostream() const;
     bool& reverse_color_in_ostream();
 
     friend std::ostream& operator<<(std::ostream& os, const Result& result);
 
-    std::string to_svg(const std::size_t& rect_size = 16) const;
+    [[nodiscard]] std::string to_svg(const std::size_t& rect_size = 16) const;
 
-    bool get(const std::size_t& x, const std::size_t& y) const;
+    [[nodiscard]] bool get(const std::size_t& x, const std::size_t& y) const;
 
     Result& set(const std::size_t& x,
                 const std::size_t& y,
                 const bool& value = true);
 
-    bool empty() const noexcept;
+    [[nodiscard]] bool empty() const noexcept;
 
     Result& reset() noexcept;
 
     Result& resize(const std::size_t& width, const std::size_t& height);
-    Result& resize(std::size_t&& width, std::size_t&& height);
     Result& resize(const std::size_t& width,
                    const std::size_t& height,
-                   const bool& value);
-    Result& resize(std::size_t&& width,
-                   std::size_t&& height,
                    const bool& value);
 
     Result& flip();
@@ -137,8 +126,6 @@ protected:
     bool reverse_in_ostream_ = false;
 };
 
-} // namespace barcode
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::barcode
 
 #endif // RA_UTILS_RAUTILS_BARCODE_QRCODE_H_

@@ -4,10 +4,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace hash {
+namespace rayalto::utils::crypto::hash {
 
 // sha-256 digest, empty when openssl failed
 std::vector<unsigned char> sha256(const std::vector<unsigned char>& message);
@@ -20,9 +17,6 @@ std::vector<unsigned char> sha256(const unsigned char* message);
 std::vector<unsigned char> sha256(const unsigned char* message,
                                   const std::size_t& message_length);
 
-} // namespace hash
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::hash
 
 #endif // RA_UTILS_CRYPTO_HASH_H_

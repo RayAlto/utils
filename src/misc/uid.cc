@@ -11,9 +11,7 @@
 
 #include "rautils/string/strtool.h"
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 constexpr const char hex_map[] {"0123456789abcdef"};
 
@@ -72,6 +70,7 @@ bool validate_uid_string(const std::string& uid) {
     return true;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 std::uint16_t parse_hex_uint16(const std::string& hex_str) {
     const std::size_t hex_str_length = hex_str.length();
     switch (hex_str_length) {
@@ -108,9 +107,7 @@ Uid::Uid(const std::uint16_t& part1,
 
 Uid::Uid(const std::array<std::uint16_t, 8>& parts) : parts_(parts) {}
 
-Uid::Uid(std::array<std::uint16_t, 8>&& parts) : parts_(std::move(parts)) {}
-
-Uid::Uid(const std::string& uid) : parts_ {} {
+Uid::Uid(const std::string& uid) {
     if (!validate_uid_string(uid)) {
         // invalid
         parts_.fill(0xffff);
@@ -155,7 +152,7 @@ Uid Uid::operator--(int) {
 }
 
 Uid& Uid::operator+=(const Uid& rv) {
-    std::uint16_t new_value;
+    std::uint16_t new_value = 0;
     for (int i = 7; i > 0; --i) {
         new_value = parts_[i] + rv.parts_[i];
         if (new_value < parts_[i] && new_value < rv.parts_[i]) {
@@ -230,7 +227,7 @@ bool operator<(const Uid& lv, const Uid& rv) {
         if (left_part > right_part) {
             return false;
         }
-        else if (left_part < right_part) {
+        if (left_part < right_part) {
             return true;
         }
     }
@@ -245,7 +242,7 @@ bool operator>(const Uid& lv, const Uid& rv) {
         if (left_part > right_part) {
             return true;
         }
-        else if (left_part < right_part) {
+        if (left_part < right_part) {
             return false;
         }
     }
@@ -260,7 +257,7 @@ bool operator<=(const Uid& lv, const Uid& rv) {
         if (left_part > right_part) {
             return false;
         }
-        else if (left_part < right_part) {
+        if (left_part < right_part) {
             return true;
         }
     }
@@ -275,7 +272,7 @@ bool operator>=(const Uid& lv, const Uid& rv) {
         if (left_part > right_part) {
             return true;
         }
-        else if (left_part < right_part) {
+        if (left_part < right_part) {
             return false;
         }
     }
@@ -356,6 +353,4 @@ inline void Uid::check_borrow(std::size_t cursor) {
     --parts_[cursor];
 }
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc

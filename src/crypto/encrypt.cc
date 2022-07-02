@@ -7,9 +7,7 @@
 #include "openssl/evp.h"
 #include "openssl/ossl_typ.h"
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
+namespace rayalto::utils::crypto {
 
 namespace encrypt {
 
@@ -57,8 +55,8 @@ std::vector<unsigned char> aes256cbc(const unsigned char* message,
                                      const unsigned char* key,
                                      const unsigned char* iv) {
     std::vector<unsigned char> result;
-    int buffer_length;
-    int result_length;
+    int buffer_length = 0;
+    int result_length = 0;
     unsigned char
         buffer[message_length + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
     EVP_CIPHER_CTX* cipher_context = nullptr;
@@ -72,8 +70,11 @@ std::vector<unsigned char> aes256cbc(const unsigned char* message,
         EVP_CIPHER_CTX_free(cipher_context);
         return result;
     }
-    if (EVP_EncryptUpdate(
-            cipher_context, buffer, &buffer_length, message, message_length)
+    if (EVP_EncryptUpdate(cipher_context,
+                          buffer,
+                          &buffer_length,
+                          message,
+                          static_cast<int>(message_length))
         != 1) {
         EVP_CIPHER_CTX_free(cipher_context);
         return result;
@@ -145,8 +146,8 @@ std::vector<unsigned char> aes256cbc(const unsigned char* ciphertext,
                                      const unsigned char* key,
                                      const unsigned char* iv) {
     std::vector<unsigned char> result;
-    int buffer_length;
-    int result_length;
+    int buffer_length = 0;
+    int result_length = 0;
     unsigned char
         buffer[ciphertext_length + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
     EVP_CIPHER_CTX* cipher_context = nullptr;
@@ -164,7 +165,7 @@ std::vector<unsigned char> aes256cbc(const unsigned char* ciphertext,
                           buffer,
                           &buffer_length,
                           ciphertext,
-                          ciphertext_length)
+                          static_cast<int>(ciphertext_length))
         != 1) {
         EVP_CIPHER_CTX_free(cipher_context);
         return result;
@@ -184,6 +185,4 @@ std::vector<unsigned char> aes256cbc(const unsigned char* ciphertext,
 
 } // namespace decrypt
 
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto

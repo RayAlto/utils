@@ -4,9 +4,10 @@
 #include <string>
 #include <vector>
 
+// NOLINTNEXTLINE(google-build-using-namespace)
 using namespace rayalto::utils;
 
-int main(int argc, char const* argv[]) {
+int main(int /* argc */, char const* /*  argv */[]) {
     std::vector<std::string> strings {"foo", "bar", "hello", "world"};
     std::cout
         << string::join(", ", {"foo", "bar", "hello", "world"}) << std::endl

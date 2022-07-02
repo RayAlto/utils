@@ -4,16 +4,10 @@
 #include <cstddef>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace random {
+namespace rayalto::utils::crypto::random {
 
-std::vector<unsigned char> bytes(const std::size_t& length);
+std::vector<unsigned char> bytes(const int& length);
 
-} // namespace random
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::random
 
 #endif // RA_UTILS_CRYPTO_RANDOM_H_

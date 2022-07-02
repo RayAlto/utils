@@ -5,20 +5,14 @@
 
 #include "openssl/rand.h"
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
-namespace random {
+namespace rayalto::utils::crypto::random {
 
-std::vector<unsigned char> bytes(const std::size_t& length) {
+std::vector<unsigned char> bytes(const int& length) {
     unsigned char buffer[length + 1];
     if (RAND_bytes(buffer, length) <= 0) {
         return std::vector<unsigned char> {};
     }
-    return std::vector<unsigned char>(buffer, buffer + length);
+    return {buffer, buffer + length};
 }
 
-} // namespace random
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto::random

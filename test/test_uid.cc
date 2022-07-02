@@ -2,9 +2,10 @@
 
 #include "rautils/misc/uid.h"
 
+// NOLINTNEXTLINE(google-build-using-namespace)
 using namespace rayalto::utils;
 
-int main(int argc, char const* argv[]) {
+int main(int /* argc */, char const* /* argv */[]) {
     misc::Uid id("ffff:f::ffff");
     std::cout << id.to_string(false, '0') << std::endl;
     std::cout << id.to_string(true, '0') << std::endl;

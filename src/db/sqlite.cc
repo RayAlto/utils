@@ -9,9 +9,7 @@
 
 #include "rautils/misc/status.h"
 
-namespace rayalto {
-namespace utils {
-namespace db {
+namespace rayalto::utils::db {
 
 /* ===== Sqlite::Impl ===== */
 
@@ -19,12 +17,11 @@ class Sqlite::SqliteImpl {
 public:
     friend class Sqlite;
 
-public:
     SqliteImpl() = default;
     SqliteImpl(const SqliteImpl&) = delete;
     SqliteImpl(SqliteImpl&& old) noexcept;
     SqliteImpl& operator=(const SqliteImpl&) = delete;
-    SqliteImpl& operator=(SqliteImpl&& old) noexcept;
+    SqliteImpl& operator=(SqliteImpl&& sqlite_impl) noexcept;
 
     virtual ~SqliteImpl();
 
@@ -32,14 +29,13 @@ public:
     void connect(std::string&& uri, misc::Status& status);
     void connect(misc::Status& status);
 
-    const std::string& uri() const;
+    [[nodiscard]] const std::string& uri() const;
 
 protected:
     sqlite3* sqlite3_ = nullptr;
 
     std::string uri_;
 
-protected:
     bool check_sqlite_ok(const int& return_code, misc::Status& status);
 };
 
@@ -101,14 +97,13 @@ class Sqlite::Cursor::CursorImpl {
 public:
     friend class Sqlite;
 
-public:
     CursorImpl() = delete;
     CursorImpl(const CursorImpl&) = delete;
     CursorImpl(CursorImpl&& old) noexcept;
     CursorImpl& operator=(const CursorImpl&) = delete;
-    CursorImpl& operator=(CursorImpl&& old) noexcept;
+    CursorImpl& operator=(CursorImpl&& cursor_impl) noexcept;
 
-    CursorImpl(sqlite3* sqlite3_ptr);
+    explicit CursorImpl(sqlite3* sqlite3_ptr);
 
     virtual ~CursorImpl();
 
@@ -120,7 +115,7 @@ public:
     void prepare(std::string&& statement, misc::Status& status);
     bool prepare(misc::Status& status);
 
-    const std::string& statement() const;
+    [[nodiscard]] const std::string& statement() const;
 
     // bind blob
     void bind(const int& index,
@@ -134,11 +129,13 @@ public:
               const std::int64_t& integer,
               misc::Status& status);
     // bind null
-    void bind(const int& index, const std::nullptr_t&, misc::Status& status);
+    void bind(const int& index,
+              const std::nullptr_t& /* ignore */,
+              misc::Status& status);
     // bind text
     void bind(const int& index, const std::string& text, misc::Status& status);
 
-    bool has_next_row();
+    [[nodiscard]] bool has_next_row() const;
     int column_count();
     void advance(misc::Status& status);
     Column column(const int& index);
@@ -148,12 +145,11 @@ protected:
     sqlite3* sqlite3_ = nullptr;
 
     std::string statement_;
-    bool has_next_row_;
+    bool has_next_row_ = false;
 
-protected:
     bool check_sqlite_ok(const int& return_code, misc::Status& status);
     bool check_sqlite_row(const int& return_code, misc::Status& status);
-    bool check_sqlite_etc(const int& return_code, misc::Status& status);
+    static bool check_sqlite_etc(const int& return_code, misc::Status& status);
 };
 
 Sqlite::Cursor::CursorImpl::CursorImpl(CursorImpl&& old) noexcept :
@@ -222,15 +218,13 @@ bool Sqlite::Cursor::CursorImpl::prepare(misc::Status& status) {
     if (sqlite3_stmt_ != nullptr) {
         return true;
     }
-    if (!check_sqlite_ok(sqlite3_prepare_v2(sqlite3_,
-                                            statement_.c_str(),
-                                            statement_.length(),
-                                            &sqlite3_stmt_,
-                                            nullptr),
-                         status)) {
-        return false;
-    }
-    return true;
+    return check_sqlite_ok(
+        sqlite3_prepare_v2(sqlite3_,
+                           statement_.c_str(),
+                           static_cast<int>(statement_.length()),
+                           &sqlite3_stmt_,
+                           nullptr),
+        status);
 }
 
 const std::string& Sqlite::Cursor::CursorImpl::statement() const {
@@ -242,7 +236,12 @@ void Sqlite::Cursor::CursorImpl::bind(const int& index,
                                       misc::Status& status) {
     check_sqlite_etc(
         sqlite3_bind_blob(
-            sqlite3_stmt_, index, blob.data(), blob.size(), SQLITE_TRANSIENT),
+            sqlite3_stmt_,
+            index,
+            blob.data(),
+            static_cast<int>(blob.size()),
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, performance-no-int-to-ptr)
+            SQLITE_TRANSIENT),
         status);
 }
 
@@ -265,7 +264,7 @@ void Sqlite::Cursor::CursorImpl::bind(const int& index,
 }
 
 void Sqlite::Cursor::CursorImpl::bind(const int& index,
-                                      const std::nullptr_t&,
+                                      const std::nullptr_t& /* ignore */,
                                       misc::Status& status) {
     check_sqlite_etc(sqlite3_bind_null(sqlite3_stmt_, index), status);
 }
@@ -273,15 +272,18 @@ void Sqlite::Cursor::CursorImpl::bind(const int& index,
 void Sqlite::Cursor::CursorImpl::bind(const int& index,
                                       const std::string& text,
                                       misc::Status& status) {
-    check_sqlite_etc(sqlite3_bind_text(sqlite3_stmt_,
-                                       index,
-                                       text.c_str(),
-                                       text.length(),
-                                       SQLITE_TRANSIENT),
-                     status);
+    check_sqlite_etc(
+        sqlite3_bind_text(
+            sqlite3_stmt_,
+            index,
+            text.c_str(),
+            static_cast<int>(text.length()),
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast, performance-no-int-to-ptr)
+            SQLITE_TRANSIENT),
+        status);
 }
 
-bool Sqlite::Cursor::CursorImpl::has_next_row() {
+bool Sqlite::Cursor::CursorImpl::has_next_row() const {
     return has_next_row_;
 }
 
@@ -300,42 +302,41 @@ void Sqlite::Cursor::CursorImpl::advance(misc::Status& status) {
 Sqlite::Column Sqlite::Cursor::CursorImpl::column(const int& index) {
     switch (sqlite3_column_type(sqlite3_stmt_, index)) {
     case SQLITE_NULL: // ...
-        return {nullptr};
+        return Column {nullptr};
         break;
     case SQLITE_INTEGER: {
         std::int64_t data_64 = sqlite3_column_int64(sqlite3_stmt_, index);
         int data = static_cast<int>(data_64);
         if (data == data_64) {
             // is 32-bit integer
-            return {data};
+            return Column {data};
         }
-        else {
-            // is 64-bit integer
-            return {data_64};
-        }
-    } break;
+        // is 64-bit integer
+        return Column {data_64};
+        break;
+    }
     case SQLITE_FLOAT:
-        return {sqlite3_column_double(sqlite3_stmt_, index)};
+        return Column {sqlite3_column_double(sqlite3_stmt_, index)};
         break;
     case SQLITE_TEXT:
-        return {std::string(reinterpret_cast<const char*>(
-                                sqlite3_column_text(sqlite3_stmt_, index)),
-                            sqlite3_column_bytes(sqlite3_stmt_, index))};
+        return Column {
+            std::string(reinterpret_cast<const char*>(
+                            sqlite3_column_text(sqlite3_stmt_, index)),
+                        sqlite3_column_bytes(sqlite3_stmt_, index))};
         break;
     case SQLITE_BLOB: {
         const unsigned char* data = reinterpret_cast<const unsigned char*>(
             sqlite3_column_blob(sqlite3_stmt_, index));
         if (data == nullptr) {
-            return {std::vector<unsigned char>()};
+            return Column {std::vector<unsigned char>()};
         }
-        else {
-            return {std::vector<unsigned char>(
-                data, data + sqlite3_column_bytes(sqlite3_stmt_, index))};
-        }
+        return Column {std::vector<unsigned char>(
+            data, data + sqlite3_column_bytes(sqlite3_stmt_, index))};
+
     }; break;
     default: break;
     }
-    return {nullptr};
+    return Column {nullptr};
 }
 
 bool Sqlite::Cursor::CursorImpl::check_sqlite_ok(const int& return_code,
@@ -413,7 +414,7 @@ const std::string& Sqlite::uri() const {
 }
 
 Sqlite::Cursor Sqlite::cursor() {
-    return {impl_->sqlite3_};
+    return Cursor {Cursor::CursorImpl {impl_->sqlite3_}};
 }
 
 /* ===== Sqlite::Cursor ===== */
@@ -482,7 +483,7 @@ Sqlite::Cursor& Sqlite::Cursor::bind(const int& index,
 }
 
 Sqlite::Cursor& Sqlite::Cursor::bind(const int& index,
-                                     const std::nullptr_t&,
+                                     const std::nullptr_t& /* ignore */,
                                      misc::Status& status) {
     impl_->bind(index, nullptr, status);
     return *this;
@@ -573,21 +574,11 @@ Sqlite::Column::operator std::vector<unsigned char>() {
 Sqlite::Column::Column(const int& data) :
     type_(Type::INTEGER), data_(std::make_unique<int>(data)) {}
 
-Sqlite::Column::Column(int&& data) :
-    type_(Type::INTEGER), data_(std::make_unique<int>(std::move(data))) {}
-
 Sqlite::Column::Column(const std::int64_t& data) :
     type_(Type::INTEGER64), data_(std::make_unique<std::int64_t>(data)) {}
 
-Sqlite::Column::Column(std::int64_t&& data) :
-    type_(Type::INTEGER64),
-    data_(std::make_unique<std::int64_t>(std::move(data))) {}
-
 Sqlite::Column::Column(const double& data) :
     type_(Type::REAL), data_(std::make_unique<double>(data)) {}
-
-Sqlite::Column::Column(double&& data) :
-    type_(Type::REAL), data_(std::make_unique<double>(std::move(data))) {}
 
 Sqlite::Column::Column(const std::string& data) :
     type_(Type::TEXT), data_(std::make_unique<std::string>(data)) {}
@@ -603,10 +594,7 @@ Sqlite::Column::Column(std::vector<unsigned char>&& data) :
     type_(Type::BLOB),
     data_(std::make_unique<std::vector<unsigned char>>(std::move(data))) {}
 
-Sqlite::Column::Column(const std::nullptr_t&) : type_(Type::NULLTYPE) {}
+Sqlite::Column::Column(const std::nullptr_t& /* ignore */) :
+    type_(Type::NULLTYPE) {}
 
-Sqlite::Column::Column(std::nullptr_t&&) : type_(Type::NULLTYPE) {}
-
-} // namespace db
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::db

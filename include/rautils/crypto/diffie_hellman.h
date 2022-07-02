@@ -4,9 +4,7 @@
 #include <memory>
 #include <vector>
 
-namespace rayalto {
-namespace utils {
-namespace crypto {
+namespace rayalto::utils::crypto {
 
 /**
  * A simple Diffie-Hellman Key Exchange (ANSI X9.42) implement
@@ -67,7 +65,7 @@ public:
     void peer_public_key(const unsigned char* peer_public_key,
                          const std::size_t& peer_public_key_length);
     std::vector<unsigned char>& peer_public_key();
-    const std::vector<unsigned char>& peer_public_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& peer_public_key() const;
 
     void param_p(const std::vector<unsigned char>& param_p);
     void param_p(const std::vector<unsigned char>& param_p,
@@ -81,7 +79,7 @@ public:
     void param_p(const unsigned char* param_p,
                  const std::size_t& param_p_length);
     std::vector<unsigned char>& param_p();
-    const std::vector<unsigned char>& param_p() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_p() const;
 
     void param_q(const std::vector<unsigned char>& param_q);
     void param_q(const std::vector<unsigned char>& param_q,
@@ -95,7 +93,7 @@ public:
     void param_q(const unsigned char* param_q,
                  const std::size_t& param_q_length);
     std::vector<unsigned char>& param_q();
-    const std::vector<unsigned char>& param_q() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_q() const;
 
     void param_g(const std::vector<unsigned char>& param_g);
     void param_g(const std::vector<unsigned char>& param_g,
@@ -109,19 +107,18 @@ public:
     void param_g(const unsigned char* param_g,
                  const std::size_t& param_g_length);
     std::vector<unsigned char>& param_g();
-    const std::vector<unsigned char>& param_g() const;
+    [[nodiscard]] const std::vector<unsigned char>& param_g() const;
 
     // generated public key
-    const std::vector<unsigned char>& public_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& public_key() const;
     // generated private key
-    const std::vector<unsigned char>& private_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& private_key() const;
     // generated shared key
-    const std::vector<unsigned char>& shared_key() const;
+    [[nodiscard]] const std::vector<unsigned char>& shared_key() const;
 
     // force use OpenSSL built-in generation parameters
     void use_built_in_params(const bool& built_in);
-    void use_built_in_params(bool&& built_in);
-    const bool& use_built_in_params() const;
+    [[nodiscard]] const bool& use_built_in_params() const;
     bool& use_built_in_params();
 
     // generate key pair using generation parameters
@@ -135,8 +132,6 @@ protected:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace crypto
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::crypto
 
 #endif // RA_UTILS_CRYPTO_DIFFIE_HELLMAN_H_

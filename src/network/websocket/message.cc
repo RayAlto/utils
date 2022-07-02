@@ -8,18 +8,14 @@
 
 #include "libwebsockets.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
-namespace websocket {
+namespace rayalto::utils::network::websocket {
 
 const std::size_t Message::MAX_LENGTH =
     std::numeric_limits<std::size_t>::max() - LWS_PRE;
 
-Message::Message(const std::string& text) : data_(text), type_(Type::TEXT) {}
+Message::Message(const std::string& text) : data_(text) {}
 
-Message::Message(std::string&& text) :
-    data_(std::move(text)), type_(Type::TEXT) {}
+Message::Message(std::string&& text) : data_(std::move(text)) {}
 
 Message::Message(const std::vector<unsigned char>& binary) :
     data_(binary), type_(Type::BINARY) {}
@@ -37,11 +33,6 @@ Message::Type& Message::type() {
 
 Message& Message::type(const Type& type) {
     type_ = type;
-    return *this;
-}
-
-Message& Message::type(Type&& type) {
-    type_ = std::move(type);
     return *this;
 }
 
@@ -128,7 +119,4 @@ unsigned char* Message::data() {
     }
 }
 
-} // namespace websocket
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network::websocket

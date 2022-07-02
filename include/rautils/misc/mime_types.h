@@ -4,9 +4,7 @@
 #include <map>
 #include <string>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
 class MimeTypes {
 public:
@@ -34,8 +32,6 @@ protected:
     static const std::map<std::string, std::string> ext2mime_;
 };
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc
 
 #endif // RA_UTILS_UTIL_MIME_TYPES_H_

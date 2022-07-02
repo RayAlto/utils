@@ -5,11 +5,11 @@
 #include <thread>
 #include <unordered_map>
 
-namespace rayalto {
-namespace utils {
-namespace misc {
+namespace rayalto::utils::misc {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static std::unordered_map<std::thread::id, unsigned int> thread_id_map;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static std::mutex thread_id_map_lock;
 
 unsigned int thread_id() {
@@ -27,6 +27,4 @@ unsigned int thread_id() {
     return found->second;
 }
 
-} // namespace misc
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::misc

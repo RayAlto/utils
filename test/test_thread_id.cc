@@ -4,7 +4,7 @@
 
 #include "rautils/misc/thread_id.h"
 
-int main(int argc, char const *argv[]) {
+int main(int /* argc */, char const* /* argv */[]) {
     for (int i = 0; i < 100; ++i) {
         std::thread t([&]() -> void {
             std::printf("%d\n", rayalto::utils::misc::thread_id());

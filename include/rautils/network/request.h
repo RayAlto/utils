@@ -1,6 +1,7 @@
 #ifndef RA_UTILS_REQUEST_REQUEST_HPP_
 #define RA_UTILS_REQUEST_REQUEST_HPP_
 
+#include <cstdint>
 #include <ctime>
 #include <initializer_list>
 #include <memory>
@@ -12,9 +13,7 @@
 #include "rautils/network/general/header.h"
 #include "rautils/network/general/url.h"
 
-namespace rayalto {
-namespace utils {
-namespace network {
+namespace rayalto::utils::network {
 
 /**
  * Make http request easily, super heavy shitty wrapper for the great curl
@@ -36,7 +35,6 @@ public:
 
     static constexpr const char* method_c_str(const Method& method);
 
-public:
     Request();
     Request(const Request&) = delete;
     Request(Request&&) noexcept = default;
@@ -51,13 +49,13 @@ public:
     void reset();
 
     // get current request method
-    const Method& method() const;
+    [[nodiscard]] const Method& method() const;
     Method& method();
     // set request method
     Request& method(Method method);
 
     // get current setting for ip resolve (whatever/IPv4 only/IPv6 only)
-    const IpResolve& ip_resolve() const;
+    [[nodiscard]] const IpResolve& ip_resolve() const;
     IpResolve& ip_resolve();
     // select the kind of IP address to use (whatever/IPv4 only/IPv6 only)
     Request& ip_resolve(IpResolve ip_resolve);
@@ -119,7 +117,6 @@ public:
     const std::unique_ptr<TimeoutSetting>& timeout_setting();
     // set timeout
     Request& timeout_setting(const TimeoutSetting& timeout_setting);
-    Request& timeout_setting(TimeoutSetting&& timeout_setting);
 
     const std::unique_ptr<LocalSetting>& local_setting();
     Request& local_setting(const LocalSetting& local_setting);
@@ -131,7 +128,6 @@ public:
     // get the last response
     const std::unique_ptr<Response>& response();
 
-public:
     static std::time_t parse_time_str(const char* time_str);
 
 protected:
@@ -140,14 +136,14 @@ protected:
 };
 
 struct Request::TimeoutSetting {
-    long timeout = 0l;
-    long connect_timeout = 300000l;
+    std::int64_t timeout = 0L;
+    std::int64_t connect_timeout = 300000L;
 };
 
 struct Request::LocalSetting {
     std::string interface;
-    long port = 0;
-    long port_range = 1;
+    std::int64_t port = 0;
+    std::int64_t port_range = 1;
     std::string dns_interface;
     std::string dns_local_ipv4;
     std::string dns_local_ipv6;
@@ -181,13 +177,13 @@ struct Request::Response {
 
     struct LocalInfo {
         std::string ip;
-        long port;
+        std::int64_t port;
     };
 
     std::string message;
     std::string body;
-    long code;
-    long http_version;
+    std::int64_t code;
+    std::int64_t http_version;
     general::Header header;
     general::Cookie cookie;
     Response::TimeElapsed time_elapsed;
@@ -209,26 +205,25 @@ public:
 
     // is a file?
     bool& is_file();
-    const bool& is_file() const;
+    [[nodiscard]] const bool& is_file() const;
     MimePart& is_file(const bool& file);
-    MimePart& is_file(bool&& file);
 
     // part data or a local file name
     std::string& data();
-    const std::string& data() const;
+    [[nodiscard]] const std::string& data() const;
     MimePart& data(const std::string& data);
     MimePart& data(std::string&& data);
     MimePart& data(char* data, std::size_t length);
 
     // mime type
     std::string& type();
-    const std::string& type() const;
+    [[nodiscard]] const std::string& type() const;
     MimePart& type(const std::string& type);
     MimePart& type(std::string&& type);
 
     // [optional] remote file name, take effect when file() is true
     std::string& file_name();
-    const std::string& file_name() const;
+    [[nodiscard]] const std::string& file_name() const;
     MimePart& file_name(const std::string& file_name);
     MimePart& file_name(std::string&& file_name);
 
@@ -247,15 +242,15 @@ class Request::MimeParts : public misc::Map<MimePart> {
 public:
     MimeParts(
         std::initializer_list<std::pair<const std::string, MimePart>> pairs);
-    MimeParts(const misc::Map<MimePart>& map);
-    MimeParts(misc::Map<MimePart>&& map);
+    explicit MimeParts(const misc::Map<MimePart>& map);
+    explicit MimeParts(misc::Map<MimePart>&& map);
     MimeParts() = default;
     MimeParts(const MimeParts& mime_parts) = default;
     MimeParts(MimeParts&& mime_parts) noexcept = default;
     MimeParts& operator=(const MimeParts& mime_parts) = default;
     MimeParts& operator=(MimeParts&& mime_parts) noexcept = default;
 
-    virtual ~MimeParts() override = default;
+    ~MimeParts() override = default;
 };
 
 class Request::Proxy {
@@ -270,10 +265,11 @@ public:
     };
     static constexpr const char* type_c_str(const Type& type);
 
-public:
-    Proxy(const std::string& proxy);
-    Proxy(std::string&& proxy);
-    Proxy(const Proxy::Type& type, const std::string& ip, const long& port);
+    explicit Proxy(const std::string& proxy);
+    explicit Proxy(std::string&& proxy);
+    Proxy(const Proxy::Type& type,
+          const std::string& ip,
+          const std::int64_t& port);
     Proxy() = default;
     Proxy(const Proxy&) = default;
     Proxy(Proxy&&) noexcept = default;
@@ -283,29 +279,26 @@ public:
     virtual ~Proxy() = default;
 
     std::string& str();
-    const std::string& str() const;
+    [[nodiscard]] const std::string& str() const;
     void str(const std::string& str);
     void str(std::string&& str);
 
     // tunneling through http proxy
     bool& http_proxy_tunnel();
-    const bool& http_proxy_tunnel() const;
+    [[nodiscard]] const bool& http_proxy_tunnel() const;
     // whether tunneling through http proxy
     void http_proxy_tunnel(const bool& http_proxy_tunnel);
-    void http_proxy_tunnel(bool&& http_proxy_tunnel);
 
     void clear() noexcept;
 
-    const char* c_str() const noexcept;
-    bool empty() const noexcept;
+    [[nodiscard]] const char* c_str() const noexcept;
+    [[nodiscard]] bool empty() const noexcept;
 
 protected:
     std::string proxy_;
     bool http_proxy_tunnel_ = false;
 };
 
-} // namespace network
-} // namespace utils
-} // namespace rayalto
+} // namespace rayalto::utils::network
 
 #endif // RA_UTILS_REQUEST_REQUEST_HPP_
