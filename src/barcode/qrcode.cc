@@ -4,34 +4,22 @@
 #include <cstdint>
 #include <utility>
 
+#include "ZXing/BarcodeFormat.h"
 #include "ZXing/BitMatrix.h"
 #include "ZXing/CharacterSet.h"
-#include "ZXing/TextUtfEncoding.h"
-#include "ZXing/qrcode/QRErrorCorrectionLevel.h"
-#include "ZXing/qrcode/QRWriter.h"
+#include "ZXing/MultiFormatWriter.h"
 
 namespace rayalto::utils::barcode {
 
 namespace {
 
-void prepare_zxing_qr_writer(ZXing::QRCode::Writer& writer,
+void prepare_zxing_qr_writer(ZXing::MultiFormatWriter& writer,
                              const std::uint8_t& margin,
-                             const std::uint8_t& version,
                              const Qrcode::EC& ec,
-                             const Qrcode::Mask& mask) {
-    if (margin != 4) {
-        writer.setMargin(margin);
-    }
-    if (version != 0) {
-        writer.setVersion(version);
-    }
-    if (ec != Qrcode::EC::L) {
-        writer.setErrorCorrectionLevel(
-            static_cast<ZXing::QRCode::ErrorCorrectionLevel>(ec));
-    }
-    if (mask != Qrcode::Mask::AUTO) {
-        writer.setMaskPattern(static_cast<int>(mask));
-    }
+                             const ZXing::CharacterSet& character_set) {
+    writer.setMargin(margin);
+    writer.setEccLevel(static_cast<int>(ec));
+    writer.setEncoding(character_set);
 }
 
 Qrcode::Result convert_to_qrcode_result(const ZXing::BitMatrix& qr_matrix) {
@@ -65,19 +53,6 @@ Qrcode& Qrcode::margin(const std::uint8_t& margin) {
     return *this;
 }
 
-const std::uint8_t& Qrcode::version() const {
-    return version_;
-}
-
-std::uint8_t& Qrcode::version() {
-    return version_;
-}
-
-Qrcode& Qrcode::version(const std::uint8_t& version) {
-    version_ = version;
-    return *this;
-}
-
 const Qrcode::EC& Qrcode::error_correction_level() const {
     return ec_;
 }
@@ -91,32 +66,17 @@ Qrcode& Qrcode::error_correction_level(const EC& ec) {
     return *this;
 }
 
-const Qrcode::Mask& Qrcode::mask() const {
-    return mask_;
-}
-
-Qrcode::Mask& Qrcode::mask() {
-    return mask_;
-}
-
-Qrcode& Qrcode::mask(const Qrcode::Mask& mask) {
-    mask_ = mask;
-    return *this;
-}
-
 Qrcode::Result Qrcode::encode(const std::string& text) {
-    ZXing::QRCode::Writer qr_writer;
-    prepare_zxing_qr_writer(qr_writer, margin_, version_, ec_, mask_);
-    qr_writer.setEncoding(ZXing::CharacterSet::UTF8);
-    ZXing::BitMatrix qr_matrix =
-        qr_writer.encode(ZXing::TextUtfEncoding::FromUtf8(text), 1, 1);
+    ZXing::MultiFormatWriter qr_writer(ZXing::BarcodeFormat::QRCode);
+    prepare_zxing_qr_writer(qr_writer, margin_, ec_, ZXing::CharacterSet::UTF8);
+    ZXing::BitMatrix qr_matrix = qr_writer.encode(text, 1, 1);
     return convert_to_qrcode_result(qr_matrix);
 }
 
 Qrcode::Result Qrcode::encode(const std::vector<unsigned char>& binary) {
-    ZXing::QRCode::Writer qr_writer;
-    prepare_zxing_qr_writer(qr_writer, margin_, version_, ec_, mask_);
-    qr_writer.setEncoding(ZXing::CharacterSet::BINARY);
+    ZXing::MultiFormatWriter qr_writer(ZXing::BarcodeFormat::QRCode);
+    prepare_zxing_qr_writer(
+        qr_writer, margin_, ec_, ZXing::CharacterSet::BINARY);
     ZXing::BitMatrix qr_matrix =
         qr_writer.encode(std::wstring(binary.begin(), binary.end()), 1, 1);
     return convert_to_qrcode_result(qr_matrix);

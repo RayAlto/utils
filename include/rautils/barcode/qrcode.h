@@ -14,22 +14,10 @@ public:
 
     // error correction level
     enum class EC : std::uint8_t {
-        L, /* Low, 7% */
-        M, /* Medium, 15% */
-        Q, /* Quality, 25% */
-        H /* High, 30% */
-    };
-    // mask
-    enum class Mask : std::uint8_t {
-        M0, /* 000 */
-        M1, /* 001 */
-        M2, /* 010 */
-        M3, /* 011 */
-        M4, /* 100 */
-        M5, /* 101 */
-        M6, /* 110 */
-        M7, /* 111 */
-        AUTO
+        L = 1, /* Low, 7% */
+        M = 3, /* Medium, 15% */
+        Q = 5, /* Quality, 25% */
+        H = 7 /* High, 30% */
     };
 
     Qrcode() = default;
@@ -45,20 +33,10 @@ public:
     std::uint8_t& margin();
     Qrcode& margin(const std::uint8_t& margin);
 
-    // version of qr code, should be between 1 and 40
-    [[nodiscard]] const std::uint8_t& version() const;
-    std::uint8_t& version();
-    Qrcode& version(const std::uint8_t& version);
-
     // error correction level
     [[nodiscard]] const EC& error_correction_level() const;
     EC& error_correction_level();
     Qrcode& error_correction_level(const EC& ec);
-
-    // mask
-    [[nodiscard]] const Mask& mask() const;
-    Mask& mask();
-    Qrcode& mask(const Mask& mask);
 
     // encode utf-8 text
     Result encode(const std::string& text);
@@ -68,9 +46,7 @@ public:
 
 protected:
     std::uint8_t margin_ = 4;
-    std::uint8_t version_ = 0;
     EC ec_ = EC::M;
-    Mask mask_ = Mask::AUTO;
 };
 
 class Qrcode::Result {
