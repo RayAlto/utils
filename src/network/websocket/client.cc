@@ -667,7 +667,14 @@ int lws_callback(lws* wsi,
     }
 
     case /* 24 */ LWS_CALLBACK_CLIENT_APPEND_HANDSHAKE_HEADER: {
-        if (client_impl.header_ == nullptr) {
+        if (client_impl.cookie_ != nullptr) {
+            if (client_impl.header_ == nullptr) {
+                client_impl.header_ = std::make_unique<general::Header>();
+            }
+            client_impl.header_->update(
+                {"Cookie", client_impl.cookie_->c_str()});
+        }
+        else if (client_impl.header_ == nullptr) {
             break;
         }
         unsigned char** p = reinterpret_cast<unsigned char**>(in);
