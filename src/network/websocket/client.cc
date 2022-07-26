@@ -589,6 +589,7 @@ int lws_callback(lws* wsi,
             }
             break;
         }
+
         switch (client_impl.receive_message_->type()) {
         case Message::Type::BINARY: {
             unsigned char* binary_message =
@@ -605,13 +606,13 @@ int lws_callback(lws* wsi,
         }
         default: break;
         }
+
         if (lws_is_final_fragment(wsi) != 0) {
             if (client_impl.on_receive_ != nullptr) {
                 (*client_impl.on_receive_)(client_impl.client_,
                                            *client_impl.receive_message_);
             }
         }
-        break;
 
         break;
     }
