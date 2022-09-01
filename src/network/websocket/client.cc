@@ -32,7 +32,7 @@ struct CustomHeaderContext {
     Client::ClientImpl& client_impl;
 };
 
-int lws_callback(lws* wsi,
+int lws_client_callback(lws* wsi,
                  lws_callback_reasons reason,
                  void* user,
                  void* in,
@@ -40,7 +40,7 @@ int lws_callback(lws* wsi,
 
 class Client::ClientImpl {
 public:
-    friend int lws_callback(lws* wsi,
+    friend int lws_client_callback(lws* wsi,
                             lws_callback_reasons reason,
                             void* user,
                             void* in,
@@ -137,7 +137,7 @@ protected:
     lws_context* ws_context_ = nullptr;
     lws_context_creation_info ws_context_info_ {};
     lws_protocols ws_protocols_[2] {
-        {LWS_LOCAL_PROTOCOL_NAME, lws_callback, 0, 0, 0, nullptr, 0},
+        {LWS_LOCAL_PROTOCOL_NAME, lws_client_callback, 0, 0, 0, nullptr, 0},
         LWS_PROTOCOL_LIST_TERM};
     lws_client_connect_info ws_connection_info_ {};
 
@@ -484,7 +484,7 @@ void Client::ClientImpl::reset_config_() {
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
-int lws_callback(lws* wsi,
+int lws_client_callback(lws* wsi,
                  lws_callback_reasons reason,
                  void* /* user */,
                  void* in,
