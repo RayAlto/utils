@@ -32,8 +32,10 @@ public:
     CloseStatus& operator=(CloseStatus&&) noexcept = default;
 
     explicit CloseStatus(const Code& code);
-
     explicit CloseStatus(const std::uint16_t& value);
+
+    CloseStatus& operator=(const Code& code);
+    CloseStatus& operator=(const std::uint16_t& value);
 
     [[nodiscard]] const std::uint16_t& value() const;
     std::uint16_t& value();

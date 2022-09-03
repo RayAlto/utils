@@ -10,6 +10,16 @@ CloseStatus::CloseStatus(const Code& code) :
 
 CloseStatus::CloseStatus(const std::uint16_t& value) : value_(value) {}
 
+CloseStatus& CloseStatus::operator=(const Code& code) {
+    value_ = static_cast<std::uint16_t>(code);
+    return *this;
+}
+
+CloseStatus& CloseStatus::operator=(const std::uint16_t& value) {
+    value_ = value;
+    return *this;
+}
+
 const std::uint16_t& CloseStatus::value() const {
     return value_;
 }
