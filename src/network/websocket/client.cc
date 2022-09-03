@@ -33,18 +33,18 @@ struct CustomHeaderContext {
 };
 
 int lws_client_callback(lws* wsi,
-                 lws_callback_reasons reason,
-                 void* user,
-                 void* in,
-                 std::size_t len);
+                        lws_callback_reasons reason,
+                        void* user,
+                        void* in,
+                        std::size_t len);
 
 class Client::ClientImpl {
 public:
     friend int lws_client_callback(lws* wsi,
-                            lws_callback_reasons reason,
-                            void* user,
-                            void* in,
-                            std::size_t len);
+                                   lws_callback_reasons reason,
+                                   void* user,
+                                   void* in,
+                                   std::size_t len);
 
     explicit ClientImpl(Client& client);
     ClientImpl() = delete;
@@ -65,8 +65,8 @@ public:
     void disconnect(const CloseStatus& close_status);
     void disconnect(const std::uint16_t& close_status);
     void disconnect(const std::string& message,
-                    const CloseStatus& close_status =
-                        static_cast<CloseStatus>(CloseStatus::NORMAL));
+                    const CloseStatus& close_status = CloseStatus {
+                        CloseStatus::NORMAL});
     void disconnect(const std::string& message,
                     const std::uint16_t& close_status);
 
@@ -485,10 +485,10 @@ void Client::ClientImpl::reset_config_() {
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
 int lws_client_callback(lws* wsi,
-                 lws_callback_reasons reason,
-                 void* /* user */,
-                 void* in,
-                 std::size_t len) {
+                        lws_callback_reasons reason,
+                        void* /* user */,
+                        void* in,
+                        std::size_t len) {
     Client::ClientImpl& client_impl = *reinterpret_cast<Client::ClientImpl*>(
         lws_context_user(lws_get_context(wsi)));
 
