@@ -26,7 +26,7 @@ namespace rayalto::utils::network::websocket {
 constexpr const char* LWS_LOCAL_PROTOCOL_NAME = "ra-utils-websocket-client";
 
 // only for custom header callback, function pointer is fucking disgusting
-struct CustomHeaderContext {
+struct LwsClientCustomHeaderContext {
     std::vector<char>& buf;
     int& result_len;
     Client::ClientImpl& client_impl;
@@ -536,12 +536,13 @@ int lws_client_callback(lws* wsi,
             }
             ++index;
         }
-        CustomHeaderContext custom_header_ctx {buf, result_len, client_impl};
+        LwsClientCustomHeaderContext custom_header_ctx {
+            buf, result_len, client_impl};
         lws_hdr_custom_name_foreach(
             wsi,
             [](const char* name, int name_len, void* opaque) -> void {
-                CustomHeaderContext& custom_header_ctx =
-                    *reinterpret_cast<CustomHeaderContext*>(opaque);
+                LwsClientCustomHeaderContext& custom_header_ctx =
+                    *reinterpret_cast<LwsClientCustomHeaderContext*>(opaque);
                 custom_header_ctx.result_len = lws_hdr_custom_copy(
                     custom_header_ctx.client_impl.ws_instance_,
                     custom_header_ctx.buf.data(),
