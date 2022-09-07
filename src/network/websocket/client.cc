@@ -169,7 +169,7 @@ protected:
     std::unique_ptr<general::Header> server_header_ = nullptr;
     std::unique_ptr<Message> receive_message_ = nullptr;
     std::unique_ptr<std::uint16_t> close_status_ = nullptr;
-    std::unique_ptr<std::string> close_message = nullptr;
+    std::unique_ptr<std::string> close_message_ = nullptr;
 
     void wake_lws_up_();
     void reset_config_();
@@ -713,7 +713,7 @@ int lws_client_callback(lws* wsi,
         std::size_t message_length = len - 2;
         client_impl.close_status_ = std::make_unique<std::uint16_t>(
             (message_bytes[0] << 8) | message_bytes[1]);
-        client_impl.close_message = std::make_unique<std::string>(
+        client_impl.close_message_ = std::make_unique<std::string>(
             &reinterpret_cast<char*>(in)[2], len - 2);
         break;
     }
@@ -730,7 +730,7 @@ int lws_client_callback(lws* wsi,
                 (*client_impl.on_close_)(
                     client_impl.client_,
                     static_cast<CloseStatus>(*client_impl.close_status_),
-                    *client_impl.close_message);
+                    *client_impl.close_message_);
             }
         }
         client_impl.stopped_ = true;
