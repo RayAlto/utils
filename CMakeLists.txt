@@ -31,6 +31,7 @@ set(RA_UTILS_SRCS
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/client.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/close_status.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/message.cc
+  ${CMAKE_CURRENT_LIST_DIR}/src/network/websocket/server.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/string/strtool.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/system/subprocess.cc
   ${CMAKE_CURRENT_LIST_DIR}/src/system/subprocess/args.cc
